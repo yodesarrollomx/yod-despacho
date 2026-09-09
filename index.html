@@ -95,6 +95,20 @@ h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,4.6vw,48px);lin
 .bfirmar:hover{background:var(--oro);color:var(--hoja)}
 .bfirmar[disabled]{opacity:.4;cursor:default}
 .dpie{padding:11px 20px;font-family:var(--mono);font-size:10.5px;color:var(--tenue)}
+
+/* soltar un pendiente */
+.soltar{margin:0 0 20px;background:var(--hoja);border:1px solid var(--linea2);border-radius:3px;padding:16px 18px;display:grid;gap:10px}
+.soltar h2{font-family:var(--serif);font-weight:400;font-size:22px}
+.soltar p.q{color:var(--suave);font-size:13px}
+.soltar textarea{width:100%;min-height:64px;resize:vertical;background:var(--papel);border:1px solid var(--linea2);border-radius:3px;color:var(--tinta);padding:10px 12px;font:inherit;line-height:1.45}
+.soltar textarea::placeholder{color:var(--tenue)}
+.sfila{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.soltar select{background:var(--papel);color:var(--tinta);border:1px solid var(--linea2);border-radius:3px;padding:8px 10px;font:inherit;font-size:13px}
+.bp{background:var(--oro);color:var(--hoja);border-radius:3px;padding:9px 16px;font-size:13.5px;font-weight:600}
+.bp[disabled]{opacity:.45;cursor:default}
+.smsg{font-family:var(--mono);font-size:10.5px;color:var(--tenue);width:100%}
+.smsg.mal{color:var(--rojo)}
+.smsg.ok{color:var(--verde)}
 /* focos */
 .focos{margin-top:34px;border-top:1px solid var(--linea2);padding-top:16px}
 .focos h2{font-family:var(--serif);font-weight:400;font-size:25px;margin-bottom:10px}
@@ -128,6 +142,22 @@ h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,4.6vw,48px);lin
   </div>
 
   <div class="aviso" id="banner" hidden></div>
+  <section class="soltar" id="soltar" hidden>
+    <h2>Suelta un pendiente</h2>
+    <p class="q">Escríbelo o dícta­lo con el micrófono de tu teclado. Nace como tarjeta en tu tablero, con dueño y fecha, y aparece aquí en la casilla que le toque.</p>
+    <textarea id="sTexto" placeholder="Qué pasó, qué falta o qué hay que hacer…"></textarea>
+    <div class="sfila">
+      <select id="sProy"></select>
+      <select id="sResp"></select>
+      <select id="sFecha">
+        <option value="hoy">para hoy</option>
+        <option value="semana" selected>esta semana</option>
+        <option value="proxima">la próxima semana</option>
+      </select>
+      <button class="bp" id="sBtn" type="button">Ponerlo en el tablero</button>
+      <span class="smsg" id="sMsg"></span>
+    </div>
+  </section>
   <div id="riesgos"></div>
   <div class="rejilla" id="rejilla"></div>
   <div class="detalle" id="detalle" hidden></div>
@@ -442,6 +472,55 @@ async function firmar(id,btn){
   }
 }
 
+
+/* ── soltar un pendiente: nace como tarjeta en el Sheet, con tu sesión ── */
+function llenarSoltar(){
+  var proy={}, resp={};
+  TAREAS.forEach(function(t){
+    var p=String(t.proyecto||'').trim(); if(p) proy[p]=(proy[p]||0)+1;
+    var q=String(t.responsable||'').trim(); if(q) resp[q]=(resp[q]||0)+1;
+  });
+  function ops(o,pri){
+    var ks=Object.keys(o).sort(function(a,b){return o[b]-o[a];});
+    if(pri && ks.indexOf(pri)>=0){ ks.splice(ks.indexOf(pri),1); ks.unshift(pri); }
+    return ks.map(function(k){return '<option>'+esc(k)+'</option>';}).join('');
+  }
+  $('#sProy').innerHTML=ops(proy);
+  $('#sResp').innerHTML=ops(resp,'Alejandro');
+  $('#soltar').hidden=false;
+}
+function fechaTexto(cual){
+  var d=new Date(HOY), dow=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  if(cual==='semana'){ d.setDate(d.getDate()+(5-(d.getDay()||7))); if(d<HOY) d=new Date(HOY); }
+  else if(cual==='proxima'){ d.setDate(d.getDate()+(12-(d.getDay()||7))); }
+  var mes=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][d.getMonth()];
+  var jue=new Date(d); jue.setDate(d.getDate()+3-((d.getDay()+6)%7));
+  var sem=1+Math.round(((jue-new Date(jue.getFullYear(),0,4))/86400000-3+((new Date(jue.getFullYear(),0,4).getDay()+6)%7))/7);
+  return {fecha:dow[d.getDay()]+' '+d.getDate(), mes:mes, semana:'Semana '+sem};
+}
+async function soltar(){
+  var txt=$('#sTexto').value.trim(), m=$('#sMsg'), b=$('#sBtn');
+  if(!txt){ m.className='smsg'; m.textContent='Escribe algo primero.'; return; }
+  if(!credencial()){ m.className='smsg mal'; m.textContent='Entra con el Portero: sin credencial el tablero no deja escribir.'; return; }
+  var f=fechaTexto($('#sFecha').value);
+  var proy=$('#sProy').value, resp=$('#sResp').value;
+  var emp=(TAREAS.filter(function(t){return String(t.proyecto||'').trim()===proy;})[0]||{}).empresa||'YoDesarrollo';
+  b.disabled=true; m.className='smsg'; m.textContent='Escribiendo en el tablero…';
+  try{
+    var tarea={mes:f.mes,semana:f.semana,fecha:f.fecha,empresa:emp,proyecto:proy,responsable:resp,
+               actividad:txt,estado:'Pendiente',prioridad:'Alta',entregable:'',observaciones:'',
+               comentarios:'Claudet~'+new Date().toISOString().slice(0,10)+'~Soltado desde El Despacho.'};
+    var r=await llamar('create',{task:tarea});
+    if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
+    m.className='smsg ok'; m.textContent='Listo'+(r.task&&r.task.id?(' · quedó como '+r.task.id):'')+'. Ya está en tu tablero.';
+    $('#sTexto').value='';
+    await cargar();
+  }catch(e){
+    m.className='smsg mal'; m.textContent='No se pudo: '+e.message+'. No se escribió nada.';
+  }
+  b.disabled=false;
+}
+
 /* ── arranque ── */
 async function cargar(){
   var b=$('#banner');
@@ -454,6 +533,7 @@ async function cargar(){
     $('#estado').innerHTML='<b>'+n+' tarjetas vivas</b> · leído del tablero ahora mismo';
     b.hidden=true;
     pintar();
+    llenarSoltar();
   }catch(e){
     $('#led').className='led mal';
     $('#estado').textContent='no pude leer el tablero';
@@ -463,6 +543,7 @@ async function cargar(){
       : 'Todavía no entras: el Portero pide tu acceso. En cuanto entres, este tablero se llena solo.';
   }
 }
+document.addEventListener('DOMContentLoaded',function(){ var b=$('#sBtn'); if(b) b.addEventListener('click',soltar); });
 cargar();
 </script>
 <script src="https://yodesarrollomx.github.io/potenciales-yod/portero.js"></script>
