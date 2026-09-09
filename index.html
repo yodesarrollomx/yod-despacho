@@ -20,6 +20,9 @@
  --serif:"Instrument Serif",Georgia,serif;--sans:"Instrument Sans",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0}
+/* el shell del OS trae su propio CSS global: aqui reclamamos lo nuestro */
+.w svg,.hoja svg{max-width:none}
+.w h1,.w h2,.w h3{color:var(--ink)}
 html,body{background:var(--bg)}
 body{color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
  background:radial-gradient(120% 55% at 50% -8%,#1B1710 0%,#0B0A08 58%);min-height:100vh;padding:0 0 120px}
@@ -56,24 +59,25 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .bo{border:1px solid var(--hair2);color:var(--ink2);font-size:13.5px;padding:11px 16px;border-radius:16px}
 /* riesgos */
 .rz{margin-top:16px;background:var(--rojoS);border:1px solid #4A2A24;border-radius:22px;padding:18px 20px}
-.rz h2{font-family:var(--serif);font-weight:400;font-size:21px;margin-bottom:8px}
+.rz h2{font-family:var(--serif);font-weight:400;font-size:21px;margin-bottom:8px;color:var(--ink)}
 .rzf{display:grid;grid-template-columns:92px 1fr;gap:0 16px;padding:9px 0;border-top:1px solid #3A231D}
 .rzf .d{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--rojo)}
 .rzf b{font-weight:600;color:var(--ink);display:block;margin-bottom:2px}.rzf p{font-size:13px;color:var(--dim)}
 /* soltar */
 .soltar{margin-top:20px;background:var(--panel);border-radius:24px;padding:20px;display:grid;gap:12px}
-.soltar h2{font-family:var(--serif);font-weight:400;font-size:22px}
+.soltar h2{font-family:var(--serif);font-weight:400;font-size:22px;color:var(--ink)}
 .soltar p.q{color:var(--dim);font-size:13px}
 .soltar textarea{width:100%;min-height:66px;resize:vertical;background:var(--bg);border:1px solid var(--hair2);border-radius:16px;color:var(--ink);padding:13px 15px;font:inherit;line-height:1.45}
 .soltar textarea::placeholder{color:var(--faint)}
 .sfila{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.soltar select{background:var(--bg);color:var(--ink);border:1px solid var(--hair2);border-radius:14px;padding:10px 12px;font:inherit;font-size:13px}
+.soltar select{background:var(--bg);color:var(--ink);border:1px solid var(--hair2);border-radius:14px;padding:10px 12px;font:inherit;font-size:13px;-webkit-appearance:none;appearance:none;min-width:120px}
+.soltar select option{background:var(--panel);color:var(--ink)}
 .smsg{font-family:var(--mono);font-size:10.5px;color:var(--faint);width:100%}
 .smsg.mal{color:var(--rojo)}.smsg.ok{color:var(--verde)}
 /* carriles + fichas */
 .lane{margin-top:26px}
 .laneCab{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
-.laneCab h2{font-family:var(--serif);font-weight:400;font-size:24px}
+.laneCab h2{font-family:var(--serif);font-weight:400;font-size:24px;color:var(--ink)}
 .laneCab span{font-size:12.5px;color:var(--faint)}
 .laneCab .cola{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
 .fichas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -83,7 +87,7 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .ficha.hot{border-color:#4A2A24}
 .ficha.sel{border-color:var(--oro)}
 .fCab{display:flex;gap:12px;align-items:flex-start}
-.fCab svg{border-radius:12px;flex:none}
+.fCab svg{width:52px;height:52px;border-radius:12px;flex:none;display:block}
 .fCab .t{min-width:0;display:flex;flex-direction:column;gap:4px}
 .fCab h3{font-family:var(--serif);font-weight:400;font-size:21px;line-height:1.1}
 .fCab .m{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--oro)}
@@ -112,6 +116,7 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .grab{display:flex;justify-content:center;padding:11px 0 4px}
 .grab i{width:38px;height:4px;border-radius:3px;background:#2C2519;display:block}
 .hCab{padding:8px 22px 16px;display:flex;gap:14px;align-items:flex-start;max-width:1180px;margin:0 auto;width:100%}
+.hCab svg{width:56px;height:56px;border-radius:14px;flex:none;display:block}
 .hCab .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .hCab h3{font-family:var(--serif);font-weight:400;font-size:28px;line-height:1.05}
 .hCab .m{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--oro)}
@@ -132,7 +137,7 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .hPie{padding:14px 22px 26px;border-top:1px solid #1C1811;font-family:var(--mono);font-size:10px;color:var(--faint);max-width:1180px;margin:0 auto;width:100%}
 /* focos */
 .focos{margin-top:34px}
-.focos h2{font-family:var(--serif);font-weight:400;font-size:24px;margin-bottom:12px}
+.focos h2{font-family:var(--serif);font-weight:400;font-size:24px;margin-bottom:12px;color:var(--ink)}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
 .foco{display:grid;grid-template-columns:20px 1fr;gap:11px;background:var(--panel);border-radius:16px;padding:13px 15px;align-items:start}
 .foco i{width:12px;height:12px;border-radius:4px;margin-top:3px;display:block}
