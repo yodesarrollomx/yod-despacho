@@ -158,6 +158,11 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
    repinta .hero (con !important) y .pie. Aqui vuelven al oscuro aprobado. */
 html[data-tema][data-tema] .hero{background:linear-gradient(160deg,#221C13 0%,#17140F 62%)!important}
 html[data-tema][data-tema] .pie{background:none}
+/* El shell de YOD OS pinta su lienzo claro (.yod-canvas{background:#f6f3ed})
+   y su tinta oscura (.yod-shell{color:var(--ytext)}) porque los demas
+   tableros son claros. El Despacho es oscuro: se le devuelve el lienzo.
+   Solo el lienzo: la barra lateral y la de arriba son hermanas y no se tocan. */
+body .yod-canvas{background:var(--bg);color:var(--ink)}
 </style>
 </head>
 <body>
