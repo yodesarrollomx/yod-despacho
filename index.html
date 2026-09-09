@@ -280,6 +280,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .hist .hd b{font-family:var(--mono);font-size:12.5px;color:var(--ink2);font-weight:500}
 .hist .hd u{font-family:var(--mono);font-size:11.5px;color:var(--faint);text-decoration:none}
 .hist .hd s{font-family:var(--mono);font-size:11.5px;color:var(--oro2);text-decoration:none}
+.hist .k .ap{font-style:normal;color:var(--mute);letter-spacing:.1em;border-bottom:1px dotted var(--hair2);cursor:help}
 .hist .esp{font-size:12.5px;color:var(--dim);line-height:1.5;max-width:52ch}
 .masMesa{font-size:12.5px;color:var(--dim);padding:12px 2px 0;line-height:1.5}
 .salDin .sem{color:var(--dim);font-weight:400}
@@ -872,7 +873,9 @@ function acuerdo(){
   $('#acuerdoDin').innerHTML = suma
     ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(suma))+'</b>'+dcomp
        +'<span class="q">'+(det.length?(det.join(' · ')+' — '):'')
-       +'lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma, leído de sus palabras: no es una cifra del contador</span>')
+       +(MESA.length===1?'lo que menciona la tarjeta que espera tu firma'
+                        :('lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma'))
+       +', leído de sus palabras: no es una cifra del contador</span>')
     : '';
   $('#acuerdoDin').hidden = !suma;
   /* Los 7 dias que se guardan desde la ronda 6 por fin se ven. Numeros, no
@@ -883,7 +886,9 @@ function acuerdo(){
     hist=hist.filter(function(x){ return x && x.n!=null; });
     if(hist.length>=3){
       var mx=Math.max.apply(null,hist.map(function(x){return x.n;}))||1;
-      elH.innerHTML='<span class="k">LOS ÚLTIMOS DÍAS QUE ABRISTE</span>'
+      elH.innerHTML='<span class="k">LOS ÚLTIMOS DÍAS QUE ABRISTE <i class="ap" '
+        +'title="Se guarda en ESTE navegador. Si abres en el celular, ese lleva su propia cuenta. '
+        +'El Sheet sigue siendo la única bandeja: esto es solo para comparar.">en esta compu</i></span>'
         + hist.map(function(x){
             var dd=x.f.split('-'); var alto=Math.max(8,Math.round(x.n/mx*100));
             return '<span class="hd" title="'+esc(x.f)+': '+x.n+(x.n===1?' vencida':' vencidas')
@@ -897,9 +902,9 @@ function acuerdo(){
       /* Sin esto, la franja no existe hasta el tercer dia y nadie sabe que
          viene. Se dice cuanto falta; no es un premio ni una racha. */
       var faltan=Math.max(1,3-hist.length);
-      elH.innerHTML='<span class="k">LOS ÚLTIMOS DÍAS QUE ABRISTE</span>'
+      elH.innerHTML='<span class="k">LOS ÚLTIMOS DÍAS QUE ABRISTE <i class="ap">en esta compu</i></span>'
         +'<span class="esp">En '+faltan+(faltan===1?' día más':' días más')+' de abrir esto '
-        +'vas a poder comparar tu semana. No hay que hacer nada: se guarda solo.</span>';
+        +'vas a poder comparar tu semana. Se guarda solo, en este navegador.</span>';
       elH.hidden=false;
     }
   }
@@ -931,10 +936,12 @@ function riesgoMasProximo(soloInminente){
 /* ── 2 · la charola de entrada ── */
 function pintarEntrada(){
   var l=VIVAS.filter(enCharola).sort(function(a,b){ return (b._f?b._f:0)-(a._f?a._f:0); });
-  $('#entrada').innerHTML = !l.length ? ''
+  $('#entrada').innerHTML = !l.length
+    ? '<div class="vacio">Nada crudo esperando: ya lo acomodaste todo.</div>'
     : '<p class="micEst" style="text-align:left;margin:0 0 8px">'+l.length+(l.length===1?' cosa esperando a que la acomode':' cosas esperando a que las acomode')+'</p>'
       + l.slice(0,6).map(function(r){
-          return '<div class="sal"><span class="h">'+esc(r.id)+'</span><div class="t">'+esc(String(r.actividad||'').slice(0,90))+'</div></div>';
+          /* el id (A-140) es jerga de control: al title, como la matricula */
+          return '<div class="sal" title="'+esc(r.id)+'"><div class="t">'+esc(String(r.actividad||'').slice(0,90))+'</div></div>';
         }).join('');
 }
 
@@ -978,11 +985,26 @@ function pintarMesa(){
   /* Si estabas escribiendo «quién lo ejecuta» y el tablero se refresco, tu
      texto se borraba con el innerHTML. Se guarda antes y se repone despues:
      nunca se pierde lo que ya habias tecleado o dictado. */
-  var abiertas={};
+  var abiertas={}, cambios={};
   Array.prototype.forEach.call(c.querySelectorAll('.quien.on'),function(q){
-    var id=q.id.slice(3), tx=document.getElementById('qx_'+id), sl=document.getElementById('qd_'+id);
-    abiertas[id]={t:tx?tx.value:'', d:sl?sl.value:''};
+    var id=q.id.slice(3), tx=document.getElementById('qx_'+id),
+        sl=document.getElementById('qd_'+id), sm=document.getElementById('qm_'+id);
+    /* tambien el selector de cobro/pago: si lo corregiste a mano y el tablero
+       se refresco, volvia a lo adivinado sin decirte nada. */
+    abiertas[id]={t:tx?tx.value:'', d:sl?sl.value:'', m:sm?sm.value:null};
   });
+  /* La caja de «Cambiar» se perdia entera: es otra pantalla donde escribes. */
+  Array.prototype.forEach.call(c.querySelectorAll('.caja.on'),function(q){
+    var id=q.id.slice(3), tx=document.getElementById('cx_'+id);
+    cambios[id]= tx?tx.value:'';
+  });
+  /* Si estabas dictando, el reconocimiento apunta a un textarea que este
+     innerHTML va a tirar: tu voz se iria a la nada y el boton se quedaria en
+     «grabando» para siempre. Se corta aqui, antes de repintar. */
+  if(typeof REC!=='undefined' && REC && RECdest && !document.body.contains(RECdest)){
+    try{ REC.onend=null; REC.onerror=null; REC.abort(); }catch(e){}
+    REC=null; RECdest=null; RECbtn=null; marcarGrabando(false);
+  }
   if(!MESA.length){ c.innerHTML='<div class="vacio">La mesa está limpia. Cuando sueltes algo en la charola, aquí te lo dejo listo para firmar.</div>'; return; }
   /* La mesa era el unico de los cuatro renders sin tope. Nueve tarjetas de
      firma en fila cansan y ninguna se ve urgente; MESA ya viene ordenada por
@@ -1064,6 +1086,12 @@ function pintarMesa(){
     q.classList.add('on');
     var tx=document.getElementById('qx_'+id); if(tx) tx.value=abiertas[id].t;
     var sl=document.getElementById('qd_'+id); if(sl && abiertas[id].d) sl.value=abiertas[id].d;
+    var sm=document.getElementById('qm_'+id); if(sm && abiertas[id].m!=null) sm.value=abiertas[id].m;
+  });
+  Object.keys(cambios).forEach(function(id){
+    var q=document.getElementById('cj_'+id); if(!q) return;
+    q.classList.add('on');
+    var tx=document.getElementById('cx_'+id); if(tx) tx.value=cambios[id];
   });
   Array.prototype.forEach.call(c.querySelectorAll('[data-firmar]'),function(b){ b.onclick=function(){
     var q=document.getElementById('qn_'+b.dataset.firmar); q.classList.add('on');
@@ -1178,8 +1206,8 @@ function pintarSalida(){
     elS.innerHTML = (cob||pag)
       ? ('Hoy se movió '+(cob?('<b style="color:var(--verde)">'+esc(pesos(cob))+' cobrado</b>'):'')
          +(cob&&pag?' · ':'')+(pag?('<b>'+esc(pesos(pag))+' pagado</b>'):'')
-         +(semTot>cob?('<span class="sem"> · '+esc(pesos(semTot))+' cobrado en los últimos días que abriste</span>'):''))
-      : (semTot?('<span class="sem">Hoy todavía nada. En los últimos días que abriste llevas '
+         +(semTot>cob?('<span class="sem"> · '+esc(pesos(semTot))+' cobrado en los últimos días que abriste esta compu</span>'):''))
+      : (semTot?('<span class="sem">Hoy todavía nada. En los últimos días que abriste esta compu llevas '
                  +esc(pesos(semTot))+' cobrado.</span>'):'');
     elS.hidden = !(cob||pag||semTot);
     try{
@@ -1196,7 +1224,7 @@ function pintarSalida(){
         var q = x.texto.indexOf('Ejecutado')>=0
               ? (x.texto.indexOf('cobrada')>=0 ? 'cobrada' : (x.texto.indexOf('pagada')>=0 ? 'pagada' : (x.texto.indexOf('cerrada')>=0 ? 'cerrada' : 'firmada')))
               : (x.texto.indexOf('Aplazada')>=0?'aplazada':(x.texto.indexOf('Cambio')>=0?'corregida':'entró a la charola'));
-        return '<div class="sal"><span class="h">'+esc(x.id)+'</span><div class="t"><em>'+q+'</em> · '+esc(x.act)+'</div></div>';
+        return '<div class="sal" title="'+esc(x.id)+'"><div class="t"><em>'+q+'</em> · '+esc(x.act)+'</div></div>';
       }).join('');
 }
 function pintarAtoro(){
@@ -1432,13 +1460,36 @@ async function escribirComentario(id, texto, btn, dice){
     return false;
   }
 }
+/* «Después» y «Guardar el cambio» tambien escriben en el Sheet, y hasta hoy lo
+   hacian al primer clic mientras que Firmar exigia ver la vista previa antes.
+   Misma regla para los tres: ves lo que se va a escribir, y luego pasa. */
+function confirmarAntes(btn, id, textoQueSeEscribe, etiqueta){
+  var m=document.getElementById('fm_'+id);
+  if(btn.dataset.confirmado==='1' && btn.dataset.visto===textoQueSeEscribe) return true;
+  if(m){ m.className='smsg';
+    m.innerHTML='<b>Se va a escribir en la tarjeta:</b><br>'+esc(textoQueSeEscribe); }
+  btn.dataset.confirmado='1'; btn.dataset.visto=textoQueSeEscribe;
+  btn.dataset.antes=btn.dataset.antes||btn.textContent;
+  btn.textContent=etiqueta;
+  return false;
+}
+function limpiarConfirma(btn){
+  if(btn.dataset.antes){ btn.textContent=btn.dataset.antes; }
+  btn.dataset.confirmado=''; btn.dataset.visto='';
+}
 async function aplazar(id, btn){
-  await escribirComentario(id, '⏳ Aplazada (Despacho, '+hoyLocal()+') por Alejandro.', btn, 'aplazada ✓');
+  var texto='⏳ Aplazada (Despacho, '+hoyLocal()+') por Alejandro.';
+  if(!confirmarAntes(btn, id, texto, 'Sí, aplazarla')) return;
+  limpiarConfirma(btn);
+  await escribirComentario(id, texto, btn, 'aplazada ✓');
 }
 async function pedirCambio(id, btn){
   var t=(document.getElementById('cx_'+id).value||'').trim();
   if(!t){ document.getElementById('cx_'+id).focus(); return; }
-  await escribirComentario(id, '✏️ Cambio pedido (Despacho, '+hoyLocal()+'): '+t, btn, 'anotado ✓');
+  var texto='✏️ Cambio pedido (Despacho, '+hoyLocal()+'): '+t;
+  if(!confirmarAntes(btn, id, texto, 'Sí, guardarlo')) return;
+  limpiarConfirma(btn);
+  await escribirComentario(id, texto, btn, 'anotado ✓');
 }
 
 /* ── escribir en el tablero, con TU sesión del Portero ── */
@@ -1740,9 +1791,14 @@ async function cargar(){
       var rb=document.getElementById('reint');
       if(rb) rb.onclick=function(){ rb.disabled=true; rb.textContent='intentando…'; _fallos=0; cargar(); };
     }else{
-      b.textContent = _fallos<=esperas.length
-        ? ('El tablero de Google no contestó: '+enCristiano(e.message)+'. Lo intento otra vez en '+esperas[_fallos-1]+' s…')
-        : ('El tablero de Google lleva rato sin contestar: '+enCristiano(e.message)+'. Suele ser de ellos, no tuyo. Nada de lo que escribiste se perdió.');
+      /* Sin copia guardada (primera vez en este navegador) la pantalla se
+         quedaba en blanco y, agotados los intentos, sin nada que apretar. */
+      b.innerHTML = (_fallos<=esperas.length
+          ? ('El tablero de Google no contestó: '+esc(enCristiano(e.message))+'. Lo intento otra vez en '+esperas[_fallos-1]+' s…')
+          : ('El tablero de Google lleva rato sin contestar: '+esc(enCristiano(e.message))+'. Suele ser de ellos, no tuyo. Nada de lo que escribiste se perdió.'))
+        +' <button class="bp" id="reint" type="button" style="margin-left:10px;padding:8px 15px;font-size:13px">Reintentar ahora</button>';
+      var rb2=document.getElementById('reint');
+      if(rb2) rb2.onclick=function(){ rb2.disabled=true; rb2.textContent='intentando…'; _fallos=0; cargar(); };
     }
     if(_fallos<=esperas.length) setTimeout(cargar,esperas[_fallos-1]*1000);
   }
