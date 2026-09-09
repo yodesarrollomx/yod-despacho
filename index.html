@@ -255,6 +255,10 @@ var CARRILES = [
 ];
 var MESES = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,setiembre:9,octubre:10,noviembre:11,diciembre:12};
 var HOY = new Date(); HOY.setHours(0,0,0,0);
+/* Fecha de HOY en la zona del que mira. new Date().toISOString() da UTC:
+   despues de las 6 de la tarde en Mexico estampaba el dia siguiente. */
+function hoyLocal(){ var d=new Date(), z=function(n){return (n<10?'0':'')+n;};
+  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 var ANIO = HOY.getFullYear();
 
 var $ = function(s){ return document.querySelector(s); };
@@ -534,12 +538,14 @@ function abrir(fid,nom){
   });
   h+='</div><div class="hPie">'+c.cuantas+' TARJETAS · SE ESCRIBE EN TU TABLERO CON TU PROPIA SESIÓN · CERRADO SIGNIFICA CONTESTADO, NO AVISADO</div>';
   var hoja=$('#hoja'); hoja.innerHTML=h; hoja.classList.add('on'); $('#velo').classList.add('on');
+  document.body.style.overflow='hidden';  /* con la hoja abierta, el fondo no se mueve */
   Array.prototype.forEach.call(hoja.querySelectorAll('[data-firmar]'),function(b){
     b.addEventListener('click',function(){ firmar(b.dataset.firmar,b); });
   });
   $('#hCerrar').addEventListener('click',cerrarHoja);
 }
-function cerrarHoja(){ $('#hoja').classList.remove('on'); $('#velo').classList.remove('on'); SEL=null; pintar(); }
+function cerrarHoja(){ $('#hoja').classList.remove('on'); $('#velo').classList.remove('on');
+  document.body.style.overflow=''; SEL=null; pintar(); }
 
 /* ── escribir en el tablero, con TU sesión del Portero ── */
 async function llamar(action,payload){
@@ -553,7 +559,7 @@ async function llamar(action,payload){
 async function firmar(id,btn){
   var t=TAREAS.filter(function(x){return x.id===id;})[0]; if(!t) return;
   if(!credencial()){ alert('Primero entra con el Portero: sin credencial el tablero no deja escribir.'); return; }
-  var hoy=new Date().toISOString().slice(0,10);
+  var hoy=hoyLocal();
   var texto='🤖 Ejecutado (Despacho, '+hoy+'): firmada por Alejandro desde El Despacho.';
   if(!confirm('Se va a escribir en la tarjeta '+id+':\n\n'+texto+'\n\n¿Lo firmo?')) return;
   btn.disabled=true; btn.textContent='escribiendo…';
@@ -610,7 +616,7 @@ async function soltar(){
   try{
     var tarea={mes:f.mes,semana:f.semana,fecha:f.fecha,empresa:emp,proyecto:proy,responsable:resp,
                actividad:txt,estado:'Pendiente',prioridad:'Alta',entregable:'',observaciones:'',
-               comentarios:'Claudet~'+new Date().toISOString().slice(0,10)+'~Soltado desde El Despacho.'};
+               comentarios:'Claudet~'+hoyLocal()+'~Soltado desde El Despacho.'};
     var r=await llamar('create',{task:tarea});
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
     m.className='smsg ok'; m.textContent='Listo'+(r.task&&r.task.id?(' · quedó como '+r.task.id):'')+'. Ya está en tu tablero.';
