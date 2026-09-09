@@ -51,6 +51,9 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .hola{padding:26px 0 4px}
 .hola .d{font-size:13.5px;color:var(--dim)}
 .hola h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,40px);line-height:1.05;margin-top:2px}
+/* tablero caido: lo que se ve es una foto vieja, no se firma contra una foto */
+.caido [data-firmarya],.caido [data-guardar],.caido [data-despues],.caido #sBtn{
+  opacity:.38;pointer-events:none;filter:grayscale(1)}
 .bp{background:var(--oro);color:#14100A;font-weight:600;font-size:14px;padding:12px 20px;border-radius:16px;display:inline-flex;align-items:center;gap:9px}
 .bp[disabled]{opacity:.45;cursor:default}
 .bo{border:1px solid var(--hair2);color:var(--ink2);font-size:13.5px;padding:11px 16px;border-radius:16px}
@@ -416,6 +419,15 @@ function hoyLocal(){ var d=new Date(), z=function(n){return (n<10?'0':'')+n;};
 var ANIO = HOY.getFullYear();
 
 var $ = function(s){ return document.querySelector(s); };
+/* El backend contesta con claves cortas («liga», «clave»). Puestas tal cual en
+   pantalla no le dicen nada a nadie: aqui se traducen a espanol de a de veras. */
+function enCristiano(msg){
+  var m=String(msg||'');
+  if(m==='liga')  return 'Google no reconoció el acceso ahorita (suele durar unos minutos y volver solo)';
+  if(m==='clave') return 'el Portero no reconoció tu acceso: vuelve a entrar';
+  if(/no pude releer/.test(m)) return 'no pude releer el tablero antes de escribir, así que mejor no escribí nada';
+  return m;
+}
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function sinac(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim(); }
 function dias(f){ return f? Math.round((HOY-f)/86400000) : null; }
@@ -1022,6 +1034,9 @@ function pintarMandar(){
 }
 
 function pintar(){
+  /* Si el tablero esta caido, lo que se ve es una foto vieja: los botones que
+     escriben se apagan a proposito, para que nadie firme contra una copia. */
+  try{ document.body.classList.toggle('caido', !!CAIDO); }catch(e){}
   armarMesa();
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
@@ -1102,7 +1117,7 @@ async function escribirComentario(id, texto, btn, dice){
     return true;
   }catch(e){
     btn.disabled=false; btn.textContent=antes;
-    if(m){ m.className='smsg mal'; m.textContent='No se pudo: '+e.message; }
+    if(m){ m.className='smsg mal'; m.textContent='No se pudo: '+enCristiano(e.message)+'.'; }
     return false;
   }
 }
@@ -1247,7 +1262,7 @@ async function firmar(id,btn){
     await cargar();       /* la mesa se rehace con lo que de verdad quedo escrito */
   }catch(e){
     btn.disabled=false; btn.textContent=btn.dataset.etiqueta||'Firmar'; btn.dataset.confirmado='';
-    if(msj){ msj.className='smsg mal'; msj.textContent='No se pudo: '+e.message+'. No se escribió nada.'; }
+    if(msj){ msj.className='smsg mal'; msj.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.'; }
   }
 }
 
@@ -1294,19 +1309,24 @@ async function soltar(){
     $('#sTexto').value='';
     await cargar();
   }catch(e){
-    m.className='smsg mal'; m.textContent='No se pudo: '+e.message+'. No se escribió nada.';
+    m.className='smsg mal'; m.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.';
   }
   b.disabled=false;
 }
 
 /* ── arranque ── */
-var _fallos=0;
+var _fallos=0, CAIDO=false;
 async function cargar(){
   var b=$('#banner');
   try{
     var r=await llamar('getAll',{});
     if(!r || !r.ok) throw new Error(r&&r.error?r.error:'sin respuesta');
     TAREAS=r.tasks||[];
+    /* Se guarda la ultima lectura buena. NO es una segunda bandeja: el Sheet
+       sigue mandando y esto jamas se escribe. Es para que un parpadeo de Google
+       no deje la pantalla en blanco, y siempre se dice de cuando es. */
+    try{ localStorage.setItem('cierre_ultima',JSON.stringify({f:Date.now(),t:TAREAS})); }catch(e){}
+    CAIDO=false;
     var n=construir(TAREAS);
     $('#viva').className='viva';
     var mias=VIVAS.filter(function(r){return r._mio;}).length;
@@ -1322,18 +1342,33 @@ async function cargar(){
       b.textContent='Todavía no entras: el Portero pide tu acceso. En cuanto entres, este tablero se llena solo.';
       return;
     }
-    /* El Apps Script parpadea de vez en cuando y contesta «liga» aunque la
-       credencial este bien. Antes la pantalla se quedaba muerta hasta que
-       alguien recargaba a mano; ahora lo reintenta dos veces y lo dice. */
+    /* El Apps Script de Google parpadea y contesta «liga» aunque la credencial
+       este buena: comprobado hoy tres veces seguidas. Cuando pasa, la respuesta
+       mala se le queda pegada unos minutos, asi que reintentar cada 4 segundos
+       no sirve de nada: se espacia. Y mientras no conteste se pinta la ultima
+       lectura buena DICIENDO de cuando es, para no dejar la pantalla en blanco. */
+    CAIDO=true;
     _fallos=(_fallos||0)+1;
-    if(_fallos<=2){
-      b.textContent='El tablero no contestó ('+e.message+'). Lo intento otra vez en '+(_fallos*4)+' s…';
-      setTimeout(cargar,_fallos*4000);
+    var esperas=[8,20,45,90];
+    var vieja=null; try{ vieja=JSON.parse(localStorage.getItem('cierre_ultima')||'null'); }catch(e2){}
+    if(vieja && vieja.t && vieja.t.length){
+      TAREAS=vieja.t; construir(TAREAS); pintar(); llenarSoltar();
+      var min=Math.max(1,Math.round((Date.now()-vieja.f)/60000));
+      var cuando = min<60 ? ('hace '+min+' min') : ('hace '+Math.round(min/60)+' h');
+      $('#viva').className='viva mal';
+      $('#estado').textContent='esto es de '+cuando+' · el tablero no contesta';
+      b.hidden=false; b.className='aviso mal';
+      b.innerHTML='<b>Lo que ves es de '+cuando+'.</b> El tablero de Google no contesta ('+esc(enCristiano(e.message))+'), '
+        +'y hasta que conteste no se puede firmar nada. Casi siempre vuelve solo en unos minutos. '
+        +'<button class="bp" id="reint" type="button" style="margin-left:10px;padding:8px 15px;font-size:13px">Reintentar ahora</button>';
+      var rb=document.getElementById('reint');
+      if(rb) rb.onclick=function(){ rb.disabled=true; rb.textContent='intentando…'; _fallos=0; cargar(); };
     }else{
-      b.textContent='El tablero lleva tres intentos sin contestar ('+e.message+'). '
-        +'Suele ser Google, no tú: espera un minuto y recarga. Nada de lo que escribiste se perdió.';
-      _fallos=0;
+      b.textContent = _fallos<=esperas.length
+        ? ('El tablero de Google no contestó: '+enCristiano(e.message)+'. Lo intento otra vez en '+esperas[_fallos-1]+' s…')
+        : ('El tablero de Google lleva rato sin contestar: '+enCristiano(e.message)+'. Suele ser de ellos, no tuyo. Nada de lo que escribiste se perdió.');
     }
+    if(_fallos<=esperas.length) setTimeout(cargar,esperas[_fallos-1]*1000);
   }
 }
 document.addEventListener('DOMContentLoaded',function(){ var b=$('#sBtn'); if(b) b.addEventListener('click',soltar); });
