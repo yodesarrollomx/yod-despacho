@@ -407,6 +407,22 @@ function construir(tasks){
 }
 
 /* ── pintar ── */
+function riesgos(){
+  var caja=$('#riesgos'); if(!caja) return;
+  var R=(RIESGOS||[]).map(function(x){
+    var p=String(x.fecha).split('-'); var f=new Date(+p[0],+p[1]-1,+p[2]);
+    return {fecha:x.fecha,titulo:x.titulo,que:x.que,cae:x.cae,dias:Math.round((f-HOY)/86400000)};
+  }).filter(function(x){ return x.dias<=75; }).sort(function(a,b){ return a.dias-b.dias; });
+  if(!R.length){ caja.innerHTML=''; return; }
+  var h='<div class="rz"><h2>Lo que puede tumbar el sistema</h2>';
+  R.forEach(function(x){
+    var cuando = x.dias<0 ? ('hace '+(-x.dias)+' d') : (x.dias===0?'HOY':('en '+x.dias+' d'));
+    h+='<div class="rzf"><span class="d">'+esc(cuando)+'</span><div><b>'+esc(x.titulo)+'</b>'
+     +'<p>'+esc(x.que)+' <i style="font-style:normal;color:var(--rojo)">Si se pasa: '+esc(x.cae)+'</i></p></div></div>';
+  });
+  caja.innerHTML=h+'</div>';
+}
+
 function pintar(){
   var h='';
   FILAS.forEach(function(f){
