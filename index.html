@@ -258,13 +258,16 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* los ultimos dias: numeros con una barrita de apoyo, no una grafica */
 .hist{display:flex;align-items:flex-end;gap:12px;margin-top:14px;padding-top:13px;
   border-top:1px solid var(--hair2);flex-wrap:wrap}
-.hist .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);
+.hist .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--faint);
   width:100%;margin-bottom:2px}
 .hist .hd{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:34px}
 .hist .hd i{display:block;width:7px;height:26px;background:var(--hair2);border-radius:3px}
-.hist .hd:last-child i{background:var(--oro2)}
+/* la de hoy se distingue por FORMA (mas ancha), no por un dorado de premio */
+.hist .hd:last-child i{background:var(--dim);width:11px}
 .hist .hd b{font-family:var(--mono);font-size:12.5px;color:var(--ink2);font-weight:500}
-.hist .hd u{font-family:var(--mono);font-size:9.5px;color:var(--faint);text-decoration:none}
+.hist .hd u{font-family:var(--mono);font-size:11.5px;color:var(--faint);text-decoration:none}
+.hist .hd s{font-family:var(--mono);font-size:11.5px;color:var(--oro2);text-decoration:none}
+.hist .esp{font-size:12.5px;color:var(--dim);line-height:1.5;max-width:52ch}
 .masMesa{font-size:12.5px;color:var(--dim);padding:12px 2px 0;line-height:1.5}
 .salDin{font-size:13px;color:var(--ink2);margin:2px 0 11px;padding-bottom:10px;
   border-bottom:1px solid var(--hair2)}
@@ -285,8 +288,9 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .rzf.grave{background:rgba(200,60,50,.07);border-left:3px solid var(--rojo);padding-left:11px}
 .rzf.grave .d{color:var(--rojo);font-weight:700;font-size:1.06em}
 /* la que espera a otro no es la que te espera a ti */
-/* Las tres clases se distinguen por FORMA, no solo por color: quien no separa
-   bien verde de azul sigue viendo un filo continuo contra uno punteado. */
+/* Las TRES clases se distinguen por forma, no solo por color: decidir de cero
+   es lo mas caro y llevaba el mismo filo gris que cualquier tarjeta suelta. */
+.firma.decidir{border-left:4px solid var(--oro)}
 .firma.vuelta{border-left:3px dashed var(--azul)}
 .firma.cerrar{border-left:3px solid var(--verde)}
 .firma.vuelta .rama{color:var(--azul)}
@@ -431,7 +435,18 @@ function momentoDeLaHora(){ var h=new Date().getHours(); return h<11?'arranque':
 var MOMENTO = (function(){ try{ var m=sessionStorage.getItem('cierre_momento');
   return (m && ['arranque','firma','cierre'].indexOf(m)>=0) ? m : momentoDeLaHora(); }
   catch(e){ return momentoDeLaHora(); } })();
-function congelado(r){ return !!CONGELADOS[String(r.proyecto||'').trim()]; }
+/* Congelado se decide por el TEMA REAL de la tarjeta, no por la columna
+   «proyecto» a secas: una tarjeta que vive en «Decisiones» pero habla de La
+   Cercada se agrupa con La Cercada en el arbol, y tenia que congelarse igual.
+   Por eso el arbol decia «La Cercada 20» mientras el encabezado decia «19
+   congeladas» en la misma pantalla. */
+function congelado(r){
+  var p=String(r.proyecto||'').trim();
+  if(CONGELADOS[p]) return true;
+  if(sinac(p)!=='decisiones') return false;
+  var t=temaDecision(r);
+  return !!(t && CONGELADOS[String(t).trim()]);
+}
 
 var CARRILES = [
   ['proyectos','Proyectos','lo que ya está en obra'],
@@ -689,7 +704,7 @@ function construir(tasks){
     {ok:decs<=5, t:'la bandeja de decisiones no está atorada',
      d:decs+(decs===1?' espera':' esperan')+' que decidas (tope 5)'
        +(espMias?(' · '+espMias+' ya redactada'+(espMias===1?'':'s')+' y te toca cerrarla'+(espMias===1?'':'s')):'')
-       +(espOtro?(' · '+espOtro+' esperan a otra persona'):'')}
+       +(espOtro?(' · '+espOtro+(espOtro===1?' espera':' esperan')+' a otra persona'):'')}
   ];
   return viv.length;
 }
@@ -790,11 +805,11 @@ function acuerdo(){
     var cuando = dd<=1?'ayer':('hace '+dd+' días');
     var dif=ayer.n-venc;
     var col = dif>0?'var(--verde)':(dif<0?'var(--rojo)':'var(--dim)');
-    comp = ' <small style="color:'+col+'">('+cuando+' eran '+ayer.n
+    comp = ' <small style="color:'+col+'">('+cuando+(ayer.n===1?' era ':' eran ')+ayer.n
          + (dif>0?(' — bajaron '+dif):(dif<0?(' — subieron '+(-dif)):' — igual'))+')</small>';
   }
   var seg = MESA.length
-    ? ('<span class="seg"> · '+MESA.length+(MESA.length===1?' por cerrar hoy':' por cerrar hoy')+'</span>')
+    ? ('<span class="seg"> · '+MESA.length+' por cerrar hoy</span>')
     : '<span class="seg"> · la mesa está limpia</span>';
   $('#acuerdoN').innerHTML = venc
     ? ('<em class="mal">'+venc+'</em>'+(venc===1?' vencida':' vencidas')+comp+seg)
@@ -849,12 +864,22 @@ function acuerdo(){
       elH.innerHTML='<span class="k">LOS ÚLTIMOS DÍAS QUE ABRISTE</span>'
         + hist.map(function(x){
             var dd=x.f.split('-'); var alto=Math.max(8,Math.round(x.n/mx*100));
-            return '<span class="hd" title="'+esc(x.f)+': '+x.n+' vencidas">'
+            return '<span class="hd" title="'+esc(x.f)+': '+x.n+(x.n===1?' vencida':' vencidas')
+                 + (x.d?(' · '+pesos(x.d)+' en la mesa'):'')+'">'
                  + '<i style="height:'+alto+'%"></i><b>'+x.n+'</b>'
+                 + (x.d?('<s>'+esc(pesos(x.d))+'</s>'):'')
                  + '<u>'+esc(dd[2]+'/'+dd[1])+'</u></span>';
           }).join('');
       elH.hidden=false;
-    } else { elH.hidden=true; }
+    } else {
+      /* Sin esto, la franja no existe hasta el tercer dia y nadie sabe que
+         viene. Se dice cuanto falta; no es un premio ni una racha. */
+      var faltan=Math.max(1,3-hist.length);
+      elH.innerHTML='<span class="k">LOS ÚLTIMOS DÍAS QUE ABRISTE</span>'
+        +'<span class="esp">En '+faltan+(faltan===1?' día más':' días más')+' de abrir esto '
+        +'vas a poder comparar tu semana. No hay que hacer nada: se guarda solo.</span>';
+      elH.hidden=false;
+    }
   }
   /* Se guarda tambien el dinero del dia, y se conservan los ultimos 7 dias
      ABIERTOS (no dias del calendario): es un dato para comparar, no una racha
@@ -949,7 +974,8 @@ function pintarMesa(){
     var d=yaSalio ? esperandoDesde(r) : dias(r._f);
     if(yaSalio && d===null) d=dias(r._f);
     var que=yaSalio?loQueSalio(r):loQueDecidiste(r);
-    return '<div class="firma'+(m.ap>=2?' hot':'')+(esVuelta?' vuelta':'')+(esCerrar?' cerrar':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
+    return '<div class="firma'+(m.ap>=2?' hot':'')+(esVuelta?' vuelta':'')+(esCerrar?' cerrar':'')
+      +(m.clase==='firmar'?' decidir':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
       /* la meta se dice, no se codifica: DICC.metas_nombre existia desde
          siempre y nunca se leyo. 'MD' no le dice nada a nadie. */
       +'<div class="rama">'+esc(ra.sujeto)+(ra.meta?(' · <span title="'+esc(metaNombre(ra.meta))
@@ -1116,7 +1142,10 @@ function pintarSalida(){
       }).join('');
 }
 function pintarAtoro(){
-  var l=VIVAS.filter(function(r){ return aplazos(r)>=3; })
+  /* Lo congelado NO se atora: esta en pausa a proposito. Las otras cuatro
+     listas accionables ya lo excluian y esta se habia quedado atras — el mismo
+     descuido, en el tercer lugar distinto del archivo. */
+  var l=VIVAS.filter(function(r){ return !r._frio && aplazos(r)>=3; })
              .sort(function(a,b){ return aplazos(b)-aplazos(a); });
   $('#atora').innerHTML = !l.length
     ? '<div class="vacio" style="border-color:#3A231D">Nada aplazado tres veces. Bien.</div>'
@@ -1224,7 +1253,7 @@ function pintarMandar(){
           +' — lleva '+x.d+(x.d===1?' día':' días')+(x.r._dinTxt?(' · '+x.r._dinTxt):'')+'.'; }).join('\n')
       + '\n\n¿En qué punto va cada uno? Si algo ya no aplica, dímelo y lo cierro.';
     return '<div class="wp"><h4>'+esc(n)+'</h4>'
-      +'<p class="q">'+l.length+(l.length===1?' pendiente vencido':' pendientes vencidos')+' · el más viejo lleva '+l[0].d+' días</p>'
+      +'<p class="q">'+l.length+(l.length===1?' pendiente vencido':' pendientes vencidos')+' · el más viejo lleva '+l[0].d+(l[0].d===1?' día':' días')+'</p>'
       +'<pre id="wp'+i+'">'+esc(t)+'</pre>'
       +'<button class="bCopiar" data-copiar="'+i+'" type="button">Copiar para WhatsApp</button></div>';
   }).join('');
@@ -1389,7 +1418,7 @@ async function firmar(id,btn){
   var caja=document.getElementById('qx_'+id);
   var quien=caja?String(caja.value||'').trim():'';
   if(!quien){
-    if(msj){ msj.className='smsg mal'; msj.textContent='Escribe quién lo ejecuta y para cuándo. Sin eso no se firma.'; }
+    if(msj){ msj.className='smsg mal'; msj.textContent='Escribe quién lo ejecuta. Sin un nombre no se firma; la fecha te la pido aparte.'; }
     if(caja) caja.focus();
     return;
   }
@@ -1482,7 +1511,13 @@ async function firmar(id,btn){
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
     btn.textContent=esCierre?'cerrada ✓':'firmada ✓';
     if(msj){ msj.className='smsg ok';
-      msj.textContent=verbo+(nuevoDueno?(' · ahora es de '+nuevoDueno):'')+' · quedó escrita en la tarjeta'; }
+      /* el mismo aviso de la vista previa, repetido DESPUES de escribir: si lo
+         leiste rapido, aqui queda la constancia de a nombre de quien quedo. */
+      var dicho2=quienNombras(quien);
+      msj.innerHTML=esc(verbo)
+        +(nuevoDueno?(' · ahora es de <b>'+esc(nuevoDueno)+'</b>')
+                    :(dicho2?'':' · <b>sigue a tu nombre</b>: no reconocí a nadie en el renglón'))
+        +' · quedó escrita en la tarjeta'; }
     await cargar();       /* la mesa se rehace con lo que de verdad quedo escrito */
   }catch(e){
     btn.disabled=false; btn.textContent=btn.dataset.etiqueta||'Firmar'; btn.dataset.confirmado='';
