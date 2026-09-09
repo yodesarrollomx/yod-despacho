@@ -146,7 +146,9 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .firma .por b{color:var(--ink);font-weight:600}
 .firma .meta{font-family:var(--mono);font-size:11px;color:var(--ink2);margin-bottom:12px}
 /* una fecha que el motor dedujo, marcada: nunca se lee como dato del Sheet */
-#acuerdoDin .cmp{font-family:var(--sans);font-size:.42em;color:var(--dim);font-weight:400;letter-spacing:0}
+/* Iba en .42em de un padre que nunca fija su propio font-size: heredaba los
+   15px del body y salia a ~6.3px, la mitad del piso de 11.5px de este archivo. */
+#acuerdoDin .cmp{font-family:var(--sans);font-size:12px;color:var(--dim);font-weight:400;letter-spacing:0}
 .estim{font-style:normal;color:var(--ambar);border:1px solid rgba(200,150,60,.34);
   border-radius:6px;padding:1px 7px;font-size:11.5px;letter-spacing:.06em;margin-left:6px}
 .firma .acc{display:flex;gap:7px;flex-wrap:wrap}
@@ -638,20 +640,25 @@ function construir(tasks){
     for(var k in sujetos){
       var s=sujetos[k]; if(s.carril!==C[0]) continue;
       var ts=s.tarjetas;
-      var dmax=null, din=0, dinTxt='', dec=0, esp=0, mios=0, venc=0, sf=0;
+      var dmax=null, din=0, dinTxt='', dec=0, esp=0, mios=0, venc=0, sf=0, act=0;
       ts.forEach(function(t){
         var d=dias(t._f);
         if(d!==null && (dmax===null||d>dmax)) dmax=d;
         if(t._din>din){ din=t._din; dinTxt=t._dinTxt; }
         if(t._dec) dec++; if(t._esp) esp++; if(t._mio) mios++;
-        if(t._f && t._f<HOY) venc++;
+        if(t._f && t._f<HOY && !t._frio) venc++;   /* lo congelado no vence */
+        if(!t._frio) act++;                        /* lo accionable de verdad */
         if(!t._f) sf++;
       });
       ss.push({nombre:s.nombre,cuantas:ts.length,mias:mios,vencidas:venc,dias:dmax,sinFecha:sf,
                dinero:din,dineroTxt:dinTxt,decisiones:dec,esperando:esp,tarjetas:ts,
                sigla:DICC.sujetos[s.nombre]||DICC.personas[s.nombre]||'',
                meta:DICC.metas[s.nombre]||'',
-               puntos:(din?1000:0)+dec*100+(dmax||0)+ts.length});
+               /* El ranking de las tres casillas visibles se ordena por lo
+                  ACCIONABLE: un carril lleno de tarjetas congeladas subia al
+                  #1 y tapaba a otro que si te esta esperando. Cuarto lugar
+                  donde este mismo descuido estaba vivo. */
+               puntos:act?((din?1000:0)+dec*100+(dmax||0)+act):0});
     }
     ss.sort(function(a,b){ return b.puntos-a.puntos; });
     ss.forEach(function(c){ if(!c.meta){ var mm={}; c.tarjetas.forEach(function(t){ var x=matricula(t,c.nombre).split('-')[3]; if(x&&x!=='M?') mm[x]=(mm[x]||0)+1; }); var best='',n=0; for(var k in mm) if(mm[k]>n){best=k;n=mm[k];} c.meta=best; } });
@@ -1477,7 +1484,9 @@ async function firmar(id,btn){
     if(!/\b(hoy|mañana|manana|pasado|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|semana|mes|quincena|ahorita|ya|noche|tarde|medio\s*d[ií]a|antes de|al rato|en cuanto|el d[ií]a|el \d|\d{1,2}\s*(de|\/)|en \d+)\b/i.test(quien))
       aviso += '<br><b style="color:var(--ambar)">No vi para cuándo. Si de veras no tiene fecha, dale otra vez; si no, agrégala.</b>';
     av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
-      +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso+'</p>';
+      +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso
+      +'<br><b style="color:var(--verde)">Y la tarjeta queda cerrada: deja de contar '
+      +'entre las vencidas y se va de la mesa.</b></p>';
     btn.dataset.confirmado='1'; btn.dataset.visto=quien;
     btn.textContent=esCierre?'Sí, cerrarla':'Sí, firmar';
     return;
@@ -1500,7 +1509,22 @@ async function firmar(id,btn){
     /* Si el renglon nombra a alguien de la casa, la tarjeta CAMBIA de dueño.
        Antes el nombre se quedaba en la prosa del comentario y la tarjeta seguia
        a nombre de Alejandro: por eso 28 de 46 eran suyas y el traspaso no ocurria. */
-    var patch={comentarios:nuevo};
+    /* El estado tambien. Sin esto la tarjeta quedaba «Ejecutado» en el
+       comentario pero VIVA para el conteo: firmabas y el numero grande de
+       arriba no se movia ni un digito. Es lo unico que esta pantalla existe
+       para bajar. La vista previa lo dice antes, con todas sus letras.
+
+       Y se escribe COMO LO ESCRIBE EL BOARD, no a medias: cerrar una tarjeta
+       alla mueve tres columnas (estado, historial y fechaTerminado). Si solo
+       mandaramos «estado», la tarjeta quedaria terminada sin fecha de cierre y
+       sin rastro en el historial — y las otras pantallas del sistema que leen
+       fechaTerminado verian un hueco. Mismo contrato que board.py campo(). */
+    var patch={comentarios:nuevo, estado:'Terminado'};
+    var hist=String(actual.historial||'');
+    var ult=hist?hist.split('|').pop().trim():'';
+    /* el formato real de la hoja es «2026-07-02 Terminado», con el espacio */
+    if(!/\sTerminado$/.test(ult)) patch.historial=(hist?hist+'|':'')+hoy+' Terminado';
+    if(!String(actual.fechaTerminado||'').trim()) patch.fechaTerminado=hoy;
     var sel=document.getElementById('qd_'+id);
     var elegido=sel?String(sel.value||'').trim():'';
     /* Lo dictado manda; el desplegable solo sobreescribe cuando lo tocaste.
