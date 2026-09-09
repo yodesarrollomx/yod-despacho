@@ -909,8 +909,11 @@ function pintarMesa(){
         +(d!==null?(' · '+(esVuelta?('lleva '+d+' d esperando a '+esc(r.responsable||'alguien'))
               :(esCerrar?('redactada hace '+d+' d · falta cerrarla')
                         :(fmtDias(d)+(d>0?' tarde':''))))
-            /* una fecha que YO deduje no se lee igual que una escrita en el Sheet */
-            +(r._como&&r._como!=='explicita'?' <i class="estim" title="'+esc(r._como)+'">fecha estimada</i>':'')):' · sin fecha')
+            /* La marca solo vale para el numero DEDUCIDO (el vencimiento). El
+               «redactada hace N d» sale de un comentario con fecha exacta:
+               ponerle «estimada» al lado seria mentir en la otra direccion. */
+            +((!yaSalio && r._como && r._como!=='explicita')
+               ?' <i class="estim" title="'+esc(r._como)+'">fecha estimada</i>':'')):' · sin fecha')
         +(m.ap?(' · aplazada '+m.ap+(m.ap===1?' vez':' veces')):'')+'</div>'
       +'<div class="acc">'
         +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(yaSalio?'Cerrarla':'Firmar')+'</button>'
@@ -938,8 +941,9 @@ function pintarMesa(){
         +'<button class="bOtro" data-cancelfirma="'+esc(r.id)+'">Cancelar</button></div>'
       +'</div></div>';
   }).join('')
-  + (resto ? ('<div class="masMesa">Hay '+resto+' más esperando tu firma, debajo de éstas por '
-              +'dinero y por antigüedad. Se suben solas conforme cierres las de arriba.</div>') : '');
+  + (resto ? ('<div class="masMesa">Hay '+resto+(resto===1?' más abajo':' más abajo')+', ordenada'
+              +(resto===1?'':'s')+' por dinero y por antigüedad. '
+              +'Se sube'+(resto===1?'':'n')+' sola'+(resto===1?'':'s')+' conforme cierres las de arriba.</div>') : '');
   Object.keys(abiertas).forEach(function(id){
     var q=document.getElementById('qn_'+id); if(!q) return;
     q.classList.add('on');
