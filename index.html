@@ -12,7 +12,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 /* ── El Despacho · la súper app aprobada, con la mecánica de la casa ── */
-:root{
+/* El Despacho nace oscuro (el diseno aprobado). El shell de YOD OS trae tema
+   claro y repintaba --bg dejando tinta clara sobre fondo claro: por eso la
+   segunda mitad del selector, que le gana al [data-tema="claro"] del shell. */
+:root,html[data-tema][data-tema]{
  --bg:#0B0A08;--panel:#17140F;--panel2:#1F1A13;--panel3:#241E16;--hair:#241E16;--hair2:#2E2718;
  --ink:#F6F1E6;--ink2:#CFC6B4;--dim:#A79C88;--faint:#6F6656;--mute:#4E4738;
  --oro:#D8AC5C;--oro2:#EFD09A;--oroS:#221C13;
@@ -26,6 +29,8 @@
 html,body{background:var(--bg)}
 body{color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
  background:radial-gradient(120% 55% at 50% -8%,#1B1710 0%,#0B0A08 58%);min-height:100vh;padding:0 0 120px}
+html[data-tema][data-tema] body{color:var(--ink);
+ background:radial-gradient(120% 55% at 50% -8%,#1B1710 0%,#0B0A08 58%)}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
 button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
 a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
@@ -148,6 +153,11 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .aviso{margin-top:16px;background:var(--panel);border:1px solid var(--hair2);border-radius:20px;padding:16px 18px;font-size:14px;color:var(--dim)}
 .aviso.mal{border-color:#4A2A24;background:var(--rojoS);color:var(--ink)}
 @media(max-width:900px){.fichas{grid-template-columns:1fr}.hStats{grid-template-columns:repeat(2,1fr)}}
+
+/* Anclaje de tema. portero.js inyecta su hoja DESPUES de esta y en claro
+   repinta .hero (con !important) y .pie. Aqui vuelven al oscuro aprobado. */
+html[data-tema][data-tema] .hero{background:linear-gradient(160deg,#221C13 0%,#17140F 62%)!important}
+html[data-tema][data-tema] .pie{background:none}
 </style>
 </head>
 <body>
