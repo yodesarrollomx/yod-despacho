@@ -562,19 +562,28 @@ async function firmar(id,btn){
   var hoy=hoyLocal();
   var texto='🤖 Ejecutado (Despacho, '+hoy+'): firmada por Alejandro desde El Despacho.';
   if(!confirm('Se va a escribir en la tarjeta '+id+':\n\n'+texto+'\n\n¿Lo firmo?')) return;
-  btn.disabled=true; btn.textContent='escribiendo…';
+  btn.disabled=true; btn.textContent='leyendo la tarjeta…';
   try{
-    var prev=String(t.comentarios||'');
+    /* Releer ANTES de escribir. El patch reemplaza la columna 'comentarios'
+       COMPLETA: si armamos el texto con lo que teniamos cacheado desde que
+       se abrio la pagina, cualquier comentario que otro haya puesto mientras
+       tanto se borra. Es el mismo error que en agosto borro accesos. */
+    var fresco=await llamar('getAll',{});
+    if(!fresco || !fresco.ok) throw new Error('no pude releer el tablero antes de firmar');
+    var actual=(fresco.tasks||[]).filter(function(x){return x.id===id;})[0];
+    if(!actual) throw new Error('esa tarjeta ya no esta en el tablero');
+    var prev=String(actual.comentarios||'');
+    if(prev.indexOf('Ejecutado')>=0) throw new Error('ya estaba firmada desde otra pantalla');
     var linea='Claudet~'+hoy+'~'+texto;
     var nuevo=prev? (prev+'|||'+linea) : linea;
+    btn.textContent='escribiendo…';
     var r=await llamar('update',{id:id,patch:{comentarios:nuevo}});
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
-    t.comentarios=nuevo; t._dec=false;
     btn.textContent='firmada ✓';
-    construir(TAREAS); pintar();
-    var f=SEL.split('|'); abrir(f[0],f[1]);
+    await cargar();                       /* la pantalla se repinta con lo que quedo escrito */
+    if(SEL){ var f=SEL.split('|'); abrir(f[0],f[1]); }
   }catch(e){
-    btn.disabled=false; btn.textContent='firmar ejecutada';
+    btn.disabled=false; btn.textContent='Firmar';   /* el boton vuelve a decir lo que decia */
     alert('No se pudo escribir: '+e.message);
   }
 }
