@@ -1121,6 +1121,14 @@ function pintarMesa(){
 
 /* ── 4 · el árbol de la casa ── */
 function pintarArbol(){
+  /* Con el tablero vacio el arbol se quedaba en blanco, sin decir por que.
+     Un hueco sin explicacion se lee como pantalla rota. */
+  var conAlgo=FILAS.filter(function(f){ return f.casillas.length; }).length;
+  if(!conAlgo){
+    $('#arbol').innerHTML = '<div class="vacio">Todavía no hay nada repartido. '
+      + 'En cuanto el tablero traiga tarjetas, aquí se prende la rama de la que tengas enfrente.</div>';
+    return;
+  }
   $('#arbol').innerHTML = FILAS.map(function(f){
     if(!f.casillas.length) return '';
     return '<div class="rama" data-carril="'+esc(f.id)+'"><div class="ramaT"><i></i>'+esc(f.nombre)+'</div>'
