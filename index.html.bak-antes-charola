@@ -164,86 +164,6 @@ html[data-tema][data-tema] .pie{background:none}
    tableros son claros. El Despacho es oscuro: se le devuelve el lienzo.
    Solo el lienzo: la barra lateral y la de arriba son hermanas y no se tocan. */
 body .yod-canvas{background:var(--bg);color:var(--ink)}
-/* ══════════ LA CHAROLA DEL DIRECTOR ══════════
-   El boceto que Alejandro aprobo el 7-sep: un escritorio con tres charolas —
-   lo que entra, lo que ya acomode, y lo que salio firmado. El centro no es una
-   lista: es un acto. Firmar. */
-.acuerdo{margin-top:16px;background:linear-gradient(160deg,#221C13 0%,#17140F 62%);border-radius:24px;padding:22px 24px}
-.acuerdo .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--oro)}
-.acuerdo .n{font-family:var(--serif);font-size:clamp(30px,4.4vw,44px);line-height:1.05;color:var(--ink);margin-top:4px}
-.acuerdo .n em{font-style:normal;color:var(--oro)}
-.acuerdo .sub{font-size:13.5px;color:var(--dim);margin-top:8px}
-.tres{display:grid;grid-template-columns:0.9fr 1.25fr 0.85fr;gap:14px;margin-top:14px;align-items:start}
-@media(max-width:1080px){.tres{grid-template-columns:1fr}}
-.dos{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
-@media(max-width:820px){.dos{grid-template-columns:1fr}}
-.zona{background:var(--panel);border:1px solid var(--hair);border-radius:22px;padding:18px 18px 16px}
-.zona>h2{font-family:var(--serif);font-size:21px;color:var(--ink);line-height:1.15}
-.zona>.sub{display:block;font-size:12px;color:var(--faint);margin:2px 0 14px}
-.zona.entrada{border-color:#25402C}
-.zona.mesa{border-color:#4A3C1E;background:linear-gradient(180deg,#1B1710 0%,#141109 100%)}
-.zona.arbol{border-color:#2E2545}
-.zona.salida{border-color:#2A3A4A}
-.zona.atora{border-color:#4A2A24;background:var(--rojoS)}
-/* ── el boton grande de grabar ── */
-.mic{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:var(--verdeS);
-  border:1px solid #2C5138;color:var(--verde);border-radius:18px;padding:18px;font-size:15px;font-weight:600;transition:.15s}
-.mic:hover{border-color:var(--verde)}
-.mic i{width:12px;height:12px;border-radius:50%;background:var(--verde);display:block}
-.mic.on{background:var(--rojoS);border-color:var(--rojo);color:var(--rojo)}
-.mic.on i{background:var(--rojo);animation:lat 1s infinite}
-@keyframes lat{50%{opacity:.25}}
-.mic[disabled]{opacity:.45}
-.micEst{font-size:12px;color:var(--faint);text-align:center;margin:8px 0 12px;min-height:16px}
-.zona textarea{width:100%;min-height:88px;background:var(--panel2);border:1px solid var(--hair2);border-radius:14px;
-  padding:13px 14px;color:var(--ink);font:inherit;font-size:14px;resize:vertical}
-.zona textarea:focus{outline:2px solid var(--oro);outline-offset:2px}
-.zona select{background:var(--panel2);border:1px solid var(--hair2);border-radius:12px;padding:9px 11px;color:var(--ink2);font:inherit;font-size:12.5px}
-.dicPie{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;align-items:center}
-.dicPie .bp{padding:10px 16px;font-size:13px}
-.smsg{font-size:12px;color:var(--dim);flex:1 0 100%}
-.smsg.ok{color:var(--verde)} .smsg.mal{color:var(--rojo)}
-/* ── la tarjeta de la mesa: grande, se lee en diez segundos ── */
-.firma{background:var(--panel2);border:1px solid var(--hair2);border-radius:18px;padding:16px 17px;margin-bottom:11px}
-.firma.hot{border-color:#4A3C1E}
-.firma .rama{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--oro);text-transform:uppercase}
-.firma h3{font-family:var(--serif);font-size:19px;line-height:1.2;color:var(--ink);margin:5px 0 9px}
-.firma .por{font-size:13.5px;color:var(--ink2);line-height:1.5;border-left:2px solid var(--hair2);padding-left:11px;margin-bottom:10px}
-.firma .por b{color:var(--ink);font-weight:600}
-.firma .meta{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-bottom:12px}
-.firma .acc{display:flex;gap:7px;flex-wrap:wrap}
-.bFirmar{background:var(--oro);color:#14100A;font-weight:600;font-size:12.5px;padding:9px 15px;border-radius:12px}
-.bOtro{background:transparent;border:1px solid var(--hair2);color:var(--ink2);font-size:12.5px;padding:9px 14px;border-radius:12px}
-.bOtro:hover{border-color:var(--dim);color:var(--ink)}
-.bFirmar[disabled],.bOtro[disabled]{opacity:.4;cursor:default}
-.firma .caja{margin-top:11px;display:none}
-.firma .caja.on{display:block}
-.vacio{font-size:13.5px;color:var(--dim);background:var(--panel2);border:1px dashed var(--hair2);border-radius:16px;padding:18px;text-align:center}
-/* ── el arbol: solo se prende la rama de la tarjeta abierta ── */
-.rama{margin-bottom:4px}
-.ramaT{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--faint);padding:7px 0}
-.ramaT i{width:5px;height:5px;border-radius:50%;background:var(--mute)}
-.hoja2{display:flex;align-items:center;gap:9px;padding:6px 0 6px 14px;border-left:1px solid var(--hair2);
-  font-size:13px;color:var(--faint);transition:.15s}
-.hoja2 b{font-weight:500;color:var(--dim)}
-.hoja2 .cu{margin-left:auto;font-family:var(--mono);font-size:10px}
-.rama.on .ramaT{color:var(--oro)} .rama.on .ramaT i{background:var(--oro)}
-.rama.on .hoja2{border-left-color:var(--oro);color:var(--ink2)}
-.rama.on .hoja2 b{color:var(--ink)}
-.rama.on .hoja2.esa{background:var(--oroS);border-radius:0 10px 10px 0}
-.rama.on .hoja2.esa b{color:var(--oro2)}
-/* ── salida y atoro ── */
-.sal{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--hair)}
-.sal:last-child{border-bottom:0}
-.sal .h{font-family:var(--mono);font-size:10px;color:var(--faint);min-width:44px}
-.sal .t{font-size:13.5px;color:var(--ink2);line-height:1.45}
-.sal .t em{font-style:normal;color:var(--verde)}
-.at{padding:9px 0;border-bottom:1px solid #3A231D}
-.at:last-child{border-bottom:0}
-.at b{display:block;font-size:14px;color:var(--ink)}
-.at span{font-size:12.5px;color:var(--rojo)}
-
 </style>
 </head>
 <body>
@@ -259,64 +179,48 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <h1 id="saludo">Buenos días, Alejandro</h1>
   </div>
 
-  <!-- 1 · EL ACUERDO DEL DÍA: lo único que importa hoy -->
-  <section class="acuerdo" id="acuerdo" hidden>
-    <div class="k">EL ACUERDO DEL DÍA</div>
-    <div class="n" id="acuerdoN">—</div>
-    <p class="sub" id="acuerdoSub">—</p>
-  </section>
+  <div class="hero" id="hero" hidden>
+    <div class="heroTop">
+      <div>
+        <div class="k">HOY PASAN POR TI</div>
+        <div class="n"><span id="nMias">—</span><small> de <span id="nVivas">—</span></small></div>
+      </div>
+      <div style="display:flex;gap:22px;flex-wrap:wrap">
+        <div><div class="k">SIN EJECUTAR</div><div class="n" style="font-size:34px;color:var(--rojo)" id="nDec">—</div></div>
+        <div><div class="k">VENCIDAS</div><div class="n" style="font-size:34px;color:var(--ambar)" id="nVenc">—</div></div>
+      </div>
+    </div>
+    <div class="barras" id="barras"></div>
+    <div class="heroPie">
+      <p id="heroPie">—</p>
+      <button class="bp" id="irSoltar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#14100A" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Soltar un pendiente
+      </button>
+    </div>
+  </div>
 
   <div class="aviso" id="banner" hidden></div>
   <div id="riesgos"></div>
 
-  <!-- 2 · las tres charolas -->
-  <div class="tres">
-    <section class="zona entrada">
-      <h2>Charola de entrada</h2>
-      <span class="sub">lo crudo que soltaste y todavía no acomodo</span>
-      <button class="mic" id="micBtn" type="button"><i></i><span id="micTxt">Grabar</span></button>
-      <p class="micEst" id="micEst">Apriétalo y habla. Yo lo escribo.</p>
-      <textarea id="sTexto" placeholder="…o escríbelo aquí"></textarea>
-      <div class="dicPie">
-        <select id="sProy"></select>
-        <select id="sResp"></select>
-        <select id="sFecha">
-          <option value="hoy">para hoy</option>
-          <option value="semana" selected>esta semana</option>
-          <option value="proxima">la próxima semana</option>
-        </select>
-        <button class="bp" id="sBtn" type="button">Ponerlo en la charola</button>
-        <span class="smsg" id="sMsg"></span>
-      </div>
-      <div id="entrada" style="margin-top:14px"></div>
-    </section>
+  <section class="soltar" id="soltar" hidden>
+    <h2>Suelta un pendiente</h2>
+    <p class="q">Escríbelo o díctalo con el micrófono de tu teclado. Nace como tarjeta en tu tablero, con dueño y fecha, y aparece aquí en la casilla que le toque.</p>
+    <textarea id="sTexto" placeholder="Qué pasó, qué falta o qué hay que hacer…"></textarea>
+    <div class="sfila">
+      <select id="sProy"></select>
+      <select id="sResp"></select>
+      <select id="sFecha">
+        <option value="hoy">para hoy</option>
+        <option value="semana" selected>esta semana</option>
+        <option value="proxima">la próxima semana</option>
+      </select>
+      <button class="bp" id="sBtn" type="button">Ponerlo en el tablero</button>
+      <span class="smsg" id="sMsg"></span>
+    </div>
+  </section>
 
-    <section class="zona mesa">
-      <h2>La mesa de firmas</h2>
-      <span class="sub">se firma, se corrige o se aplaza — nada más</span>
-      <div id="mesa"></div>
-    </section>
-
-    <section class="zona arbol">
-      <h2>El árbol de la casa</h2>
-      <span class="sub">se prende la rama de la tarjeta abierta</span>
-      <div id="arbol"></div>
-    </section>
-  </div>
-
-  <!-- 3 · lo que salió y lo que se atora -->
-  <div class="dos">
-    <section class="zona salida">
-      <h2>Charola de salida</h2>
-      <span class="sub">lo que firmaste hoy y adónde se fue</span>
-      <div id="salida"></div>
-    </section>
-    <section class="zona atora">
-      <h2>Lo que se está atorando</h2>
-      <span class="sub">aplazado tres veces o más</span>
-      <div id="atora"></div>
-    </section>
-  </div>
+  <div id="carriles"></div>
 
   <div class="focos">
     <h2>¿Cómo sé que jala?</h2>
@@ -564,257 +468,107 @@ function riesgos(){
   caja.innerHTML=h+'</div>';
 }
 
-/* ══════════ EL ESCRITORIO ══════════
-   Cuatro zonas y un acto. Todo sale del MISMO Sheet: no hay segunda bandeja.
-   Se distinguen por lo que dice el ultimo comentario de cada tarjeta:
-     📥 Charola   → lo solto y todavia no lo acomodo   → charola de entrada
-     ✅ DECISIÓN  → decidida; si no hay Ejecutado, va a la mesa de firmas
-     🤖 Ejecutado → cerrada hoy                        → charola de salida
-     ⏳ Aplazada  → contadas; tres o mas, se atora                          */
-
-function comentarios(r){
-  return String(r.comentarios||'').split('|||').map(function(c){
-    var p=c.split('~'); return {autor:(p[0]||'').trim(), fecha:(p[1]||'').trim(), texto:p.slice(2).join('~').trim()};
-  }).filter(function(c){ return c.texto; });
-}
-function enCharola(r){ var c=String(r.comentarios||''); return c.indexOf('📥 Charola')>=0 && c.indexOf('DECISIÓN')<0 && c.indexOf('Ejecutado')<0; }
-function aplazos(r){ return (String(r.comentarios||'').match(/⏳ Aplazada/g)||[]).length; }
-function salioHoy(r){
-  var hoy=hoyLocal();
-  return comentarios(r).filter(function(c){
-    return c.fecha===hoy && /🤖 Ejecutado|⏳ Aplazada|✏️ Cambio pedido|📥 Charola/.test(c.texto);
-  });
-}
-/* De que trata la decision, en las palabras que el mismo escribio */
-function loQueDecidiste(r){
-  var c=comentarios(r).filter(function(x){ return x.texto.indexOf('DECISIÓN')>=0; }).pop();
-  if(!c) return '';
-  return c.texto.replace(/^.*DECISIÓN:?\s*/,'').replace(/^(Opción|Otra)\s*[A-C]?\s*[—-]?\s*/,'').trim();
-}
-function loQueSalio(r){
-  var c=comentarios(r).filter(function(x){ return x.texto.indexOf('Redactado')>=0; }).pop();
-  return c ? c.texto.replace(/^🤖\s*Redactado:?\s*/,'').trim() : '';
-}
-function ramaDe(r){
-  var p=String(r.proyecto||'').trim(), t=(sinac(p)==='decisiones')?temaDecision(r):p;
-  var car=carrilDe(t)||'interno';
-  var nom=(CARRILES.filter(function(C){return C[0]===car;})[0]||['','—'])[1];
-  var meta=DICC.metas[t]||'';
-  return {carril:car, carrilNombre:nom, sujeto:t||'Sin tema', meta:meta};
-}
-
-/* ── 1 · el acuerdo del día ── */
-function acuerdo(){
-  var porFirmar=MESA.filter(function(x){return x.clase==='firmar';}).length;
-  var deVuelta =MESA.filter(function(x){return x.clase==='vuelta';}).length;
-  var min=Math.max(1,Math.round((porFirmar*1.5)+(deVuelta*0.5)));
-  var sinSalir=VIVAS.filter(function(r){ return r._esp; }).length;
-  var a=$('#acuerdo'); a.hidden=false;
-  $('#acuerdoN').innerHTML = MESA.length
-    ? ('<em>'+MESA.length+'</em> '+(MESA.length===1?'tarjeta espera tu firma':'tarjetas esperan tu firma')+' · <em>'+min+'</em> min')
-    : 'Nada espera tu firma. <em>La mesa está limpia.</em>';
-  $('#acuerdoSub').textContent = (porFirmar? porFirmar+' por firmar · ':'')
-    + (deVuelta? deVuelta+' de vuelta (ya salieron y nadie contestó) · ':'')
-    + sinSalir+' decisiones esperando a otra persona · '+VIVAS.length+' tarjetas vivas';
-}
-
-/* ── 2 · la charola de entrada ── */
-function pintarEntrada(){
-  var l=VIVAS.filter(enCharola).sort(function(a,b){ return (b._f?b._f:0)-(a._f?a._f:0); });
-  $('#entrada').innerHTML = !l.length ? ''
-    : '<p class="micEst" style="text-align:left;margin:0 0 8px">'+l.length+(l.length===1?' cosa esperando a que la acomode':' cosas esperando a que las acomode')+'</p>'
-      + l.slice(0,6).map(function(r){
-          return '<div class="sal"><span class="h">'+esc(r.id)+'</span><div class="t">'+esc(String(r.actividad||'').slice(0,90))+'</div></div>';
-        }).join('');
-}
-
-/* ── 3 · la mesa de firmas ── */
-var MESA=[];
-function armarMesa(){
-  MESA=[];
-  VIVAS.forEach(function(r){
-    var d=dias(r._f), ap=aplazos(r);
-    if(r._dec)      MESA.push({r:r, clase:'firmar', ap:ap});
-    else if(r._esp && d!==null && d>7) MESA.push({r:r, clase:'vuelta', ap:ap});
-  });
-  MESA.sort(function(a,b){
-    if(a.clase!==b.clase) return a.clase==='firmar'?-1:1;
-    return (dias(b.r._f)||0)-(dias(a.r._f)||0);
-  });
-}
-function pintarMesa(){
-  var c=$('#mesa');
-  if(!MESA.length){ c.innerHTML='<div class="vacio">La mesa está limpia. Cuando sueltes algo en la charola, aquí te lo dejo listo para firmar.</div>'; return; }
-  c.innerHTML = MESA.map(function(m){
-    var r=m.r, ra=ramaDe(r), d=dias(r._f);
-    var esVuelta=m.clase==='vuelta';
-    var que=esVuelta?loQueSalio(r):loQueDecidiste(r);
-    return '<div class="firma'+(m.ap>=2?' hot':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
-      +'<div class="rama">'+esc(ra.sujeto)+(ra.meta?(' · '+esc(ra.meta)):'')+'</div>'
-      +'<h3>'+esc(String(r.actividad||'').slice(0,120))+'</h3>'
-      +(que?('<p class="por"><b>'+(esVuelta?'Ya salió esto:':'Lo que decidiste:')+'</b> '+esc(que.slice(0,220))+'</p>'):'')
-      +'<div class="meta">'+esc(matricula(r,ra.sujeto))+' · '+esc(r.responsable||'sin dueño')
-        +(d!==null?(' · '+(esVuelta?('lleva '+d+' d esperando a '+esc(r.responsable||'alguien')):(fmtDias(d)+(d>0?' tarde':'')))):' · sin fecha')
-        +(m.ap?(' · aplazada '+m.ap+(m.ap===1?' vez':' veces')):'')+'</div>'
-      +'<div class="acc">'
-        +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(esVuelta?'Darla por cerrada':'Firmar')+'</button>'
-        +'<button class="bOtro" data-cambiar="'+esc(r.id)+'">Cambiar</button>'
-        +'<button class="bOtro" data-despues="'+esc(r.id)+'">Después</button>'
-        +'<span class="smsg" id="fm_'+esc(r.id)+'"></span>'
-      +'</div>'
-      +'<div class="caja" id="cj_'+esc(r.id)+'">'
-        +'<textarea id="cx_'+esc(r.id)+'" placeholder="Dicta o escribe la corrección…"></textarea>'
-        +'<div class="dicPie"><button class="bOtro" data-dictar="'+esc(r.id)+'">🎙 Dictar</button>'
-        +'<button class="bp" data-guardar="'+esc(r.id)+'" style="padding:9px 15px;font-size:13px">Guardar el cambio</button></div>'
-      +'</div></div>';
-  }).join('');
-  Array.prototype.forEach.call(c.querySelectorAll('[data-firmar]'),function(b){ b.onclick=function(){ firmar(b.dataset.firmar,b); }; });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-despues]'),function(b){ b.onclick=function(){ aplazar(b.dataset.despues,b); }; });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-cambiar]'),function(b){ b.onclick=function(){
-    var cj=document.getElementById('cj_'+b.dataset.cambiar); cj.classList.toggle('on');
-    if(cj.classList.contains('on')) document.getElementById('cx_'+b.dataset.cambiar).focus();
-  }; });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-guardar]'),function(b){ b.onclick=function(){ pedirCambio(b.dataset.guardar,b); }; });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-dictar]'),function(b){ b.onclick=function(){ dictarEn(document.getElementById('cx_'+b.dataset.dictar), b); }; });
-  /* el arbol se prende con la tarjeta que tengas enfrente */
-  Array.prototype.forEach.call(c.querySelectorAll('.firma'),function(f){
-    f.addEventListener('mouseenter',function(){ prenderRama(f.dataset.rama); });
-  });
-  if(MESA.length) prenderRama(c.querySelector('.firma').dataset.rama);
-}
-
-/* ── 4 · el árbol de la casa ── */
-function pintarArbol(){
-  $('#arbol').innerHTML = FILAS.map(function(f){
-    if(!f.casillas.length) return '';
-    return '<div class="rama" data-carril="'+esc(f.id)+'"><div class="ramaT"><i></i>'+esc(f.nombre)+'</div>'
-      + f.casillas.map(function(c){
-          return '<div class="hoja2" data-sujeto="'+esc(c.nombre)+'"><b>'+esc(c.nombre)+'</b>'
-            +'<span class="cu">'+c.cuantas+'</span></div>';
-        }).join('') + '</div>';
-  }).join('');
-}
-function prenderRama(clave){
-  var p=String(clave||'').split('|'), car=p[0], suj=p[1];
-  Array.prototype.forEach.call(document.querySelectorAll('#arbol .rama'),function(r){
-    var on = r.dataset.carril===car;
-    r.classList.toggle('on', on);
-    Array.prototype.forEach.call(r.querySelectorAll('.hoja2'),function(h){
-      h.classList.toggle('esa', on && h.dataset.sujeto===suj);
-    });
-  });
-}
-
-/* ── 5 · charola de salida y lo que se atora ── */
-function pintarSalida(){
-  var l=[];
-  VIVAS.concat(TAREAS.filter(function(t){return VIVAS.indexOf(t)<0;})).forEach(function(r){
-    salioHoy(r).forEach(function(c){ l.push({id:r.id, texto:c.texto, act:String(r.actividad||'').slice(0,70)}); });
-  });
-  $('#salida').innerHTML = !l.length
-    ? '<div class="vacio">Todavía no sale nada hoy. En cuanto firmes algo, aquí queda el rastro.</div>'
-    : l.slice(0,8).map(function(x){
-        var q = x.texto.indexOf('Ejecutado')>=0 ? 'firmada' : (x.texto.indexOf('Aplazada')>=0?'aplazada':(x.texto.indexOf('Cambio')>=0?'corregida':'entró a la charola'));
-        return '<div class="sal"><span class="h">'+esc(x.id)+'</span><div class="t"><em>'+q+'</em> · '+esc(x.act)+'</div></div>';
-      }).join('');
-}
-function pintarAtoro(){
-  var l=VIVAS.filter(function(r){ return aplazos(r)>=3; })
-             .sort(function(a,b){ return aplazos(b)-aplazos(a); });
-  $('#atora').innerHTML = !l.length
-    ? '<div class="vacio" style="border-color:#3A231D">Nada aplazado tres veces. Bien.</div>'
-    : l.slice(0,6).map(function(r){
-        return '<div class="at"><b>'+esc(String(r.actividad||'').slice(0,80))+'</b>'
-          +'<span>aplazada '+aplazos(r)+' veces · decide hoy o se archiva</span></div>';
-      }).join('');
-}
-
 function pintar(){
-  armarMesa();
-  acuerdo(); pintarEntrada(); pintarMesa(); pintarArbol(); pintarSalida(); pintarAtoro(); riesgos();
-  var f=new Date();
-  $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
-  var h=f.getHours();
-  $('#saludo').textContent = (h<12?'Buenos días':(h<19?'Buenas tardes':'Buenas noches'))+', Alejandro';
-  $('#focos').innerHTML=FOCOS.map(function(x){
-    return '<div class="foco"><i class="'+(x.ok?'ok':'no')+'"></i><div><b>'+esc(x.t)+'</b><span>'+esc(x.d)+'</span></div></div>';
+  var h='';
+  FILAS.forEach(function(f){
+    h+='<section class="lane"><div class="laneCab"><h2>'+esc(f.nombre)+'</h2><span>'+esc(f.sub)+'</span>'
+     +'<span class="cola">'+(f.cola?(f.cola+' en cola · '+esc(f.colaNombres.join(' · '))):'sin cola')+'</span></div>';
+    if(!f.casillas.length){
+      h+='<div class="limpio"><i></i><span>Limpio. Nadie de este frente te espera hoy.</span></div></section>'; return;
+    }
+    h+='<div class="fichas">';
+    f.casillas.forEach(function(c){
+      var sig=c.sigla||c.nombre.slice(0,3).toUpperCase();
+      var arde=(c.dias!==null&&c.dias>14)||c.decisiones>=2;
+      var pct=c.dias===null?null:Math.max(4,Math.min(96,Math.round(c.dias*100/30)));
+      var col=c.dias===null?'var(--faint)':(c.dias>14?'var(--rojo)':'var(--ambar)');
+      h+='<button class="ficha'+(arde?' hot':'')+(SEL===f.id+'|'+c.nombre?' sel':'')+'" data-f="'+esc(f.id)+'" data-c="'+esc(c.nombre)+'">'
+       +'<div class="fCab">'+portada(sig,f.id)+'<div class="t"><h3>'+esc(c.nombre)+'</h3>'
+       +'<span class="m">'+esc(sig)+(c.meta?' · '+esc(c.meta):'')+'</span></div></div>'
+       +'<div class="marcas">'
+       +'<div class="mrc"><b class="'+(c.cuantas>=10?'al':'')+'">'+c.cuantas+'</b><span>TE ESPERAN</span></div>'
+       +'<div class="mrc"><b class="'+(c.dias===null?'na':(c.dias>14?'al':'am'))+'">'+(fmtDias(c.dias)||'sin fecha')+'</b><span>MÁS VIEJO</span></div>'
+       +'<div class="mrc"><b class="'+(c.dineroTxt?'or':'na')+'">'+esc(c.dineroTxt||'—')+'</b><span>MENCIONADO</span></div>'
+       +'</div>'
+       +(pct===null?'':'<div class="riel"><span class="zona" style="background:'+(c.dias>14?'#2E1A16':'#2A2115')+'"></span>'
+          +'<span class="pt" style="left:'+pct+'%;background:'+col+';box-shadow:0 0 0 3px '+(c.dias>14?'rgba(216,105,90,.18)':'rgba(224,172,74,.16)')+'"></span></div>')
+       +((c.decisiones||c.vencidas||c.mias)?'<div class="pins">'
+          +(c.decisiones?'<span class="pin d">'+c.decisiones+' sin ejecutar</span>':'')
+          +(c.esperando?'<span class="pin e">'+c.esperando+' esperando a otro</span>':'')
+          +(c.vencidas?'<span class="pin v">'+c.vencidas+' vencidas</span>':'')
+          +(c.mias?'<span class="pin m">'+c.mias+' tuyas</span>':'')+'</div>':'')
+       +'</button>';
+    });
+    h+='</div></section>';
+  });
+  $('#carriles').innerHTML=h;
+  Array.prototype.forEach.call($('#carriles').querySelectorAll('.ficha'),function(b){
+    b.addEventListener('click',function(){ abrir(b.dataset.f,b.dataset.c); });
+  });
+  $('#focos').innerHTML=FOCOS.map(function(f){
+    return '<div class="foco"><i class="'+(f.ok?'ok':'no')+'"></i><div><b>'+esc(f.t)+'</b><span>'+esc(f.d)+'</span></div></div>';
   }).join('');
+  // hero
+  var vivas=0,mias=0,dec=0,venc=0;
+  TAREAS.forEach(function(){});
+  FILAS.forEach(function(){});
+  vivas=VIVAS.length;
+  var esp=0;
+  VIVAS.forEach(function(r){ if(r._mio)mias++; if(r._dec)dec++; if(r._esp)esp++; if(r._f&&r._f<HOY)venc++; });
+  $('#nVivas').textContent=vivas; $('#nMias').textContent=mias;
+  $('#nDec').textContent=dec; $('#nVenc').textContent=venc;
+  var b=''; for(var k=0;k<15;k++){
+    var casilla=null,n=0;
+    FILAS.forEach(function(f){ f.casillas.forEach(function(c){ if(n===k) casilla=c; n++; }); });
+    var color = !casilla ? 'var(--panel3)' : (casilla.dias!==null&&casilla.dias>14 ? 'var(--rojo)' : 'var(--ambar)');
+    b+='<i style="background:'+color+'"></i>';
+  }
+  $('#barras').innerHTML=b;
+  var ocup=0; FILAS.forEach(function(f){ ocup+=f.casillas.length; });
+  $('#heroPie').textContent=ocup+' casillas ocupadas de 15 · '
+    +dec+(dec===1?' decisión espera':' decisiones esperan')+' tu firma'
+    +(esp?(' · '+esp+(esp===1?' ya salió y espera':' ya salieron y esperan')+' a otro'):'');
+  $('#hero').hidden=false;
+  riesgos();
 }
 
-/* ══════════ EL BOTÓN GRANDE: dictado del navegador ══════════
-   Alejandro aprieta y habla; el navegador lo pasa a texto en vivo. No guarda
-   el archivo — todavia. Cuando el Apps Script del board sepa recibir un audio,
-   este MISMO boton empieza a guardarlo tambien, sin rehacer nada: por eso la
-   grabacion vive en una funcion aparte y no pegada al textarea. */
-var REC=null, RECdest=null, RECbtn=null, RECbase='';
-function hayDictado(){ return !!(window.SpeechRecognition||window.webkitSpeechRecognition); }
-function dictarEn(dest, btn){
-  if(!hayDictado()){
-    if(btn) btn.textContent='tu navegador no oye';
-    return;
-  }
-  if(REC){ REC.stop(); return; }
-  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  REC=new SR(); RECdest=dest; RECbtn=btn; RECbase=dest.value?dest.value+' ':'';
-  REC.lang='es-MX'; REC.continuous=true; REC.interimResults=true;
-  REC.onstart=function(){ marcarGrabando(true); };
-  REC.onresult=function(e){
-    var t='';
-    for(var i=0;i<e.results.length;i++) t+=e.results[i][0].transcript;
-    dest.value=RECbase+t;
-  };
-  REC.onerror=function(e){
-    marcarGrabando(false);
-    var m=$('#micEst'); if(m) m.textContent = (e.error==='not-allowed')
-      ? 'Chrome no me dejó oír: dale permiso de micrófono al sitio y vuelve a apretar.'
-      : 'No pude oír ('+e.error+'). Escríbelo si urge.';
-  };
-  REC.onend=function(){ marcarGrabando(false); REC=null; };
-  try{ REC.start(); }catch(e){ REC=null; marcarGrabando(false); }
+function abrir(fid,nom){
+  var f=FILAS.filter(function(x){return x.id===fid;})[0]; if(!f) return;
+  var c=f.casillas.filter(function(x){return x.nombre===nom;})[0]; if(!c) return;
+  SEL=fid+'|'+nom; pintar();
+  var sig=c.sigla||c.nombre.slice(0,3).toUpperCase();
+  var h='<div class="grab"><i></i></div>'
+   +'<div class="hCab">'+portada(sig,f.id)+'<div class="t"><h3>'+esc(c.nombre)+'</h3>'
+   +'<span class="m">'+esc(matricula(c.tarjetas[0],c.nombre))+'</span>'
+   +'<span style="font-size:12.5px;color:var(--dim)">'+esc(f.nombre)+(c.meta?' · '+esc(DICC.metas_nombre[c.meta]||c.meta):'')+'</span></div>'
+   +'<button class="hX" id="hCerrar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A79C88" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+   +'<div class="hStats">'
+   +'<div><b class="'+(c.cuantas>=10?'':'')+'" style="color:'+(c.cuantas>=10?'var(--rojo)':'var(--ink)')+'">'+c.cuantas+'</b><span>TE ESPERAN</span></div>'
+   +'<div><b style="color:'+(c.dias!==null&&c.dias>14?'var(--rojo)':'var(--ambar)')+'">'+(fmtDias(c.dias)||'sin fecha')+'</b><span>LO MÁS VIEJO</span></div>'
+   +'<div><b style="color:var(--oro);font-size:16px">'+esc(c.dineroTxt||'—')+'</b><span>MENCIONADO</span></div>'
+   +'<div><b style="color:'+(c.decisiones?'var(--rojo)':'var(--ink)')+'">'+c.decisiones+'</b><span>SIN EJECUTAR</span></div>'
+   +'</div><div class="hLista">';
+  c.tarjetas.slice().sort(function(a,b){ return (a._f?a._f:9e15)-(b._f?b._f:9e15); }).forEach(function(t){
+    var d=dias(t._f);
+    var col=t._dec?'var(--rojo)':(t._esp?'var(--azul)':(d!==null&&d>14?'var(--rojo)':(d!==null&&d>0?'var(--ambar)':'#3A3223')));
+    h+='<div class="row"><span class="b" style="background:'+col+'"></span><div class="c">'
+     +'<b>'+esc(String(t.actividad||'').slice(0,140))+'</b>'
+     +(t._dec?'<span class="pin d" style="align-self:flex-start">decidida, sin ejecutar</span>':'')
+     +(t._esp?'<span class="pin e" style="align-self:flex-start">ya se redactó · espera a la otra parte</span>':'')
+     +'<span class="mm">'+esc(matricula(t,c.nombre))+' · '+esc(t.responsable||'sin dueño')+' · '+esc(t.estado||'')
+     +' · '+(t._f?(fmtDias(d)+(d>0?' tarde':'')):'sin fecha')+'</span></div>'
+     +'<span class="ac">'+(t._dec?'<button class="bFirmar" data-firmar="'+esc(t.id)+'">Firmar</button>':'')+'</span></div>';
+  });
+  h+='</div><div class="hPie">'+c.cuantas+' TARJETAS · SE ESCRIBE EN TU TABLERO CON TU PROPIA SESIÓN · CERRADO SIGNIFICA CONTESTADO, NO AVISADO</div>';
+  var hoja=$('#hoja'); hoja.innerHTML=h; hoja.classList.add('on'); $('#velo').classList.add('on');
+  document.body.style.overflow='hidden';  /* con la hoja abierta, el fondo no se mueve */
+  Array.prototype.forEach.call(hoja.querySelectorAll('[data-firmar]'),function(b){
+    b.addEventListener('click',function(){ firmar(b.dataset.firmar,b); });
+  });
+  $('#hCerrar').addEventListener('click',cerrarHoja);
 }
-function marcarGrabando(on){
-  var b=$('#micBtn'), t=$('#micTxt'), m=$('#micEst');
-  if(RECbtn && RECbtn!==b){ RECbtn.textContent = on?'⏹ Parar':'🎙 Dictar'; }
-  if(b && (!RECdest || RECdest===$('#sTexto'))){
-    b.classList.toggle('on',on);
-    if(t) t.textContent = on?'Te estoy oyendo — aprieta para parar':'Grabar';
-  }
-  if(m && (!RECdest || RECdest===$('#sTexto')))
-    m.textContent = on?'Habla normal. Cuando pares, lo dejo escrito abajo.':'Apriétalo y habla. Yo lo escribo.';
-}
-
-/* ══════════ los otros dos actos de la mesa ══════════ */
-async function escribirComentario(id, texto, btn, dice){
-  var m=document.getElementById('fm_'+id);
-  if(!credencial()){ if(m){m.className='smsg mal';m.textContent='Entra con el Portero: sin credencial no puedo escribir.';} return false; }
-  var antes=btn.textContent; btn.disabled=true; btn.textContent='…';
-  try{
-    /* releer antes de escribir: el patch reemplaza la columna completa */
-    var fresco=await llamar('getAll',{});
-    if(!fresco || !fresco.ok) throw new Error('no pude releer el tablero');
-    var actual=(fresco.tasks||[]).filter(function(x){return x.id===id;})[0];
-    if(!actual) throw new Error('esa tarjeta ya no está');
-    var prev=String(actual.comentarios||'');
-    var linea='Claudet~'+hoyLocal()+'~'+texto;
-    var r=await llamar('update',{id:id,patch:{comentarios: prev?(prev+'|||'+linea):linea}});
-    if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
-    if(m){ m.className='smsg ok'; m.textContent=dice; }
-    await cargar();
-    return true;
-  }catch(e){
-    btn.disabled=false; btn.textContent=antes;
-    if(m){ m.className='smsg mal'; m.textContent='No se pudo: '+e.message; }
-    return false;
-  }
-}
-async function aplazar(id, btn){
-  await escribirComentario(id, '⏳ Aplazada (Despacho, '+hoyLocal()+') por Alejandro.', btn, 'aplazada ✓');
-}
-async function pedirCambio(id, btn){
-  var t=(document.getElementById('cx_'+id).value||'').trim();
-  if(!t){ document.getElementById('cx_'+id).focus(); return; }
-  await escribirComentario(id, '✏️ Cambio pedido (Despacho, '+hoyLocal()+'): '+t, btn, 'anotado ✓');
-}
+function cerrarHoja(){ $('#hoja').classList.remove('on'); $('#velo').classList.remove('on');
+  document.body.style.overflow=''; SEL=null; pintar(); }
 
 /* ── escribir en el tablero, con TU sesión del Portero ── */
 async function llamar(action,payload){
@@ -831,7 +585,6 @@ async function firmar(id,btn){
   var hoy=hoyLocal();
   var texto='🤖 Ejecutado (Despacho, '+hoy+'): firmada por Alejandro desde El Despacho.';
   if(!confirm('Se va a escribir en la tarjeta '+id+':\n\n'+texto+'\n\n¿Lo firmo?')) return;
-  var msj=document.getElementById('fm_'+id);
   btn.disabled=true; btn.textContent='leyendo la tarjeta…';
   try{
     /* Releer ANTES de escribir. El patch reemplaza la columna 'comentarios'
@@ -850,12 +603,11 @@ async function firmar(id,btn){
     var r=await llamar('update',{id:id,patch:{comentarios:nuevo}});
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
     btn.textContent='firmada ✓';
-    if(msj){ msj.className='smsg ok'; msj.textContent='firmada · quedó escrita en la tarjeta'; }
-    await cargar();       /* la mesa se rehace con lo que de verdad quedo escrito */
+    await cargar();                       /* la pantalla se repinta con lo que quedo escrito */
+    if(SEL){ var f=SEL.split('|'); abrir(f[0],f[1]); }
   }catch(e){
     btn.disabled=false; btn.textContent='Firmar';   /* el boton vuelve a decir lo que decia */
-    if(msj){ msj.className='smsg mal'; msj.textContent='No se pudo: '+e.message; }
-    else alert('No se pudo escribir: '+e.message);
+    alert('No se pudo escribir: '+e.message);
   }
 }
 
@@ -874,6 +626,7 @@ function llenarSoltar(){
   }
   $('#sProy').innerHTML=ops(proy);
   $('#sResp').innerHTML=ops(resp,'Alejandro');
+  $('#soltar').hidden=false;
 }
 function fechaTexto(cual){
   var d=new Date(HOY), dow=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -895,10 +648,10 @@ async function soltar(){
   try{
     var tarea={mes:f.mes,semana:f.semana,fecha:f.fecha,empresa:emp,proyecto:proy,responsable:resp,
                actividad:txt,estado:'Pendiente',prioridad:'Alta',entregable:'',observaciones:'',
-               comentarios:'Claudet~'+hoyLocal()+'~📥 Charola (Despacho, '+hoyLocal()+'): lo soltó Alejandro, sin acomodar.'};
+               comentarios:'Claudet~'+hoyLocal()+'~Soltado desde El Despacho.'};
     var r=await llamar('create',{task:tarea});
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
-    m.className='smsg ok'; m.textContent='Listo'+(r.task&&r.task.id?(' · '+r.task.id):'')+'. Está en la charola; yo la acomodo.';
+    m.className='smsg ok'; m.textContent='Listo'+(r.task&&r.task.id?(' · quedó como '+r.task.id):'')+'. Ya está en tu tablero.';
     $('#sTexto').value='';
     await cargar();
   }catch(e){
@@ -937,14 +690,9 @@ document.addEventListener('DOMContentLoaded',function(){ var b=$('#sBtn'); if(b)
   var mes=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   var d=new Date();
   $('#hoy').textContent=dow[d.getDay()]+' '+d.getDate()+' de '+mes[d.getMonth()];
-  /* el boton grande de la charola de entrada */
-  var mb=$('#micBtn');
-  if(mb) mb.addEventListener('click',function(){ dictarEn($('#sTexto'), null); });
-  if(!hayDictado()){
-    if(mb){ mb.disabled=true; }
-    var me=$('#micEst'); if(me) me.textContent='Este navegador no sabe oír. En Chrome sí funciona; mientras, escríbelo aquí abajo.';
-  }
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && REC) REC.stop(); });
+  var ir=$('#irSoltar'); if(ir) ir.addEventListener('click',function(){ $('#soltar').scrollIntoView({behavior:'smooth',block:'center'}); $('#sTexto').focus(); });
+  var v=$('#velo'); if(v) v.addEventListener('click',cerrarHoja);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') cerrarHoja(); });
 })();
 cargar();
 </script>
