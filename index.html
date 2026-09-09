@@ -253,6 +253,13 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* el segundo numero acompaña, no compite */
 .acuerdo .n .seg{font-size:.5em;color:var(--dim);font-family:var(--sans)}
 
+/* el grave se ve grave; el aviso, aviso */
+.rzf.grave b{color:var(--rojo)}
+.rzf.grave .d{color:var(--rojo);font-weight:600}
+/* la que espera a otro no es la que te espera a ti */
+.firma.vuelta{border-left:3px solid var(--azul)}
+.firma.vuelta .rama{color:var(--azul)}
+
 </style>
 </head>
 <body>
@@ -368,7 +375,7 @@ var EXEC = "https://script.google.com/macros/s/AKfycbyZ1p7rGHuU01vWBbynGdmlKTnly
 var PORTERO_LSK = "pyod_clave_v1";
 function credencial(){ try{ return localStorage.getItem(PORTERO_LSK) || ""; }catch(e){ return ""; } }
 
-var DICC = {"sujetos": {"Admin": "ADM", "Ayuda Social": "AYS", "Casa Alysa": "CAA", "Casa María": "CAM", "Decisiones": "DEC", "La Cercada": "CER", "RNM": "RNM", "Real de Miramar Guaymas": "RMG", "Torre Ruiseñor": "TOR"}, "personas": {"Alejandro": "ALE", "Alma": "ALM", "Claude": "CLA", "Fernando": "FER", "Genaro": "GEN", "Mariana": "MAR", "PG Arquitectos": "PGA", "Sayri": "SAY"}, "metas": {"Admin": "MC", "Admin ": "MC", "Ayuda Social": "MC", "Ayuda Social ": "MC", "Casa Alysa": "ME", "Casa Maria": "MB", "Casa María": "MB", "Decisiones": "MC", "Gastos": "MC", "La Cercada": "MD", "Nómina": "MC", "RNM": "MB", "Real de Miramar Guaymas": "MA", "Sin proyecto": "MC", "Torre Ruiseñor": "MD"}, "metas_nombre": {"MA": "Real de Miramar en Preventa III (31-mar-2027)", "MB": "Aurum: 3 contratos nuevos de Arquitectura de Autor (28-feb-2027)", "MC": "Dos meses de operación en bolsa y nada por cobrar a más de 60 días (31-dic-2026)", "MD": "Dos aportaciones de terreno en co-desarrollo firmadas (31-dic-2026)", "ME": "Casa Alysa entregada al 100% con sus estimaciones (30-nov-2026)"}};
+var DICC = {"sujetos": {"Admin": "ADM", "Ayuda Social": "AYS", "Casa Alysa": "CAA", "Casa María": "CAM", "Decisiones": "DEC", "La Cercada": "CER", "RNM": "RNM", "Real de Miramar Guaymas": "RMG", "Torre Ruiseñor": "TOR"}, "personas": {"Alejandro": "ALE", "Alma": "ALM", "Claude": "CLA", "Fernando": "FER", "Franco": "FRA", "Genaro": "GEN", "Lupita": "LUP", "Mariana": "MAR", "PG Arquitectos": "PGA", "Rodolfo": "ROD", "Sayri": "SAY"}, "metas": {"Admin": "MC", "Admin ": "MC", "Ayuda Social": "MC", "Ayuda Social ": "MC", "Casa Alysa": "ME", "Casa Maria": "MB", "Casa María": "MB", "Decisiones": "MC", "Gastos": "MC", "La Cercada": "MD", "Nómina": "MC", "RNM": "MB", "Real de Miramar Guaymas": "MA", "Sin proyecto": "MC", "Torre Ruiseñor": "MD"}, "metas_nombre": {"MA": "Real de Miramar en Preventa III (31-mar-2027)", "MB": "Aurum: 3 contratos nuevos de Arquitectura de Autor (28-feb-2027)", "MC": "Dos meses de operación en bolsa y nada por cobrar a más de 60 días (31-dic-2026)", "MD": "Dos aportaciones de terreno en co-desarrollo firmadas (31-dic-2026)", "ME": "Casa Alysa entregada al 100% con sus estimaciones (30-nov-2026)"}};
 var MAPA = {"proyectos": ["Casa Alysa", "Casa María", "Real de Miramar Guaymas", "RNM", "Casa Maria"], "nuevos": ["La Cercada", "Torre Ruiseñor", "Gym ECOS", "Depas Guaymas"], "interno": ["Admin", "Admin ", "Ayuda Social", "Ayuda Social ", "Nómina", "Gastos"], "brokers_personas": ["Franco", "Lupita"], "alias_tema": {"la cercada": "La Cercada", "casa alysa": "Casa Alysa", "casa maria": "Casa María", "real de miramar": "Real de Miramar Guaymas", "rnm": "RNM", "torre ruiseñor": "Torre Ruiseñor", "nomina de mariana": "Nómina", "caja yod": "Gastos", "flujo yod": "Gastos", "rodriguez": "Gastos", "credito puente bbva": "Real de Miramar Guaymas", "manjarrez": "Gastos"}, "no_son_sujeto": ["Claude", "Claudet"], "decisiones_se_disuelven": true};
 var RIESGOS = [{"fecha": "2026-09-14", "titulo": "Respuesta de GoDaddy al caso 01919954", "que": "Dijeron que puede tardar una semana o más.", "cae": "sin esto el dominio no se puede recuperar", "nivel": "aviso"}, {"fecha": "2026-10-05", "titulo": "Tarjeta válida en el Workspace de Aurum", "que": "La Visa 1049 fue rechazada. Sin tarjeta buena ese día, Google suspende el Workspace.", "cae": "el correo de las cinco cuentas y TODOS los Apps Script — con ellos, los 15 tableros", "nivel": "grave"}, {"fecha": "2026-10-05", "titulo": "Se cierra la redención de aurumarquitectos.com", "que": "Venció el 25 de julio y entró en redención el 5 de septiembre. Dura unos treinta días.", "cae": "si se libera, el dominio se pierde para siempre", "nivel": "grave"}, {"fecha": "2026-11-17", "titulo": "Vence el registro de yodesarrollo.mx", "que": "Registrador Neubox.", "cae": "el sitio yodesarrollo.mx y su correo", "nivel": "aviso"}];
 
@@ -493,6 +500,15 @@ function tipoDe(r){
   if(/entreg|plano|expediente|documento|contrato|carta/i.test(t)) return 'E';
   return 'A';
 }
+/* tipoDe() mete cobro y pago en la misma letra P — y NO se puede cambiar, porque
+   esa letra va en la matricula y las matriculas son estables. Para el dinero se
+   pregunta aparte hacia donde va: lo que entra no es lo que sale. */
+function movimiento(r){
+  var t=String(r.actividad||'')+' '+String(r.observaciones||'');
+  if(/cobr|dep[oó]sito|ingres|nos pagan|anticipo de|factura a/i.test(t)) return 'cobro';
+  if(/pagar|pago a|abono|n[oó]mina|transferen|liquidar|saldar/i.test(t)) return 'pago';
+  return '';
+}
 function matricula(r,suj){
   var emp = String(r.empresa||'').indexOf('Aurum')>=0 ? 'AU':'YD';
   var su = DICC.sujetos[suj] || DICC.personas[suj] || '???';
@@ -616,14 +632,14 @@ function riesgos(){
   var caja=$('#riesgos'); if(!caja) return;
   var R=(RIESGOS||[]).map(function(x){
     var p=String(x.fecha).split('-'); var f=new Date(+p[0],+p[1]-1,+p[2]);
-    return {fecha:x.fecha,titulo:x.titulo,que:x.que,cae:x.cae,dias:Math.round((f-HOY)/86400000)};
+    return {fecha:x.fecha,titulo:x.titulo,que:x.que,cae:x.cae,nivel:x.nivel,dias:Math.round((f-HOY)/86400000)};
   }).filter(function(x){ return x.dias<=75; }).sort(function(a,b){ return a.dias-b.dias; });
   if(!R.length){ caja.innerHTML=''; return; }
   var h='<div class="rz"><h2>Lo que puede tumbar el sistema</h2>'
     +'<p class="rzq">Estas '+R.length+(R.length===1?' fecha la llevo':' fechas las llevo')+' yo a mano — no salen del tablero. Si algo ya se resolvió, dímelo y lo quito.</p>';
   R.forEach(function(x){
     var cuando = x.dias<0 ? ('hace '+(-x.dias)+' d') : (x.dias===0?'HOY':('en '+x.dias+' d'));
-    h+='<div class="rzf"><span class="d">'+esc(cuando)+'</span><div><b>'+esc(x.titulo)+'</b>'
+    h+='<div class="rzf'+(x.nivel==='grave'?' grave':'')+'"><span class="d">'+esc(cuando)+'</span><div><b>'+esc(x.titulo)+'</b>'
      +'<p>'+esc(x.que)+' <i style="font-style:normal;color:var(--rojo)">Si se pasa: '+esc(x.cae)+'</i></p></div></div>';
   });
   caja.innerHTML=h+'</div>';
@@ -647,7 +663,7 @@ function aplazos(r){ return (String(r.comentarios||'').match(/⏳ Aplazada/g)||[
 function salioHoy(r){
   var hoy=hoyLocal();
   return comentarios(r).filter(function(c){
-    return c.fecha===hoy && /🤖 Ejecutado|⏳ Aplazada|✏️ Cambio pedido|📥 Charola/.test(c.texto);
+    return c.fecha===hoy && /Ejecutado|⏳ Aplazada|✏️ Cambio pedido|📥 Charola/.test(c.texto);
   });
 }
 /* De que trata la decision, en las palabras que el mismo escribio */
@@ -710,13 +726,20 @@ function acuerdo(){
     + (r0 ? ((l2.length?' · ':'')+'<span style="color:var(--ambar)">'+esc(r0)+'</span>') : '');
 
   /* El dinero: separado en lo que se cobra y lo que se paga (tipoDe ya existe). */
-  var cobra=0,paga=0;
-  MESA.forEach(function(m){ var t=tipoDe(m.r); if(t==='P') paga+=(m.r._din||0); else cobra+=(m.r._din||0); });
-  var suma=cobra+paga;
+  var cobra=0,paga=0,suelto=0;
+  MESA.forEach(function(m){
+    var mv=movimiento(m.r), d=m.r._din||0;
+    if(mv==='cobro') cobra+=d; else if(mv==='pago') paga+=d; else suelto+=d;
+  });
+  var suma=cobra+paga+suelto;
+  var det=[];
+  if(cobra) det.push(pesos(cobra)+' por cobrar');
+  if(paga) det.push(pesos(paga)+' por pagar');
+  if(suelto) det.push(pesos(suelto)+' sin saber si entra o sale');
   $('#acuerdoDin').innerHTML = suma
     ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(suma))+'</b>'
-       +'<span class="q">'+(paga?('de eso, '+pesos(paga)+' son pagos · '):'')
-       +'lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma — no es una cifra del contador</span>')
+       +'<span class="q">'+(det.length?(det.join(' · ')+' — '):'')
+       +'lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma, leído de sus palabras: no es una cifra del contador</span>')
     : '';
   $('#acuerdoDin').hidden = !suma;
   try{ localStorage.setItem('cierre_vencidas',JSON.stringify({f:hoyLocal(),n:venc})); }catch(e){}
@@ -731,7 +754,7 @@ function riesgoMasProximo(soloInminente){
   var R=todos.filter(function(x){ return x.d>=0; })[0] || todos[todos.length-1];
   if(!R) return '';
   if(soloInminente && R.d>7) return '';
-  if(soloInminente) return (R.d<=0?'HOY':('en '+R.d+' d'))+': '+R.t;
+  if(soloInminente) return (R.d<0?('hace '+(-R.d)+' d'):(R.d===0?'HOY':('en '+R.d+' d')))+': '+R.t;
   return (R.d<0?('hace '+(-R.d)+' d'):(R.d===0?'HOY':('en '+R.d+' d')))+': '+R.t;
 }
 
@@ -769,7 +792,7 @@ function pintarMesa(){
     var r=m.r, ra=ramaDe(r), d=dias(r._f);
     var esVuelta=m.clase==='vuelta';
     var que=esVuelta?loQueSalio(r):loQueDecidiste(r);
-    return '<div class="firma'+(m.ap>=2?' hot':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
+    return '<div class="firma'+(m.ap>=2?' hot':'')+(esVuelta?' vuelta':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
       +'<div class="rama">'+esc(ra.sujeto)+(ra.meta?(' · '+esc(ra.meta)):'')+'</div>'
       +'<h3>'+esc(String(r.actividad||'').slice(0,120))+'</h3>'
       +(que?('<p class="por"><b>'+(esVuelta?'Ya salió esto:':'Lo que decidiste:')+'</b> '+esc(que.slice(0,220))+'</p>'):'')
@@ -817,6 +840,22 @@ function pintarMesa(){
   }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-firmarya]'),function(b){ b.onclick=function(){ firmar(b.dataset.firmarya,b); }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-dicquien]'),function(b){ b.onclick=function(){ dictarEn(document.getElementById('qx_'+b.dataset.dicquien), b); }; });
+  /* Cambiar a quien queda la tarjeta invalida la vista previa igual que cambiar
+     el texto: si no, se firmaria una cosa habiendo leido otra. */
+  Array.prototype.forEach.call(c.querySelectorAll('.quien select'),function(sel){
+    sel.onchange=function(){
+      var id=sel.id.slice(3);
+      var bf=c.querySelector('[data-firmarya="'+id+'"]');
+      if(bf && bf.dataset.confirmado==='1'){
+        bf.dataset.confirmado=''; bf.dataset.visto='';
+        bf.textContent=bf.dataset.etiqueta||'Firmar';
+        var cj=document.getElementById('qn_'+id), av=cj&&cj.querySelector('.confirma');
+        if(av) av.remove();
+        var m=document.getElementById('fm_'+id);
+        if(m){ m.className='smsg'; m.textContent='Cambiaste a quién queda: míralo otra vez.'; }
+      }
+    };
+  });
   Array.prototype.forEach.call(c.querySelectorAll('[data-despues]'),function(b){ b.onclick=function(){ aplazar(b.dataset.despues,b); }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-cambiar]'),function(b){ b.onclick=function(){
     var cj=document.getElementById('cj_'+b.dataset.cambiar); cj.classList.toggle('on');
@@ -865,7 +904,7 @@ function pintarSalida(){
     : l.slice(0,8).map(function(x){
         /* el verbo sale del texto que el propio codigo escribio, no se asume */
         var q = x.texto.indexOf('Ejecutado')>=0
-              ? (x.texto.indexOf('cerrada')>=0 ? 'cerrada' : (x.texto.indexOf('Cobrado')>=0?'cobrada':(x.texto.indexOf('Pagado')>=0?'pagada':'firmada')))
+              ? (x.texto.indexOf('cobrada')>=0 ? 'cobrada' : (x.texto.indexOf('pagada')>=0 ? 'pagada' : (x.texto.indexOf('cerrada')>=0 ? 'cerrada' : 'firmada')))
               : (x.texto.indexOf('Aplazada')>=0?'aplazada':(x.texto.indexOf('Cambio')>=0?'corregida':'entró a la charola'));
         return '<div class="sal"><span class="h">'+esc(x.id)+'</span><div class="t"><em>'+q+'</em> · '+esc(x.act)+'</div></div>';
       }).join('');
@@ -1021,9 +1060,13 @@ function dictarEn(dest, btn){
   };
   REC.onerror=function(e){
     marcarGrabando(false);
-    var m=$('#micEst'); if(m) m.textContent = (e.error==='not-allowed')
-      ? 'Chrome no me dejó oír: dale permiso de micrófono al sitio y vuelve a apretar.'
-      : 'No pude oír ('+e.error+'). Escríbelo si urge.';
+    var POR={'not-allowed':'Chrome no me dejó oír: dale permiso de micrófono al sitio y vuelve a apretar.',
+      'no-speech':'No te oí nada. Acércate al micrófono y vuelve a apretar.',
+      'audio-capture':'No encuentro micrófono. Revisa que esté conectado.',
+      'network':'Se cortó la conexión mientras te oía. Vuelve a apretar.',
+      'aborted':'Se cortó la grabación. Vuelve a apretar cuando quieras.',
+      'service-not-allowed':'El navegador no deja usar el dictado aquí. Escríbelo mientras tanto.'};
+    var m=$('#micEst'); if(m) m.textContent = POR[e.error] || 'No pude oír. Escríbelo si urge.';
   };
   REC.onend=function(){ marcarGrabando(false); REC=null; };
   try{ REC.start(); }catch(e){ REC=null; marcarGrabando(false); }
@@ -1128,8 +1171,9 @@ async function firmar(id,btn){
   var esCierre = btn.dataset.etiqueta==='Cerrarla';
   /* Lo que mueve dinero deja un rastro propio: asi se puede contar cuanto se
      cobro y cuanto se pago en el mes, aparte de cuantas tarjetas se cerraron. */
-  var esDinero = tipoDe(t)==='P' && t._din>0;
-  var verbo = esDinero ? 'cobrada o pagada' : (esCierre?'cerrada':'firmada');
+  var mov = movimiento(t);
+  var esDinero = !!mov && t._din>0;
+  var verbo = esDinero ? (mov==='cobro'?'cobrada':'pagada') : (esCierre?'cerrada':'firmada');
   var sello = esDinero ? '💰 Ejecutado' : '🤖 Ejecutado';
   var texto=sello+' (Despacho, '+hoy+'): '+verbo+' por Alejandro'
     +(esDinero&&t._dinTxt?(' · '+t._dinTxt):'')+'. Lo ejecuta: '+quien;
@@ -1154,12 +1198,18 @@ async function firmar(id,btn){
     var sel0=document.getElementById('qd_'+id);
     var nd=(sel0?String(sel0.value||'').trim():'')||quienNombras(quien);
     var duenoAhora=String(t.responsable||'').trim();
-    var aviso = nd && nd!==duenoAhora
+    /* Si dictaste un nombre y el selector dice otro, gana el selector — pero se
+       dice antes de escribir, no despues de descubrirlo en el Sheet. */
+    var dicho=quienNombras(quien);
+    var choque = dicho && nd && dicho!==nd
+      ? '<b style="color:var(--ambar)">Dijiste «'+esc(dicho)+'» pero el selector dice «'+esc(nd)+'». Manda el selector.</b><br>'
+      : '';
+    var aviso = choque + (nd && nd!==duenoAhora
       ? '<b style="color:var(--verde)">También pasa a ser de '+esc(nd)+'.</b>'
       : (nd ? '<span>Sigue siendo de '+esc(nd)+'.</span>'
             : (duenoAhora==='Alejandro' || !duenoAhora
                 ? '<span>Sigue siendo tuya.</span>'
-                : '<b style="color:var(--ambar)">No reconocí a quién nombraste: sigue siendo de '+esc(duenoAhora)+'.</b>'));
+                : '<b style="color:var(--ambar)">No reconocí a quién nombraste: sigue siendo de '+esc(duenoAhora)+'.</b>')));
     av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
       +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso+'</p>';
     btn.dataset.confirmado='1'; btn.dataset.visto=quien;
