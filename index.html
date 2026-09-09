@@ -423,7 +423,7 @@ var $ = function(s){ return document.querySelector(s); };
    pantalla no le dicen nada a nadie: aqui se traducen a espanol de a de veras. */
 function enCristiano(msg){
   var m=String(msg||'');
-  if(m==='liga')  return 'Google no reconoció el acceso ahorita (suele durar unos minutos y volver solo)';
+  if(m==='liga')  return 'Google no reconoció el acceso ahorita';
   if(m==='clave') return 'el Portero no reconoció tu acceso: vuelve a entrar';
   if(/no pude releer/.test(m)) return 'no pude releer el tablero antes de escribir, así que mejor no escribí nada';
   return m;
@@ -1358,8 +1358,8 @@ async function cargar(){
       $('#viva').className='viva mal';
       $('#estado').textContent='esto es de '+cuando+' · el tablero no contesta';
       b.hidden=false; b.className='aviso mal';
-      b.innerHTML='<b>Lo que ves es de '+cuando+'.</b> El tablero de Google no contesta ('+esc(enCristiano(e.message))+'), '
-        +'y hasta que conteste no se puede firmar nada. Casi siempre vuelve solo en unos minutos. '
+      b.innerHTML='<b>Lo que ves es de '+cuando+'.</b> El tablero de Google no contesta: '+esc(enCristiano(e.message))+'. '
+        +'Casi siempre vuelve solo en unos minutos, y hasta entonces no se puede firmar nada. '
         +'<button class="bp" id="reint" type="button" style="margin-left:10px;padding:8px 15px;font-size:13px">Reintentar ahora</button>';
       var rb=document.getElementById('reint');
       if(rb) rb.onclick=function(){ rb.disabled=true; rb.textContent='intentando…'; _fallos=0; cargar(); };
