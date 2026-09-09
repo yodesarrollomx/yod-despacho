@@ -789,7 +789,10 @@ function historialDeCierres(){
   /* dia -> cuantas se cerraron ese dia, leido del Sheet */
   var por={};
   TAREAS.forEach(function(r){
-    if(String(r.archivada)==='true' || String(r.borrada)==='true') return;
+    /* NO se excluye lo archivado: archivar es justo lo que se hace DESPUES de
+       cerrar, asi que filtrarlo tiraba 59 de las 76 cerradas y el marcador
+       salia en ceros. Solo se excluye lo borrado. */
+    if(r.borrada===true || String(r.borrada)==='true') return;
     var d=diaDe(r.fechaTerminado);
     if(d) por[d]=(por[d]||0)+1;
   });
@@ -843,7 +846,7 @@ function marcador(){
 function metasDeLaCasa(){
   var m={};
   TAREAS.forEach(function(r){
-    if(String(r.archivada)==='true' || String(r.borrada)==='true') return;
+    if(r.borrada===true || String(r.borrada)==='true') return;
     var k=DICC.metas[String(r.proyecto||'').trim()];
     if(!k && sinac(String(r.proyecto||''))==='decisiones'){
       var t=temaDecision(r); if(t) k=DICC.metas[t];
