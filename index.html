@@ -225,7 +225,8 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* 19px, no 32: el dinero acompaña al número doloroso, no compite con él. */
 .acuerdo .din b{font-family:var(--serif);font-size:19px;color:var(--oro2);font-weight:400;line-height:1.2}
 .acuerdo .din .q{font-size:12.5px;color:var(--dim)}
-.firma .din{font-family:var(--serif);font-size:20px;color:var(--oro2);margin-bottom:8px}
+/* el dinero acompaña al asunto de la tarjeta, no le gana: h3 es 19px */
+.firma .din{font-family:var(--serif);font-size:16.5px;color:var(--oro2);margin-bottom:8px}
 .firma .din span{font-family:var(--sans);font-size:11.5px;color:var(--faint)}
 .hoja2 .cuD{font-family:var(--mono);font-size:9.5px;color:var(--oro);margin-left:auto;padding-right:8px}
 .hoja2 .cu{margin-left:0}
@@ -254,6 +255,16 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .bLink{background:transparent;border:0;border-bottom:1px solid var(--oro);color:var(--oro);
   font:inherit;font-size:inherit;padding:0 0 1px;cursor:pointer}
 .bLink:hover{border-bottom-width:2px}
+/* los ultimos dias: numeros con una barrita de apoyo, no una grafica */
+.hist{display:flex;align-items:flex-end;gap:12px;margin-top:14px;padding-top:13px;
+  border-top:1px solid var(--hair2);flex-wrap:wrap}
+.hist .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);
+  width:100%;margin-bottom:2px}
+.hist .hd{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:34px}
+.hist .hd i{display:block;width:7px;height:26px;background:var(--hair2);border-radius:3px}
+.hist .hd:last-child i{background:var(--oro2)}
+.hist .hd b{font-family:var(--mono);font-size:12.5px;color:var(--ink2);font-weight:500}
+.hist .hd u{font-family:var(--mono);font-size:9.5px;color:var(--faint);text-decoration:none}
 .masMesa{font-size:12.5px;color:var(--dim);padding:12px 2px 0;line-height:1.5}
 .salDin{font-size:13px;color:var(--ink2);margin:2px 0 11px;padding-bottom:10px;
   border-bottom:1px solid var(--hair2)}
@@ -274,8 +285,9 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .rzf.grave{background:rgba(200,60,50,.07);border-left:3px solid var(--rojo);padding-left:11px}
 .rzf.grave .d{color:var(--rojo);font-weight:700;font-size:1.06em}
 /* la que espera a otro no es la que te espera a ti */
-.firma.vuelta{border-left:3px solid var(--azul)}
-/* ya redactada y TUYA: no espera a nadie, te toca a ti */
+/* Las tres clases se distinguen por FORMA, no solo por color: quien no separa
+   bien verde de azul sigue viendo un filo continuo contra uno punteado. */
+.firma.vuelta{border-left:3px dashed var(--azul)}
 .firma.cerrar{border-left:3px solid var(--verde)}
 .firma.vuelta .rama{color:var(--azul)}
 
@@ -301,6 +313,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <p class="sub" id="acuerdoSub"></p>
     <p class="sub" id="acuerdoSub2"></p>
     <div class="din" id="acuerdoDin" hidden></div>
+    <div class="hist" id="acuerdoHist" hidden></div>
   </section>
 
   <div class="moms" id="moms"></div>
@@ -409,7 +422,7 @@ var CONGELADOS = { 'La Cercada': '28 de agosto' };
    Se puede mover a mano; la hora solo decide con cual abre. */
 var MOMENTOS = [
   ['arranque','Arranque','7 de la mañana · qué te espera hoy'],
-  ['firma','Firma','mediodía · lo que se cierra'],
+  ['firma','Firma','de mediodía a la tarde · lo que se cierra'],
   ['cierre','Cierre','9 de la noche · qué se movió y qué mandas']
 ];
 function momentoDeLaHora(){ var h=new Date().getHours(); return h<11?'arranque':(h<19?'firma':'cierre'); }
@@ -639,8 +652,15 @@ function construir(tasks){
   // focos
   var sinFecha=viv.filter(function(r){ return !r._f && r.estado!=='En standby'; });
   var standby=viv.filter(function(r){ return !r._f && r.estado==='En standby'; });
-  var decs=viv.filter(function(r){ return r._dec; }).length;
-  var esps=viv.filter(function(r){ return r._esp; }).length;
+  /* Los dos numeros del foco miden LO ACCIONABLE HOY, asi que excluyen lo
+     congelado igual que ya lo hacen la mesa y el numero doloroso — antes una
+     decision dentro de las 19 de La Cercada inflaba el conteo. Y «esperan a
+     otra persona» ya no cuenta las que son TUYAS: eso era el mismo error de
+     «esperando a Alejandro», escondido en otro lugar del archivo. */
+  var acc=viv.filter(function(r){ return !r._frio; });
+  var decs=acc.filter(function(r){ return r._dec; }).length;
+  var espOtro=acc.filter(function(r){ return r._espAotro; }).length;
+  var espMias=acc.filter(function(r){ return r._miaCerrar; }).length;
   var vis=0, enCasilla={};
   /* OJO: 'tener carril' NO es lo mismo que 'tener casilla visible'. Antes esto
      recorria solo f.casillas (el top-3 que se dibuja) y daba por huerfana a
@@ -655,16 +675,21 @@ function construir(tasks){
     /* Antes estos dos decian ok:true fijo — afirmaban sin comprobar nada.
        Ahora se cuenta de verdad cuantas tarjetas cayeron en algun carril. */
     {ok:!sinCarril.length, t:'toda tarjeta viva tiene carril',
-     d:sinCarril.length?(sinCarril.length+' se quedaron fuera de los cinco carriles'):('las '+viv.length+' reparten')},
+     d:sinCarril.length?(sinCarril.length===1?'1 se quedó fuera de los cinco carriles'
+                                             :(sinCarril.length+' se quedaron fuera de los cinco carriles'))
+                       :('las '+viv.length+' reparten')},
     {ok:limpios.length<CARRILES.length, t:'cada renglón enseña su #1 o dice limpio',
      d:limpios.length?('limpios: '+limpios.join(', ')):'los cinco con contenido'},
     {ok:true, t:'lo que firmas se escribe en el tablero', d:'por el mismo Apps Script del board, con tu sesión del Portero'},
     {ok:true, t:'la cola de cada renglón está a la vista', d:colas||'sin cola'},
     {ok:true, t:'una sola bandeja', d:'este tablero lee y escribe el Sheet del board: no hay copia aparte'},
     {ok:!sinFecha.length, t:'ninguna tarjeta viva sin fecha de verdad',
-     d:sinFecha.length?(sinFecha.length+' sin fecha legible'):((viv.length-standby.length)+' con fecha'+(standby.length?(' · '+standby.length+' en standby sin fecha, a propósito'):''))},
-    {ok:vis<=15, t:'nunca más de 15 casillas a la vista', d:vis+' casillas'},
-    {ok:decs<=5, t:'la bandeja de decisiones no está atorada', d:decs+' esperan algo tuyo (tope 5)'+(esps?(' · '+esps+' ya salieron y esperan a otra persona'):'')}
+     d:sinFecha.length?(sinFecha.length+' sin fecha legible'+(sinFecha.length===1?'':'')):((viv.length-standby.length)+' con fecha'+(standby.length?(' · '+standby.length+' en standby sin fecha, a propósito'):''))},
+    {ok:vis<=15, t:'nunca más de 15 casillas a la vista', d:vis+(vis===1?' casilla':' casillas')},
+    {ok:decs<=5, t:'la bandeja de decisiones no está atorada',
+     d:decs+(decs===1?' espera':' esperan')+' que decidas (tope 5)'
+       +(espMias?(' · '+espMias+' ya redactada'+(espMias===1?'':'s')+' y te toca cerrarla'+(espMias===1?'':'s')):'')
+       +(espOtro?(' · '+espOtro+' esperan a otra persona'):'')}
   ];
   return viv.length;
 }
@@ -750,8 +775,13 @@ function acuerdo(){
   var venc=VIVAS.filter(function(r){ return !r._frio && r._f && r._f<HOY; }).length;
   var frias=VIVAS.filter(function(r){ return r._frio; }).length;
   var porFirmar=MESA.filter(function(x){return x.clase==='firmar';}).length;
+  var porCerrar=MESA.filter(function(x){return x.clase==='cerrar';}).length;
   var deVuelta =MESA.filter(function(x){return x.clase==='vuelta';}).length;
-  var min=Math.max(1,Math.round((porFirmar*1.5)+(deVuelta*0.5)));
+  /* Las tres clases cuestan tiempo distinto y las TRES cuentan: decidir de cero
+     es lo caro, cerrar lo ya redactado es medio, y empujar lo de otro es corto.
+     Antes 'cerrar' no sumaba nada y el estimado se quedaba corto justo el dia
+     en que 8 de las 9 tarjetas eran de esa clase. */
+  var min=Math.max(1,Math.round((porFirmar*1.5)+(porCerrar*1)+(deVuelta*0.5)));
   var ayer=null; try{ ayer=JSON.parse(localStorage.getItem('cierre_vencidas')||'null'); }catch(e){}
   var comp='';
   if(ayer && ayer.n!=null && ayer.f!==hoyLocal()){
@@ -763,9 +793,12 @@ function acuerdo(){
     comp = ' <small style="color:'+col+'">('+cuando+' eran '+ayer.n
          + (dif>0?(' — bajaron '+dif):(dif<0?(' — subieron '+(-dif)):' — igual'))+')</small>';
   }
+  var seg = MESA.length
+    ? ('<span class="seg"> · '+MESA.length+(MESA.length===1?' por cerrar hoy':' por cerrar hoy')+'</span>')
+    : '<span class="seg"> · la mesa está limpia</span>';
   $('#acuerdoN').innerHTML = venc
-    ? ('<em class="mal">'+venc+'</em> vencidas'+comp+'<span class="seg"> · '+MESA.length+' por cerrar hoy</span>')
-    : ('<em>Nada vencido.</em><span class="seg"> '+MESA.length+' por cerrar hoy</span>');
+    ? ('<em class="mal">'+venc+'</em>'+(venc===1?' vencida':' vencidas')+comp+seg)
+    : ('<em>Nada vencido.</em>'+seg);
 
   /* Dos renglones cortos, no uno de ciento cuarenta caracteres con tres clausulas. */
   var l1=[];
@@ -775,7 +808,7 @@ function acuerdo(){
   /* «Aurum X de 3» sale del hero: ya vive en su propia franja, y aqui competia
      con el numero doloroso. Bajo el numero va UNA sola linea de contexto. */
   var nomFrias=Object.keys(CONGELADOS);
-  if(frias) l1.push(frias+' congeladas de '+nomFrias.join(' y ')+', fuera de la cuenta');
+  if(frias) l1.push(frias+(frias===1?' congelada de ':' congeladas de ')+nomFrias.join(' y ')+', fuera de la cuenta');
   $('#acuerdoSub').textContent = l1.join(' · ');
   /* El riesgo solo si es inminente (una semana o menos), en ambar, y solo. */
   var r0=riesgoMasProximo(true);
@@ -805,6 +838,24 @@ function acuerdo(){
        +'lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma, leído de sus palabras: no es una cifra del contador</span>')
     : '';
   $('#acuerdoDin').hidden = !suma;
+  /* Los 7 dias que se guardan desde la ronda 6 por fin se ven. Numeros, no
+     grafica ni racha: solo cuantas vencidas habia cada dia que abriste. */
+  var elH=$('#acuerdoHist');
+  if(elH){
+    var hist=[]; try{ hist=JSON.parse(localStorage.getItem('cierre_hist')||'[]')||[]; }catch(e){}
+    hist=hist.filter(function(x){ return x && x.n!=null; });
+    if(hist.length>=3){
+      var mx=Math.max.apply(null,hist.map(function(x){return x.n;}))||1;
+      elH.innerHTML='<span class="k">LOS ÚLTIMOS DÍAS QUE ABRISTE</span>'
+        + hist.map(function(x){
+            var dd=x.f.split('-'); var alto=Math.max(8,Math.round(x.n/mx*100));
+            return '<span class="hd" title="'+esc(x.f)+': '+x.n+' vencidas">'
+                 + '<i style="height:'+alto+'%"></i><b>'+x.n+'</b>'
+                 + '<u>'+esc(dd[2]+'/'+dd[1])+'</u></span>';
+          }).join('');
+      elH.hidden=false;
+    } else { elH.hidden=true; }
+  }
   /* Se guarda tambien el dinero del dia, y se conservan los ultimos 7 dias
      ABIERTOS (no dias del calendario): es un dato para comparar, no una racha
      — no hay contador que se rompa ni premio por abrirlo diario. */
@@ -867,6 +918,9 @@ function armarMesa(){
        edad siga mandando entre tarjetas del mismo tamaño. */
     var t=function(x){ var d=x.r._din||0; return d>=5e5?3:(d>=5e4?2:(d>0?1:0)); };
     var dt=t(b)-t(a); if(dt) return dt;
+    /* Del mismo tamaño, primero lo que ENTRA: cobrar mueve la caja, pagar no. */
+    var mv=function(x){ var m=movimiento(x.r); return m==='cobro'?2:(m==='pago'?1:0); };
+    var dm=mv(b)-mv(a); if(dm) return dm;
     var dd=(dias(b.r._f)||0)-(dias(a.r._f)||0);
     if(dd) return dd;
     return (b.r._din||0)-(a.r._din||0);
@@ -1167,7 +1221,7 @@ function pintarMandar(){
     var sal = hh<12?'buenos días':(hh<19?'buenas tardes':'buenas noches');
     var t='Hola '+n+', '+sal+'. Te paso lo que traigo pendiente de tu lado:\n\n'
       + l.slice(0,5).map(function(x,k){ return (k+1)+'. '+String(x.r.actividad||'').slice(0,110)
-          +' — lleva '+x.d+' días'+(x.r._dinTxt?(' · '+x.r._dinTxt):'')+'.'; }).join('\n')
+          +' — lleva '+x.d+(x.d===1?' día':' días')+(x.r._dinTxt?(' · '+x.r._dinTxt):'')+'.'; }).join('\n')
       + '\n\n¿En qué punto va cada uno? Si algo ya no aplica, dímelo y lo cierro.';
     return '<div class="wp"><h4>'+esc(n)+'</h4>'
       +'<p class="q">'+l.length+(l.length===1?' pendiente vencido':' pendientes vencidos')+' · el más viejo lleva '+l[0].d+' días</p>'
@@ -1314,6 +1368,10 @@ function quienNombras(txt){
   var t=String(txt||''), mejor='', pos=1e9;
   Object.keys(DICC.personas||{}).forEach(function(n){
     if(n==='Alejandro') return;
+    /* El mismo filtro que ya tiene opsPersonas(). Sin el, dictar «que Claude lo
+       revise» dejaba la tarjeta a nombre de alguien que construir() excluye de
+       todos los carriles: viva y contando, pero invisible en el arbol. */
+    if((MAPA.no_son_sujeto||[]).indexOf(n)>=0) return;
     var m=t.match(new RegExp('\\b'+n+'\\b','i'));
     if(m && m.index<pos){ pos=m.index; mejor=n; }
   });
@@ -1387,7 +1445,7 @@ async function firmar(id,btn){
                   +'. Escógelo en «Queda a nombre de» si va para otra persona.</b>')));
     /* La caja promete «quién lo ejecuta Y para cuándo» pero solo exigia el nombre.
        No se bloquea por una fecha (a veces de verdad no hay), pero se dice. */
-    if(!/\b(hoy|mañana|manana|pasado|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|semana|mes|quincena|ahorita|ya|noche|tarde|ma[ñn]ana|medioda|antes de|al rato|en cuanto|el d[ií]a|el \d|\d{1,2}\s*(de|\/)|en \d+)\b/i.test(quien))
+    if(!/\b(hoy|mañana|manana|pasado|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|semana|mes|quincena|ahorita|ya|noche|tarde|medio\s*d[ií]a|antes de|al rato|en cuanto|el d[ií]a|el \d|\d{1,2}\s*(de|\/)|en \d+)\b/i.test(quien))
       aviso += '<br><b style="color:var(--ambar)">No vi para cuándo. Si de veras no tiene fecha, dale otra vez; si no, agrégala.</b>';
     av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
       +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso+'</p>';
