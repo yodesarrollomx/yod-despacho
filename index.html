@@ -281,6 +281,10 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .mkOff{background:transparent;border:0;color:var(--mute);font-size:11.5px;
   border-bottom:1px dotted var(--hair2);padding:0 0 1px;cursor:pointer}
 .mkOff:hover{color:var(--faint)}
+/* la recompensa vive en el mismo renglon del «quedo escrita», no en un globo */
+.premio{display:block;margin-top:5px;font-family:var(--mono);font-size:11.5px;
+  color:var(--oro);opacity:0}
+.premio.se-ve{opacity:1;transition:opacity .45s ease}
 .mkOn{background:transparent;border:1px dashed var(--hair2);color:var(--faint);
   font-size:12.5px;padding:8px 15px;border-radius:12px;margin-top:12px;cursor:pointer}
 .mkGrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:1px;background:var(--hair);
@@ -1897,8 +1901,20 @@ async function firmar(id,btn){
       msj.innerHTML=esc(verbo)
         +(nuevoDueno?(' · ahora es de <b>'+esc(nuevoDueno)+'</b>')
                     :(dicho2?'':' · <b>sigue a tu nombre</b>: no reconocí a nadie en el renglón'))
-        +' · quedó escrita en la tarjeta'; }
+        +' · quedó escrita en la tarjeta'
+        +(esTomar?'':'<span class="premio" id="premio_'+esc(id)+'"></span>'); }
     await cargar();       /* la mesa se rehace con lo que de verdad quedo escrito */
+    /* La recompensa: cuanto se movio el marcador con ESTA firma. No es confeti,
+       es el dato — y solo se dice si de verdad cambio algo. */
+    if(JUEGO && !esTomar) try{
+      var Mp=marcador(), pr='';
+      if(Mp.hoy>Mp.record) pr='🏆 Récord nuevo de la casa: '+Mp.hoy+' en un día.';
+      else if(Mp.hoy===Mp.record && Mp.record>1) pr='Igualaste el récord: '+Mp.hoy+'. Una más y es tuyo.';
+      else if(Mp.hoy===1 && Mp.racha===1) pr='Empezó la racha.';
+      else if(Mp.hoy>1) pr='Van '+Mp.hoy+' hoy'+(Mp.record?(' · faltan '+(Mp.record-Mp.hoy+1)+' para el récord'):'')+'.';
+      var pe=document.getElementById('premio_'+id);
+      if(pr && pe){ pe.textContent=pr; pe.className='premio se-ve'; }
+    }catch(e){}
   }catch(e){
     btn.disabled=false; btn.textContent=btn.dataset.etiqueta||'Firmar'; btn.dataset.confirmado='';
     if(msj){ msj.className='smsg mal'; msj.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.'; }
