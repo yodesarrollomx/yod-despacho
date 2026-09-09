@@ -790,8 +790,11 @@ function metaNombre(m){ return (DICC.metas_nombre||{})[m] || m; }
 function metaCorta(m){
   var t=metaNombre(m);
   if(t===m) return m;
-  return t.replace(/\s*\([^)]*\)\s*$/,'')      /* fuera la fecha entre parentesis */
-          .replace(/^Aurum:\s*/,'').trim().slice(0,42);
+  t=t.replace(/\s*\([^)]*\)\s*$/,'').replace(/^Aurum:\s*/,'').trim();
+  if(t.length<=42) return t;
+  /* se corta en palabra completa, no a media: «...y nada por» se leia colgado */
+  var c=t.slice(0,42), e=c.lastIndexOf(' ');
+  return (e>22?c.slice(0,e):c).replace(/[\s,;:·-]+$/,'')+'…';
 }
 function ramaDe(r){
   var p=String(r.proyecto||'').trim(), t=(sinac(p)==='decisiones')?temaDecision(r):p;
