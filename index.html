@@ -50,7 +50,10 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 /* saludo + hero */
 .hola{padding:26px 0 4px}
 .hola .d{font-size:13.5px;color:var(--dim)}
-.hola h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,40px);line-height:1.05;margin-top:2px}
+/* El saludo no compite con el numero: la unica cifra grande de la pantalla
+   tiene que ser la de vencidas. Antes iban casi iguales (40px contra 44px). */
+.hola h1{font-family:var(--serif);font-weight:400;font-size:clamp(19px,2.2vw,23px);
+  line-height:1.15;margin-top:2px;color:var(--ink2)}
 /* tablero caido: lo que se ve es una foto vieja, no se firma contra una foto */
 .caido [data-firmarya],.caido [data-guardar],.caido [data-despues],.caido #sBtn{
   opacity:.38;pointer-events:none;filter:grayscale(1)}
@@ -108,6 +111,10 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .acuerdo .n em{font-style:normal;color:var(--oro)}
 .acuerdo .sub{font-size:13.5px;color:var(--dim);margin-top:8px}
 .tres{display:grid;grid-template-columns:0.9fr 1.25fr 0.85fr;gap:14px;margin-top:14px;align-items:start}
+/* En Cierre solo queda la charola: el grid se vuelve una columna sola en vez
+   de dejar dos huecos. Se puede soltar algo a cualquier hora del dia. */
+.tres.solaEntrada{grid-template-columns:1fr}
+.zona[data-mom]{display:none} .zona[data-mom].verse{display:block}
 @media(max-width:1080px){.tres{grid-template-columns:1fr}}
 .dos{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
 @media(max-width:820px){.dos{grid-template-columns:1fr}}
@@ -194,6 +201,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .mom.on{background:var(--oroS);border-color:var(--oro)}
 .mom.on b{color:var(--oro2)} .mom.on span{color:var(--dim)}
 [data-mom]{display:none} [data-mom].verse{display:block}
+.focos[data-mom].verse{display:block}
 .tres[data-mom].verse{display:grid} .dos[data-mom].verse{display:grid}
 .acuerdo .n em.mal{color:var(--rojo)}
 .acuerdo .n small{font-size:19px;color:var(--dim);font-family:var(--sans)}
@@ -254,6 +262,9 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* piso de 11.5px para TODO lo informativo: a las nueve de la noche, cansado,
    9.5px en gris no se lee. Y el pie pasa de --mute (2.7:1) a --faint (5.2:1). */
 .etapa,.firma .rama,.ramaT,.hoja2 .cu,.hoja2 .cuD,.acuerdo .k,.acuerdo .din .k,.viva span,.mom span{font-size:11.5px}
+.mom u{display:block;font-family:var(--mono);font-size:12px;color:var(--oro2);
+  text-decoration:none;margin:3px 0 1px}
+.mom.on u{color:var(--oro)}
 .bLink{background:transparent;border:0;border-bottom:1px solid var(--oro);color:var(--oro);
   font:inherit;font-size:inherit;padding:0 0 1px;cursor:pointer}
 .bLink:hover{border-bottom-width:2px}
@@ -271,6 +282,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .hist .hd s{font-family:var(--mono);font-size:11.5px;color:var(--oro2);text-decoration:none}
 .hist .esp{font-size:12.5px;color:var(--dim);line-height:1.5;max-width:52ch}
 .masMesa{font-size:12.5px;color:var(--dim);padding:12px 2px 0;line-height:1.5}
+.salDin .sem{color:var(--dim);font-weight:400}
 .salDin{font-size:13px;color:var(--ink2);margin:2px 0 11px;padding-bottom:10px;
   border-bottom:1px solid var(--hair2)}
 .pie{font-size:11.5px;color:var(--faint)}
@@ -330,8 +342,8 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   <!-- 2 · las tres charolas -->
   <div class="pendiente" id="pendiente" data-mom="cierre" hidden></div>
 
-  <div class="tres" data-mom="arranque firma">
-    <section class="zona entrada">
+  <div class="tres" data-mom="arranque firma cierre">
+    <section class="zona entrada" data-mom="arranque firma cierre">
       <h2>Charola de entrada</h2>
       <span class="sub">lo crudo que soltaste y todavía no acomodo</span>
       <button class="mic" id="micBtn" type="button"><i></i><span id="micTxt">Grabar</span></button>
@@ -351,13 +363,13 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
       <div id="entrada" style="margin-top:14px"></div>
     </section>
 
-    <section class="zona mesa">
+    <section class="zona mesa" data-mom="arranque firma">
       <h2>La mesa de firmas</h2>
       <span class="sub">se firma, se corrige o se aplaza — nada más</span>
       <div id="mesa"></div>
     </section>
 
-    <section class="zona arbol">
+    <section class="zona arbol" data-mom="arranque firma">
       <h2>El árbol de la casa</h2>
       <span class="sub">se prende la rama de la tarjeta abierta</span>
       <div id="arbol"></div>
@@ -367,7 +379,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   <div id="riesgos" data-mom="arranque"></div>
 
   <!-- Aurum al frente: 5 de 46 tarjetas, pero carga una de las cinco metas -->
-  <section class="aurum" id="aurum" data-mom="arranque" hidden>
+  <section class="aurum" id="aurum" data-mom="arranque firma" hidden>
     <h2 style="font-family:var(--serif);font-size:21px;color:var(--ink)">Aurum al frente</h2>
     <span class="sub" style="display:block;font-size:12px;color:var(--faint);margin:2px 0 12px">3 contratos nuevos antes del 28 de febrero · no se pierden entre las de YoDesarrollo</span>
     <div id="aurumL"></div>
@@ -395,7 +407,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     </section>
   </div>
 
-  <div class="focos">
+  <div class="focos" data-mom="arranque firma">
     <h2>¿Cómo sé que jala?</h2>
     <div class="fgrid" id="focos"></div>
   </div>
@@ -815,16 +827,16 @@ function acuerdo(){
     comp = ' <small style="color:'+col+'">('+cuando+(ayer.n===1?' era ':' eran ')+ayer.n
          + (dif>0?(' — bajaron '+dif):(dif<0?(' — subieron '+(-dif)):' — igual'))+')</small>';
   }
-  var seg = MESA.length
-    ? ('<span class="seg"> · '+MESA.length+' por cerrar hoy</span>')
-    : '<span class="seg"> · la mesa está limpia</span>';
+  /* El numero grande grita UNA cosa: las vencidas. Lo de la mesa baja al
+     renglon de contexto, que para eso existe. */
   $('#acuerdoN').innerHTML = venc
-    ? ('<em class="mal">'+venc+'</em>'+(venc===1?' vencida':' vencidas')+comp+seg)
-    : ('<em>Nada vencido.</em>'+seg);
+    ? ('<em class="mal">'+venc+'</em>'+(venc===1?' vencida':' vencidas')+comp)
+    : ('<em>Nada vencido.</em>');
 
   /* Dos renglones cortos, no uno de ciento cuarenta caracteres con tres clausulas. */
   var l1=[];
-  if(MESA.length) l1.push('te toma unos '+min+' min');
+  l1.push(MESA.length ? (MESA.length+' por cerrar hoy · te toma unos '+min+' min')
+                      : 'la mesa está limpia');
   var aur=VIVAS.filter(function(r){ return /aurum/i.test(String(r.empresa||'')); });
   var firm=aur.filter(function(r){ return etapaDe(r)[1]; }).length;
   /* «Aurum X de 3» sale del hero: ya vive en su propia franja, y aqui competia
@@ -977,6 +989,9 @@ function pintarMesa(){
     var r=m.r, ra=ramaDe(r);
     var esVuelta=m.clase==='vuelta', esCerrar=m.clase==='cerrar';
     var yaSalio=esVuelta||esCerrar;
+    /* Tres actos distintos, tres verbos distintos: firmar lo que decides,
+       cerrar lo tuyo ya redactado, y tomar lo que otro no devolvio. */
+    var verboBtn = esVuelta ? 'La tomo yo' : (esCerrar ? 'Cerrarla' : 'Firmar');
     /* lo ya redactado cuenta desde que se redacto; lo demas, desde que vencio */
     var d=yaSalio ? esperandoDesde(r) : dias(r._f);
     if(yaSalio && d===null) d=dias(r._f);
@@ -1003,7 +1018,7 @@ function pintarMesa(){
                ?' <i class="estim" title="'+esc(r._como)+'">fecha estimada</i>':'')):' · sin fecha')
         +(m.ap?(' · aplazada '+m.ap+(m.ap===1?' vez':' veces')):'')+'</div>'
       +'<div class="acc">'
-        +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(yaSalio?'Cerrarla':'Firmar')+'</button>'
+        +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+esc(verboBtn)+'</button>'
         +'<button class="bOtro" data-cambiar="'+esc(r.id)+'">Cambiar</button>'
         +'<button class="bOtro" data-despues="'+esc(r.id)+'">Después</button>'
         +'<span class="smsg" id="fm_'+esc(r.id)+'"></span>'
@@ -1017,18 +1032,28 @@ function pintarMesa(){
          9 de 10 decisiones llevaban desde agosto decididas y sin que NADIE las
          cerrara, porque al firmar no quedaba escrito quien la ejecuta. */
       +'<div class="quien" id="qn_'+esc(r.id)+'">'
-        +'<p>Antes de '+(yaSalio?'cerrarla':'firmar')+': <b style="color:var(--ink)">¿quién lo ejecuta y para cuándo?</b></p>'
+        +'<p>Antes de '+(esVuelta?'tomarla':(esCerrar?'cerrarla':'firmar'))+': <b style="color:var(--ink)">¿quién lo ejecuta y para cuándo?</b></p>'
         +'<textarea id="qx_'+esc(r.id)+'" placeholder="Alma lo ingresa el viernes · Sayri le llama mañana…"></textarea>'
         /* Red de seguridad: si el dictado no acierta el nombre exacto, el
            traspaso se hacia en silencio a nadie. Aqui se elige y se acabo. */
         +'<div class="dicPie" style="margin-top:8px"><span style="font-size:12px;color:var(--dim)">Queda a nombre de</span>'
         +'<select id="qd_'+esc(r.id)+'">'+opsPersonas(r.responsable)+'</select></div>'
+        /* El dinero se adivina de las palabras de la tarjeta y a veces no se
+           puede: $2.3M de la mesa caen hoy en «sin saber si entra o sale». Aqui
+           se enseña lo que se entendio y se corrige en un clic. */
+        +(r._din>0 ? ('<div class="dicPie" style="margin-top:6px">'
+          +'<span style="font-size:12px;color:var(--dim)">Ese '+esc(r._dinTxt||'dinero')+'</span>'
+          +'<select id="qm_'+esc(r.id)+'">'
+          +'<option value=""'+(movimiento(r)?'':' selected')+'>— no sé si entra o sale —</option>'
+          +'<option value="cobro"'+(movimiento(r)==='cobro'?' selected':'')+'>entra: nos lo pagan</option>'
+          +'<option value="pago"'+(movimiento(r)==='pago'?' selected':'')+'>sale: nosotros pagamos</option>'
+          +'</select></div>') : '')
         +'<div class="dicPie"><button class="bOtro" data-dicquien="'+esc(r.id)+'">🎙 Dictar</button>'
-        +'<button class="bp" data-firmarya="'+esc(r.id)+'" data-etiqueta="'+(yaSalio?'Cerrarla':'Firmar')+'" style="padding:9px 15px;font-size:13px">'+(yaSalio?'Cerrarla':'Firmar')+'</button>'
+        +'<button class="bp" data-firmarya="'+esc(r.id)+'" data-etiqueta="'+esc(verboBtn)+'" style="padding:9px 15px;font-size:13px">'+esc(verboBtn)+'</button>'
         +'<button class="bOtro" data-cancelfirma="'+esc(r.id)+'">Cancelar</button></div>'
       +'</div></div>';
   }).join('')
-  + (resto ? ('<div class="masMesa">Hay '+resto+(resto===1?' más abajo':' más abajo')+', ordenada'
+  + (resto ? ('<div class="masMesa">Hay '+resto+' más abajo, ordenada'
               +(resto===1?'':'s')+' por dinero y por antigüedad. '
               +'Se sube'+(resto===1?'':'n')+' sola'+(resto===1?'':'s')+' conforme cierres las de arriba.</div>') : '');
   Object.keys(abiertas).forEach(function(id){
@@ -1132,11 +1157,26 @@ function pintarSalida(){
   });
   var elS=$('#salidaDin');
   if(elS){
+    /* Y lo de la semana: cierre_hist ya guarda el cobrado de cada dia. */
+    var sem=0, dias7=0;
+    try{
+      var hh=JSON.parse(localStorage.getItem('cierre_hist')||'[]')||[];
+      hh.forEach(function(x){ if(x && x.cob){ sem+=x.cob; dias7++; } });
+    }catch(e){}
+    var semTot=sem+cob;
     elS.innerHTML = (cob||pag)
       ? ('Hoy se movió '+(cob?('<b style="color:var(--verde)">'+esc(pesos(cob))+' cobrado</b>'):'')
-         +(cob&&pag?' · ':'')+(pag?('<b>'+esc(pesos(pag))+' pagado</b>'):''))
-      : '';
-    elS.hidden = !(cob||pag);
+         +(cob&&pag?' · ':'')+(pag?('<b>'+esc(pesos(pag))+' pagado</b>'):'')
+         +(semTot>cob?('<span class="sem"> · '+esc(pesos(semTot))+' cobrado en los últimos días que abriste</span>'):''))
+      : (semTot?('<span class="sem">Hoy todavía nada. En los últimos días que abriste llevas '
+                 +esc(pesos(semTot))+' cobrado.</span>'):'');
+    elS.hidden = !(cob||pag||semTot);
+    try{
+      var h2=[]; try{ h2=JSON.parse(localStorage.getItem('cierre_hist')||'[]')||[]; }catch(e2){}
+      var i7=-1; h2.forEach(function(x,k){ if(x&&x.f===hoyLocal()) i7=k; });
+      if(i7>=0){ h2[i7].cob=cob; h2[i7].pag=pag;
+                 localStorage.setItem('cierre_hist',JSON.stringify(h2)); }
+    }catch(e){}
   }
   $('#salida').innerHTML = !l.length
     ? '<div class="vacio">Todavía no sale nada hoy. En cuanto firmes algo, aquí queda el rastro.</div>'
@@ -1175,9 +1215,26 @@ function pintarPendiente(){
 }
 function pintarMomentos(){
   var c=$('#moms'); if(!c) return;
+  /* Cada pastilla dice CUANTO hay de su lado. Antes las tres decian solo su
+     nombre y una hora: no habia forma de saber cual te estaba esperando. */
+  var venc=VIVAS.filter(function(r){ return !r._frio && r._f && r._f<HOY; }).length;
+  var porMandar={};
+  VIVAS.forEach(function(r){
+    if(r._frio) return;
+    var q=String(r.responsable||'').trim();
+    if(!q || q==='Alejandro' || (MAPA.no_son_sujeto||[]).indexOf(q)>=0) return;
+    var d=dias(r._f); if(d===null||d<=0) return;
+    porMandar[q]=1;
+  });
+  var nMandar=Object.keys(porMandar).length;
+  var CUENTA={
+    arranque: venc?(venc+(venc===1?' vencida':' vencidas')):'nada vencido',
+    firma:    MESA.length?(MESA.length+(MESA.length===1?' por cerrar':' por cerrar')):'mesa limpia',
+    cierre:   nMandar?(nMandar+(nMandar===1?' persona por mandar':' personas por mandar')):'nadie te debe nada'
+  };
   c.innerHTML = MOMENTOS.map(function(m){
     return '<button class="mom'+(m[0]===MOMENTO?' on':'')+'" data-mom-btn="'+m[0]+'" type="button">'
-      +'<b>'+esc(m[1])+'</b><span>'+esc(m[2])+'</span></button>';
+      +'<b>'+esc(m[1])+'</b><u>'+esc(CUENTA[m[0]]||'')+'</u><span>'+esc(m[2])+'</span></button>';
   }).join('');
   Array.prototype.forEach.call(c.querySelectorAll('[data-mom-btn]'),function(b){
     b.onclick=function(){ MOMENTO=b.dataset.momBtn;
@@ -1187,6 +1244,8 @@ function pintarMomentos(){
   Array.prototype.forEach.call(document.querySelectorAll('[data-mom]'),function(z){
     z.classList.toggle('verse', z.dataset.mom.split(' ').indexOf(MOMENTO)>=0);
   });
+  var tres=document.querySelector('.tres');
+  if(tres) tres.classList.toggle('solaEntrada', MOMENTO==='cierre');
   var toca=momentoDeLaHora(), av=$('#momAviso');
   if(av){
     if(MOMENTO===toca){ av.textContent=''; av.hidden=true; }
@@ -1401,7 +1460,13 @@ function opsPersonas(actual){
    + l.map(function(n){ return '<option>'+esc(n)+'</option>'; }).join('');
 }
 function quienNombras(txt){
-  var t=String(txt||''), mejor='', pos=1e9;
+  var t=String(txt||'');
+  /* Traspaso en las DOS direcciones. Antes «Alejandro» estaba excluido a secas,
+     asi que se podia soltar una tarjeta pero no recuperarla hablando: habia que
+     abrir el desplegable. Se reconoce cuando te la asignas a ti. */
+  if(/\b(yo (lo|la) (hago|cierro|veo|reviso)|me (lo|la) quedo|lo hago yo|la hago yo|yo mismo|yo misma|regresa a mi|me la paso)\b/i.test(t)
+     || /\bAlejandro\b/i.test(t)) return 'Alejandro';
+  var mejor='', pos=1e9;
   Object.keys(DICC.personas||{}).forEach(function(n){
     if(n==='Alejandro') return;
     /* El mismo filtro que ya tiene opsPersonas(). Sin el, dictar «que Claude lo
@@ -1433,14 +1498,25 @@ async function firmar(id,btn){
      textContent buscando «cerrada» y nunca coincidia (el boton dice «Cerrarla»),
      asi que el Sheet decia «firmada» hasta en lo que se estaba cerrando. */
   var esCierre = btn.dataset.etiqueta==='Cerrarla';
+  var esTomar  = btn.dataset.etiqueta==='La tomo yo';
   /* Lo que mueve dinero deja un rastro propio: asi se puede contar cuanto se
      cobro y cuanto se pago en el mes, aparte de cuantas tarjetas se cerraron. */
-  var mov = movimiento(t);
+  /* lo que escogiste manda sobre lo que se adivino de las palabras */
+  var selM=document.getElementById('qm_'+id);
+  var mov = selM ? String(selM.value||'') : movimiento(t);
   var esDinero = !!mov && t._din>0;
-  var verbo = esDinero ? (mov==='cobro'?'cobrada':'pagada') : (esCierre?'cerrada':'firmada');
-  var sello = esDinero ? '💰 Ejecutado' : '🤖 Ejecutado';
-  var texto=sello+' (Despacho, '+hoy+'): '+verbo+' por Alejandro'
-    +(esDinero&&t._dinTxt?(' · '+t._dinTxt):'')+'. Lo ejecuta: '+quien;
+  /* Tomar una tarjeta que otro no devolvio NO es cerrarla: es dejar de
+     esperarlo y quedartela. Sigue viva, solo que ahora es tuya. Sellarla como
+     «Ejecutado» y marcarla Terminada seria decir que algo se hizo y no. */
+  var diasEsp = esTomar ? esperandoDesde(t) : null;
+  var verbo = esTomar ? 'retomada'
+            : (esDinero ? (mov==='cobro'?'cobrada':'pagada') : (esCierre?'cerrada':'firmada'));
+  var sello = esTomar ? '🔄 Retomada' : (esDinero ? '💰 Ejecutado' : '🤖 Ejecutado');
+  var texto = esTomar
+    ? (sello+' (Despacho, '+hoy+'): Alejandro deja de esperar a '+(String(t.responsable||'alguien'))
+       +(diasEsp!==null?(' tras '+diasEsp+(diasEsp===1?' día':' días')):'')+' y se la queda. Lo ejecuta: '+quien)
+    : (sello+' (Despacho, '+hoy+'): '+verbo+' por Alejandro'
+       +(esDinero&&t._dinTxt?(' · '+t._dinTxt):'')+'. Lo ejecuta: '+quien);
   /* Antes aqui saltaba el confirm() gris del navegador, con su voz de sistema,
      justo en el clic que mas deberia sentirse tuyo. Ahora la confirmacion vive
      en la misma caja, con las mismas palabras del resto de la pantalla. */
@@ -1450,7 +1526,7 @@ async function firmar(id,btn){
   if(btn.dataset.confirmado==='1' && btn.dataset.visto!==quien){
     btn.dataset.confirmado='';
     var m1=document.getElementById('fm_'+id);
-    if(m1){ m1.className='smsg'; m1.textContent='Cambiaste el renglón: míralo otra vez antes de '+(btn.dataset.etiqueta==='Cerrarla'?'cerrarla':'firmar')+'.'; }
+    if(m1){ m1.className='smsg'; m1.textContent='Cambiaste el renglón: míralo otra vez antes de '+(btn.dataset.etiqueta==='Cerrarla'?'cerrarla':(btn.dataset.etiqueta==='La tomo yo'?'tomarla':'firmar'))+'.'; }
   }
   if(btn.dataset.confirmado!=='1'){
     var cj=document.getElementById('qn_'+id);
@@ -1462,7 +1538,7 @@ async function firmar(id,btn){
     var sel0=document.getElementById('qd_'+id);
     var escogido=sel0?String(sel0.value||'').trim():'';
     var dicho=quienNombras(quien);
-    var nd=escogido||dicho;                       /* manda lo dictado; el select corrige */
+    var nd=esTomar ? 'Alejandro' : (escogido||dicho);   /* al tomar, siempre a ti */
     var duenoAhora=String(t.responsable||'').trim();
     /* Si escogiste a alguien en el desplegable Y dictaste otro nombre, gana el
        desplegable — pero se dice ANTES de escribir, con el verbo del control
@@ -1485,10 +1561,13 @@ async function firmar(id,btn){
       aviso += '<br><b style="color:var(--ambar)">No vi para cuándo. Si de veras no tiene fecha, dale otra vez; si no, agrégala.</b>';
     av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
       +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso
-      +'<br><b style="color:var(--verde)">Y la tarjeta queda cerrada: deja de contar '
-      +'entre las vencidas y se va de la mesa.</b></p>';
+      +'<br>'+(esTomar
+         ? '<b style="color:var(--azul)">La tarjeta NO se cierra: pasa a tu nombre y sigue viva. '
+           +'Dejas de esperar a '+esc(String(t.responsable||'alguien'))+'.</b>'
+         : '<b style="color:var(--verde)">Y la tarjeta queda cerrada: deja de contar '
+           +'entre las vencidas y se va de la mesa.</b>')+'</p>';
     btn.dataset.confirmado='1'; btn.dataset.visto=quien;
-    btn.textContent=esCierre?'Sí, cerrarla':'Sí, firmar';
+    btn.textContent=esTomar?'Sí, la tomo':(esCierre?'Sí, cerrarla':'Sí, firmar');
     return;
   }
   btn.disabled=true; btn.textContent='leyendo la tarjeta…';
@@ -1502,7 +1581,7 @@ async function firmar(id,btn){
     var actual=(fresco.tasks||[]).filter(function(x){return x.id===id;})[0];
     if(!actual) throw new Error('esa tarjeta ya no esta en el tablero');
     var prev=String(actual.comentarios||'');
-    if(prev.indexOf('Ejecutado')>=0) throw new Error('ya la '+(esCierre?'cerraron':'firmaron')+' desde otra pantalla');
+    if(prev.indexOf('Ejecutado')>=0) throw new Error('ya la '+((esCierre||esTomar)?'cerraron':'firmaron')+' desde otra pantalla');
     var linea='Claudet~'+hoy+'~'+texto;
     var nuevo=prev? (prev+'|||'+linea) : linea;
     btn.textContent='escribiendo…';
@@ -1519,21 +1598,24 @@ async function firmar(id,btn){
        mandaramos «estado», la tarjeta quedaria terminada sin fecha de cierre y
        sin rastro en el historial — y las otras pantallas del sistema que leen
        fechaTerminado verian un hueco. Mismo contrato que board.py campo(). */
-    var patch={comentarios:nuevo, estado:'Terminado'};
-    var hist=String(actual.historial||'');
-    var ult=hist?hist.split('|').pop().trim():'';
-    /* el formato real de la hoja es «2026-07-02 Terminado», con el espacio */
-    if(!/\sTerminado$/.test(ult)) patch.historial=(hist?hist+'|':'')+hoy+' Terminado';
-    if(!String(actual.fechaTerminado||'').trim()) patch.fechaTerminado=hoy;
+    var patch={comentarios:nuevo};
+    if(!esTomar){
+      patch.estado='Terminado';
+      var hist=String(actual.historial||'');
+      var ult=hist?hist.split('|').pop().trim():'';
+      /* el formato real de la hoja es «2026-07-02 Terminado», con el espacio */
+      if(!/\sTerminado$/.test(ult)) patch.historial=(hist?hist+'|':'')+hoy+' Terminado';
+      if(!String(actual.fechaTerminado||'').trim()) patch.fechaTerminado=hoy;
+    }
     var sel=document.getElementById('qd_'+id);
     var elegido=sel?String(sel.value||'').trim():'';
     /* Lo dictado manda; el desplegable solo sobreescribe cuando lo tocaste.
        Al reves (como estaba) el traspaso NUNCA ocurria. */
-    var nuevoDueno=elegido||quienNombras(quien);
+    var nuevoDueno=esTomar ? 'Alejandro' : (elegido||quienNombras(quien));
     if(nuevoDueno && nuevoDueno!==String(actual.responsable||'').trim()) patch.responsable=nuevoDueno;
     var r=await llamar('update',{id:id,patch:patch});
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
-    btn.textContent=esCierre?'cerrada ✓':'firmada ✓';
+    btn.textContent=esTomar?'la tomaste ✓':(esCierre?'cerrada ✓':'firmada ✓');
     if(msj){ msj.className='smsg ok';
       /* el mismo aviso de la vista previa, repetido DESPUES de escribir: si lo
          leiste rapido, aqui queda la constancia de a nombre de quien quedo. */
