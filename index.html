@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El Despacho · YOD OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+ --papel:#f2ece0;--hoja:#fffdf8;--hoja2:#f8f3e8;--tinta:#17140f;--tinta2:#3a3529;
+ --suave:#6b6456;--tenue:#948b7a;--linea:#ded5c2;--linea2:#c6bca6;
+ --oro:#8a6a2f;--oro2:#a98a4a;--orosuave:#f0e6cf;
+ --rojo:#a2402f;--rojosuave:#f7e5e0;--verde:#2f6340;--verdesuave:#e3ede2;--ambar:#9a7220;
+ --serif:"Instrument Serif",Georgia,serif;--sans:"Instrument Sans",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+ --sombra:0 1px 2px rgba(35,29,20,.05),0 10px 30px rgba(35,29,20,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --papel:#0e0c08;--hoja:#171410;--hoja2:#1e1a14;--tinta:#f2ede2;--tinta2:#d6cdbc;
+ --suave:#9b917f;--tenue:#7b7263;--linea:#2a2419;--linea2:#3d3524;
+ --oro:#c99e51;--oro2:#b58c3f;--orosuave:#2a2115;
+ --rojo:#d4705c;--rojosuave:#2d1a15;--verde:#83ad7d;--verdesuave:#182219;--ambar:#d0a24a;
+ --sombra:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.32);
+}}
+:root[data-theme="dark"]{
+ --papel:#0e0c08;--hoja:#171410;--hoja2:#1e1a14;--tinta:#f2ede2;--tinta2:#d6cdbc;
+ --suave:#9b917f;--tenue:#7b7263;--linea:#2a2419;--linea2:#3d3524;
+ --oro:#c99e51;--oro2:#b58c3f;--orosuave:#2a2115;
+ --rojo:#d4705c;--rojosuave:#2d1a15;--verde:#83ad7d;--verdesuave:#182219;--ambar:#d0a24a;
+ --sombra:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.32);
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--papel);color:var(--tinta);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;padding:26px 18px 80px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+a{color:var(--oro);text-decoration:none}a:hover{text-decoration:underline}
+.w{max-width:1440px;margin:0 auto}
+.ceja{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--oro)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,4.6vw,48px);line-height:1.02;margin:8px 0 6px}
+.bajada{color:var(--suave);max-width:62ch}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:26px;flex-wrap:wrap;margin-bottom:20px}
+.sello{font-family:var(--mono);font-size:11px;color:var(--tenue);text-align:right;line-height:1.8}
+.sello b{color:var(--tinta2);font-weight:500}
+.led{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--tenue);margin-right:6px}
+.led.ok{background:var(--verde)}.led.mal{background:var(--rojo)}
+.aviso{border:1px solid var(--linea2);background:var(--hoja2);border-radius:3px;padding:14px 18px;margin-bottom:18px;font-size:14px;color:var(--suave)}
+.aviso.mal{border-color:var(--rojo);background:var(--rojosuave);color:var(--tinta)}
+/* rejilla */
+.rejilla{display:grid;grid-template-columns:190px repeat(3,minmax(0,1fr)) 130px;gap:0;border-top:1px solid var(--linea2)}
+.enc{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tenue);padding:12px 14px 10px}
+.enc b{color:var(--oro);font-weight:500}
+.carril{padding:22px 16px 22px 0;border-top:1px solid var(--linea);display:flex;flex-direction:column;justify-content:center}
+.carril h2{font-family:var(--serif);font-weight:400;font-size:23px;line-height:1.1}
+.carril span{font-size:12.5px;color:var(--tenue);margin-top:3px}
+.celda{border-top:1px solid var(--linea);padding:14px 12px 14px 0;min-width:0}
+.tarj{width:100%;background:var(--hoja);border:1px solid var(--linea2);border-radius:3px;padding:13px 15px 12px;display:grid;gap:9px;height:100%;transition:border-color .14s,box-shadow .14s}
+.tarj:hover{border-color:var(--oro2);box-shadow:var(--sombra)}
+.tarj.sel{border-color:var(--oro);border-width:1.5px;box-shadow:var(--sombra)}
+.cabtarj{display:flex;gap:12px;align-items:flex-start}
+.portada{width:52px;height:52px;flex:none;border-radius:3px;border:1px solid var(--linea2);display:block}
+.idcard{display:flex;flex-direction:column;gap:4px;min-width:0}
+.tarj h3{font-family:var(--serif);font-weight:400;font-size:21px;line-height:1.12}
+.mat{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--oro);display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.meta-chip{font-family:var(--mono);font-size:9px;letter-spacing:.08em;border:1px solid var(--linea2);color:var(--suave);padding:2px 6px;border-radius:2px}
+.marcas{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--linea);padding-top:9px}
+.mrc{display:flex;flex-direction:column;gap:2px;padding-right:8px;border-right:1px solid var(--linea)}
+.mrc:last-child{border-right:0;padding-right:0}
+.mrc b{font-family:var(--mono);font-size:17px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.mrc b.al{color:var(--rojo)}.mrc b.na{color:var(--tenue);font-size:14px}
+.mrc span{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tenue)}
+.sellos{display:flex;gap:6px;flex-wrap:wrap}
+.pin{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;padding:2px 7px;border:1px solid;border-radius:2px}
+.pin.d{color:var(--rojo);border-color:var(--rojo);background:var(--rojosuave)}
+.pin.v{color:var(--ambar);border-color:var(--ambar)}
+.pin.m{color:var(--oro);border-color:var(--oro2);background:var(--orosuave)}
+.limpio{border:1px dashed var(--linea2);border-radius:3px;padding:16px;color:var(--tenue);font-size:13.5px;height:100%;display:flex;align-items:center}
+.cola{border-top:1px solid var(--linea);padding:14px 0;font-family:var(--mono);font-size:11px;color:var(--tenue);display:flex;flex-direction:column;justify-content:center;gap:3px}
+.cola b{font-size:19px;color:var(--suave);font-weight:600}
+/* detalle */
+.detalle{margin-top:26px;background:var(--hoja);border:1px solid var(--linea2);border-radius:3px;box-shadow:var(--sombra)}
+.dcab{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--linea)}
+.dcab h3{font-family:var(--serif);font-weight:400;font-size:25px}
+.dcab .ruta{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue)}
+.fila{display:grid;grid-template-columns:74px 1fr 128px 104px 96px 92px;gap:0 14px;padding:11px 20px;border-bottom:1px solid var(--linea);align-items:baseline;font-size:13.5px}
+.fila:last-child{border-bottom:0}
+.fila .id{font-family:var(--mono);font-size:11px;color:var(--oro)}
+.fila .q{color:var(--tinta2);min-width:0}
+.fila .qn{color:var(--suave);font-size:12.5px}
+.fila .es{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tenue)}
+.fila .fe{font-family:var(--mono);font-size:11px;color:var(--suave);text-align:right;font-variant-numeric:tabular-nums}
+.fila .fe.mal{color:var(--rojo)}
+.fila .ac{text-align:right}
+.bfirmar{font-family:var(--mono);font-size:10px;letter-spacing:.08em;border:1px solid var(--oro2);color:var(--oro);padding:4px 9px;border-radius:2px;background:var(--orosuave)}
+.bfirmar:hover{background:var(--oro);color:var(--hoja)}
+.bfirmar[disabled]{opacity:.4;cursor:default}
+.dpie{padding:11px 20px;font-family:var(--mono);font-size:10.5px;color:var(--tenue)}
+/* focos */
+.focos{margin-top:34px;border-top:1px solid var(--linea2);padding-top:16px}
+.focos h2{font-family:var(--serif);font-weight:400;font-size:25px;margin-bottom:10px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr))}
+.foco{display:grid;grid-template-columns:22px 1fr;gap:11px;padding:11px 18px 11px 0;border-bottom:1px solid var(--linea);align-items:start}
+.foco i{width:14px;height:14px;border-radius:2px;margin-top:4px;display:block;border:1px solid}
+.foco i.ok{background:var(--verdesuave);border-color:var(--verde)}
+.foco i.no{background:var(--rojosuave);border-color:var(--rojo)}
+.foco b{display:block;font-size:13.5px;font-weight:500}
+.foco span{font-size:12.5px;color:var(--suave)}
+.pie{margin-top:30px;font-family:var(--mono);font-size:10.5px;color:var(--tenue)}
+@media(max-width:980px){
+ .rejilla{grid-template-columns:1fr}.enc{display:none}
+ .carril{border-top:2px solid var(--linea2);padding:18px 0 6px}
+ .celda{padding:0 0 10px;border-top:0}
+ .cola{padding:0 0 16px;border-top:0;flex-direction:row;gap:8px;align-items:baseline}
+ .fila{grid-template-columns:64px 1fr;gap:2px 12px}
+ .fila .es,.fila .fe,.fila .qn,.fila .ac{grid-column:2;text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="cab">
+    <div>
+      <p class="ceja">YOD OS · tu pantalla de trabajo</p>
+      <h1>El Despacho</h1>
+      <p class="bajada">Por cada frente del negocio, quién te está esperando más. Toca una casilla, revisa sus tarjetas y fírmalas aquí mismo: lo que firmes se escribe en tu tablero de siempre.</p>
+    </div>
+    <p class="sello" id="sello"><span class="led" id="led"></span><span id="estado">Pidiendo el tablero…</span></p>
+  </div>
+
+  <div class="aviso" id="banner" hidden></div>
+  <div id="riesgos"></div>
+  <div class="rejilla" id="rejilla"></div>
+  <div class="detalle" id="detalle" hidden></div>
+
+  <div class="focos">
+    <h2>¿Cómo sé que jala?</h2>
+    <div class="fgrid" id="focos"></div>
+  </div>
+
+  <p class="pie">LEE Y ESCRIBE EL MISMO SHEET DE SIEMPRE POR EL APPS SCRIPT DEL TABLERO · EL PORTERO DECIDE QUIÉN ENTRA · NADA SE GUARDA FUERA DEL SISTEMA</p>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   EL DESPACHO · misma mecánica que los demás tableros de YOD OS:
+   Portero (portero.js) para entrar · Apps Script del tablero para
+   leer y escribir · el Sheet del board-aurum es el único almacén.
+   ───────────────────────────────────────────────────────────── */
+var EXEC = "https://script.google.com/macros/s/AKfycbyZ1p7rGHuU01vWBbynGdmlKTnlyH9CIXyhKivqLHa4rLxcHNneJKsZHv7smnjLsfH1/exec";
+var PORTERO_LSK = "pyod_clave_v1";
+function credencial(){ try{ return localStorage.getItem(PORTERO_LSK) || ""; }catch(e){ return ""; } }
+
+var DICC = {"sujetos": {"Admin": "ADM", "Ayuda Social": "AYS", "Casa Alysa": "CAA", "Casa María": "CAM", "Decisiones": "DEC", "La Cercada": "CER", "RNM": "RNM", "Real de Miramar Guaymas": "RMG", "Torre Ruiseñor": "TOR"}, "personas": {"Alejandro": "ALE", "Alma": "ALM", "Claude": "CLA", "Fernando": "FER", "Genaro": "GEN", "Mariana": "MAR", "PG Arquitectos": "PGA", "Sayri": "SAY"}, "metas": {"Admin": "MC", "Admin ": "MC", "Ayuda Social": "MC", "Ayuda Social ": "MC", "Casa Alysa": "ME", "Casa Maria": "MB", "Casa María": "MB", "Decisiones": "MC", "Gastos": "MC", "La Cercada": "MD", "Nómina": "MC", "RNM": "MB", "Real de Miramar Guaymas": "MA", "Sin proyecto": "MC", "Torre Ruiseñor": "MD"}, "metas_nombre": {"MA": "Real de Miramar en Preventa III (31-mar-2027)", "MB": "Aurum: 3 contratos nuevos de Arquitectura de Autor (28-feb-2027)", "MC": "Dos meses de operación en bolsa y nada por cobrar a más de 60 días (31-dic-2026)", "MD": "Dos aportaciones de terreno en co-desarrollo firmadas (31-dic-2026)", "ME": "Casa Alysa entregada al 100% con sus estimaciones (30-nov-2026)"}};
+var MAPA = {"proyectos": ["Casa Alysa", "Casa María", "Real de Miramar Guaymas", "RNM", "Casa Maria"], "nuevos": ["La Cercada", "Torre Ruiseñor", "Gym ECOS", "Depas Guaymas"], "interno": ["Admin", "Admin ", "Ayuda Social", "Ayuda Social ", "Nómina", "Gastos"], "brokers_personas": ["Franco", "Lupita"], "alias_tema": {"la cercada": "La Cercada", "casa alysa": "Casa Alysa", "casa maria": "Casa María", "real de miramar": "Real de Miramar Guaymas", "rnm": "RNM", "torre ruiseñor": "Torre Ruiseñor", "nomina de mariana": "Nómina", "caja yod": "Gastos", "flujo yod": "Gastos", "rodriguez": "Gastos", "credito puente bbva": "Real de Miramar Guaymas", "manjarrez": "Gastos"}, "no_son_sujeto": ["Claude", "Claudet"], "decisiones_se_disuelven": true};
+var RIESGOS = [{"fecha": "2026-09-14", "titulo": "Respuesta de GoDaddy al caso 01919954", "que": "Dijeron que puede tardar una semana o más. Si no llega, el dominio sigue sin poder recuperarse y el reloj de la redención sigue corriendo.", "cae": "nada todavía, pero es el que destraba lo demás", "nivel": "aviso"}, {"fecha": "2026-10-05", "titulo": "Tarjeta válida en el Workspace de Aurum", "que": "La Visa terminación 1049 fue rechazada. Si no hay tarjeta buena ese día, Google suspende el Workspace completo.", "cae": "el correo de las cinco cuentas, los borradores de Gmail, TODOS los Apps Script (incluido el Portero) y con ellos la escritura al tablero", "nivel": "grave"}, {"fecha": "2026-10-05", "titulo": "Se cierra la redención de aurumarquitectos.com", "que": "Venció el 25 de julio y entró en redención el 5 de septiembre. Ese periodo dura alrededor de treinta días; la fecha exacta no está documentada.", "cae": "si se libera, el dominio se pierde para siempre: correo, ligas y la identidad de Aurum", "nivel": "grave"}, {"fecha": "2026-11-17", "titulo": "Vence el registro de yodesarrollo.mx", "que": "Registrador Neubox. Su Workspace ya está suspendido desde febrero, pero el sitio y el correo dependen de este registro.", "cae": "el sitio yodesarrollo.mx y su correo", "nivel": "aviso"}];
+
+var CARRILES = [
+  ['proyectos','Proyectos','lo que ya está en obra'],
+  ['nuevos','Nuevos posibles','lo que todavía no es tuyo'],
+  ['colaboradores','Colaboradores','quien hace el trabajo contigo'],
+  ['brokers','Master brokers','quien trae la venta'],
+  ['interno','Interno','la casa']
+];
+var MESES = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,setiembre:9,octubre:10,noviembre:11,diciembre:12};
+var HOY = new Date(); HOY.setHours(0,0,0,0);
+var ANIO = HOY.getFullYear();
+
+var $ = function(s){ return document.querySelector(s); };
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function sinac(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim(); }
+function dias(f){ return f? Math.round((HOY-f)/86400000) : null; }
+function fmtDias(n){ if(n===null||n===undefined) return null; if(n>0) return n+' d'; if(n===0) return 'hoy'; return 'en '+(-n)+' d'; }
+function lunesISO(sem){ var d=new Date(Date.UTC(ANIO,0,4)); var day=d.getUTCDay()||7; d.setUTCDate(d.getUTCDate()-day+1+(sem-1)*7); return d; }
+
+/* ── la fecha real: el Sheet guarda "Lunes 24" y el mes aparte ── */
+function fechaReal(r){
+  var f=String(r.fecha||''), fs=sinac(f), mes0=MESES[sinac(r.mes)];
+  var m=f.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return [new Date(+m[1],+m[2]-1,+m[3]),'explicita'];
+  m=f.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) return [new Date(+m[3],+m[2]-1,+m[1]),'explicita'];
+  if(!/\d/.test(f)){
+    var mm=fs.match(/fin de ([a-z]+)/);
+    if(fs.indexOf('fin de mes')>=0 || mm){
+      var k=MESES[mm?mm[1]:''] || mes0;
+      if(k) return [new Date(ANIO,k,0),'deducida (fin de mes)'];
+    }
+    if(/esta seman|est[ae] sem/.test(fs)){
+      var ws=String(r.semana||'').match(/(\d{1,2})/);
+      if(ws){ var L=lunesISO(+ws[1]); return [new Date(L.getUTCFullYear(),L.getUTCMonth(),L.getUTCDate()+4),'deducida (viernes de la semana)']; }
+    }
+    return [null,'sin fecha en el Sheet'];
+  }
+  var d1=f.match(/(\d{1,2})/);
+  if(d1 && mes0) return [new Date(ANIO,mes0-1,+d1[1]),'deducida'];
+  return [null,'sin fecha en el Sheet'];
+}
+
+function dinero(r){
+  var t=[r.actividad,r.observaciones,r.entregable,r.comentarios].join(' ');
+  var re=/\$\s?(\d[\d,\.]*)\s?([kKmM]{1,2}|mil|millones)?/g, mx=0, txt='', m;
+  while((m=re.exec(t))){
+    var num=m[1].replace(/[.,]+$/,''), suf=(m[2]||'').toLowerCase();
+    var v=parseFloat(num.replace(/,/g,'')); if(isNaN(v)) continue;
+    if(suf==='k'||suf==='mil') v*=1e3; else if(suf==='m'||suf==='mm'||suf==='millones') v*=1e6;
+    if(v>mx){ mx=v; txt='$'+num+(m[2]||''); }
+  }
+  return [mx,txt];
+}
+function decisionSinEjecutar(r){ var c=String(r.comentarios||''); return (c.indexOf('DECISIÓN')>=0||c.indexOf('DECISION')>=0) && c.indexOf('Ejecutado')<0; }
+function carrilDe(p){
+  var ps=sinac(p);
+  var g=['proyectos','nuevos','interno'];
+  for(var i=0;i<g.length;i++){ var L=MAPA[g[i]]||[]; for(var j=0;j<L.length;j++) if(sinac(L[j])===ps) return g[i]; }
+  return null;
+}
+function temaDecision(r){
+  var a=String(r.actividad||''), m=a.match(/·\s*([^—\-]{2,40})/);
+  var crudo=sinac(m?m[1]:a), al=MAPA.alias_tema||{};
+  for(var k in al) if(crudo.indexOf(sinac(k))>=0) return al[k];
+  return null;
+}
+function tipoDe(r){
+  var p=sinac(r.proyecto), a=String(r.actividad||'');
+  if(p==='decisiones' || /^\s*D-\d+/.test(a)) return 'D';
+  var t=a+' '+String(r.observaciones||'');
+  if(/pag|abono|n[oó]mina|factura|cobr|dep[oó]sito|transferen/i.test(t)) return 'P';
+  if(/reuni[oó]n|junta|llamada|cita/i.test(t)) return 'R';
+  if(/entreg|plano|expediente|documento|contrato|carta/i.test(t)) return 'E';
+  return 'A';
+}
+function matricula(r,suj){
+  var emp = String(r.empresa||'').indexOf('Aurum')>=0 ? 'AU':'YD';
+  var su = DICC.sujetos[suj] || DICC.personas[suj] || '???';
+  var m = String(r.actividad||'').match(/D-(\d+)/);
+  var num = m ? 'D'+('00'+m[1]).slice(-3) : (tipoDe(r)+('00'+(String(r.id||'').match(/(\d+)/)||['','000'])[1]).slice(-3));
+  var meta = DICC.metas[suj] || 'M?';
+  var q = DICC.personas[String(r.responsable||'').trim()] || '???';
+  return [emp,su,num,meta,q].join('-');
+}
+
+/* ── portada determinista por sigla + carril ── */
+var TINTE={proyectos:['#2f6340','#e3ede2'],nuevos:['#9a7220','#f4ead2'],colaboradores:['#3d5f86','#e2eaf2'],brokers:['#6a4b8c','#ece4f4'],interno:['#a2402f','#f7e5e0']};
+function semilla(s){ var h=2166136261; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h*16777619)>>>0; } return h; }
+function portada(sig,carril){
+  var t=TINTE[carril]||['#8a6a2f','#f0e6cf'], h=semilla(sig+carril), g='';
+  for(var i=0;i<16;i++){
+    var on=(h>>(i%30))&1; h=(h*1664525+1013904223)>>>0; if(!on) continue;
+    g+='<rect x="'+((i%4)*13+2)+'" y="'+(Math.floor(i/4)*11+2)+'" width="11" height="'+((i%3===0)?14:9)+'" fill="'+t[0]+'" opacity="'+(0.30+0.14*(i%4))+'"/>';
+  }
+  return '<svg class="portada" viewBox="0 0 54 54" aria-hidden="true"><rect width="54" height="54" fill="'+t[1]+'"/>'+g
+   +'<line x1="0" y1="41.5" x2="54" y2="41.5" stroke="'+t[0]+'" stroke-width="1.2" opacity=".55"/>'
+   +'<text x="4" y="51" font-family="JetBrains Mono, monospace" font-size="9.5" letter-spacing="1.2" fill="'+t[0]+'">'+esc(sig)+'</text></svg>';
+}
+
+/* ── estado ── */
+var TAREAS=[], FILAS=[], SEL=null, FOCOS=[];
+
+function construir(tasks){
+  var viv=tasks.filter(function(r){
+    return String(r.borrada||'').toUpperCase()!=='TRUE'
+        && String(r.archivada||'').toUpperCase()!=='TRUE'
+        && r.estado!=='Terminado';
+  });
+  viv.forEach(function(r){
+    var fr=fechaReal(r); r._f=fr[0]; r._como=fr[1];
+    var dn=dinero(r); r._din=dn[0]; r._dinTxt=dn[1];
+    r._dec=decisionSinEjecutar(r); r._mio=String(r.responsable||'').trim()==='Alejandro';
+  });
+  var sujetos={};
+  function add(carril,nombre,r){
+    var k=carril+'|'+nombre;
+    if(!sujetos[k]) sujetos[k]={carril:carril,nombre:nombre,tarjetas:[]};
+    sujetos[k].tarjetas.push(r);
+  }
+  viv.forEach(function(r){
+    var p=String(r.proyecto||'').trim(), c=carrilDe(p);
+    if(c) add(c,p,r);
+    else if(sinac(p)==='decisiones'){
+      var tema=temaDecision(r), cc=tema?carrilDe(tema):null;
+      if(tema&&cc) add(cc,tema,r); else add('interno','Decisiones sin tema',r);
+    } else if(p) add('interno',p,r);
+    var q=String(r.responsable||'').trim();
+    if(q && q!=='Alejandro' && (MAPA.no_son_sujeto||[]).indexOf(q)<0)
+      add((MAPA.brokers_personas||[]).indexOf(q)>=0?'brokers':'colaboradores',q,r);
+  });
+  FILAS = CARRILES.map(function(C){
+    var ss=[];
+    for(var k in sujetos){
+      var s=sujetos[k]; if(s.carril!==C[0]) continue;
+      var ts=s.tarjetas;
+      var dmax=null, din=0, dinTxt='', dec=0, mios=0, venc=0, sf=0;
+      ts.forEach(function(t){
+        var d=dias(t._f);
+        if(d!==null && (dmax===null||d>dmax)) dmax=d;
+        if(t._din>din){ din=t._din; dinTxt=t._dinTxt; }
+        if(t._dec) dec++; if(t._mio) mios++;
+        if(t._f && t._f<HOY) venc++;
+        if(!t._f) sf++;
+      });
+      ss.push({nombre:s.nombre,cuantas:ts.length,mias:mios,vencidas:venc,dias:dmax,sinFecha:sf,
+               dinero:din,dineroTxt:dinTxt,decisiones:dec,tarjetas:ts,
+               sigla:DICC.sujetos[s.nombre]||DICC.personas[s.nombre]||'',
+               meta:DICC.metas[s.nombre]||'',
+               puntos:(din?1000:0)+dec*100+(dmax||0)+ts.length});
+    }
+    ss.sort(function(a,b){ return b.puntos-a.puntos; });
+    ss.forEach(function(c){ if(!c.meta){ var mm={}; c.tarjetas.forEach(function(t){ var x=matricula(t,c.nombre).split('-')[3]; if(x&&x!=='M?') mm[x]=(mm[x]||0)+1; }); var best='',n=0; for(var k in mm) if(mm[k]>n){best=k;n=mm[k];} c.meta=best; } });
+    return {id:C[0],nombre:C[1],sub:C[2],casillas:ss.slice(0,3),cola:Math.max(0,ss.length-3),
+            colaNombres:ss.slice(3).map(function(x){return x.nombre;}), carga:0};
+  });
+  var tot=viv.length;
+  FILAS.forEach(function(f){
+    var n=0; f.casillas.forEach(function(c){ n+=c.cuantas; });
+    f.colaNombres.forEach(function(){});
+    f.carga=tot? Math.round(n*100/tot):0;
+  });
+  // focos
+  var sinFecha=viv.filter(function(r){ return !r._f && r.estado!=='En standby'; });
+  var standby=viv.filter(function(r){ return !r._f && r.estado==='En standby'; });
+  var decs=viv.filter(function(r){ return r._dec; }).length;
+  var vis=0; FILAS.forEach(function(f){ vis+=f.casillas.length; });
+  var limpios=FILAS.filter(function(f){ return !f.casillas.length; }).map(function(f){ return f.nombre; });
+  var colas=FILAS.filter(function(f){ return f.cola; }).map(function(f){ return f.nombre+' '+f.cola; }).join(' · ');
+  FOCOS=[
+    {ok:true, t:'toda tarjeta viva tiene carril', d:'las '+viv.length+' reparten'},
+    {ok:true, t:'cada renglón enseña su #1 o dice limpio', d:limpios.length?('limpios: '+limpios.join(', ')):'los cinco con contenido'},
+    {ok:true, t:'lo que firmas se escribe en el tablero', d:'por el mismo Apps Script del board, con tu sesión del Portero'},
+    {ok:true, t:'la cola de cada renglón está a la vista', d:colas||'sin cola'},
+    {ok:true, t:'una sola bandeja', d:'este tablero lee y escribe el Sheet del board: no hay copia aparte'},
+    {ok:!sinFecha.length, t:'ninguna tarjeta viva sin fecha de verdad',
+     d:sinFecha.length?(sinFecha.length+' sin fecha legible'):((viv.length-standby.length)+' con fecha'+(standby.length?(' · '+standby.length+' en standby sin fecha, a propósito'):''))},
+    {ok:vis<=15, t:'nunca más de 15 casillas a la vista', d:vis+' casillas'},
+    {ok:decs<=5, t:'la bandeja de decisiones no está atorada', d:decs+' decisiones tomadas sin ejecutar (tope 5)'}
+  ];
+  return viv.length;
+}
+
+/* ── pintar ── */
+function pintar(){
+  var h='<div class="enc"></div><div class="enc"><b>A</b> · el que más te espera</div><div class="enc"><b>B</b> · el siguiente</div><div class="enc"><b>C</b> · el siguiente</div><div class="enc">los demás</div>';
+  FILAS.forEach(function(f){
+    h+='<div class="carril"><h2>'+esc(f.nombre)+'</h2><span>'+esc(f.sub)+'</span></div>';
+    for(var i=0;i<3;i++){
+      var c=f.casillas[i];
+      if(!c){ h+='<div class="celda">'+(i===0?'<div class="limpio">Limpio. Nadie de este frente te espera hoy.</div>':'')+'</div>'; continue; }
+      var sig=c.sigla||c.nombre.slice(0,3).toUpperCase();
+      h+='<div class="celda"><button class="tarj'+(SEL===f.id+'|'+c.nombre?' sel':'')+'" data-f="'+esc(f.id)+'" data-c="'+esc(c.nombre)+'">'
+       +'<div class="cabtarj">'+portada(sig,f.id)+'<div class="idcard"><h3>'+esc(c.nombre)+'</h3>'
+       +'<span class="mat">'+esc(sig)+(c.meta?' · <span class="meta-chip" title="'+esc(DICC.metas_nombre[c.meta]||'')+'">'+esc(c.meta)+'</span>':'')+'</span></div></div>'
+       +'<div class="marcas">'
+       +'<div class="mrc"><b>'+c.cuantas+'</b><span>te esperan</span></div>'
+       +'<div class="mrc"><b class="'+(c.dias!==null&&c.dias>14?'al':(c.dias===null?'na':''))+'">'+(fmtDias(c.dias)||'sin fecha')+'</b><span>lo más viejo</span></div>'
+       +'<div class="mrc"><b class="'+(c.dineroTxt?'al':'na')+'">'+esc(c.dineroTxt||'—')+'</b><span>dinero mencionado</span></div>'
+       +'</div>'
+       +((c.decisiones||c.vencidas||c.mias)?'<div class="sellos">'
+          +(c.decisiones?'<span class="pin d">'+c.decisiones+' sin ejecutar</span>':'')
+          +(c.vencidas?'<span class="pin v">'+c.vencidas+' vencidas</span>':'')
+          +(c.mias?'<span class="pin m">'+c.mias+' tuyas</span>':'')+'</div>':'')
+       +'</button></div>';
+    }
+    h+='<div class="cola">'+(f.cola?'<b>'+f.cola+'</b><span>en cola</span><span>'+esc(f.colaNombres.join(' · '))+'</span>':'<span>sin cola</span>')+'</div>';
+  });
+  $('#rejilla').innerHTML=h;
+  Array.prototype.forEach.call($('#rejilla').querySelectorAll('.tarj'),function(b){
+    b.addEventListener('click',function(){ abrir(b.dataset.f,b.dataset.c); });
+  });
+  $('#focos').innerHTML=FOCOS.map(function(f){
+    return '<div class="foco"><i class="'+(f.ok?'ok':'no')+'"></i><div><b>'+esc(f.t)+'</b><span>'+esc(f.d)+'</span></div></div>';
+  }).join('');
+  riesgos();
+}
+
+function riesgos(){
+  var R=(RIESGOS||[]).map(function(x){
+    var p=x.fecha.split('-'); var f=new Date(+p[0],+p[1]-1,+p[2]);
+    x.dias=Math.round((f-HOY)/86400000); return x;
+  }).filter(function(x){ return x.dias<=75; }).sort(function(a,b){ return a.dias-b.dias; });
+  if(!R.length){ $('#riesgos').innerHTML=''; return; }
+  var h='<div class="aviso mal" style="display:block"><b style="font-family:var(--serif);font-size:20px;font-weight:400;display:block;margin-bottom:6px">Lo que puede tumbar el sistema</b>';
+  R.forEach(function(x){
+    var cuando = x.dias<0?('hace '+(-x.dias)+' d'):(x.dias===0?'HOY':('en '+x.dias+' d'));
+    h+='<div style="display:grid;grid-template-columns:92px 1fr;gap:0 16px;padding:8px 0;border-top:1px solid var(--linea)">'
+     +'<span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--rojo)">'+esc(cuando)+'</span>'
+     +'<span><b>'+esc(x.titulo)+'</b> — '+esc(x.que)+' <i style="font-style:normal;color:var(--rojo)">Si se pasa: '+esc(x.cae)+'</i></span></div>';
+  });
+  $('#riesgos').innerHTML=h+'</div>';
+}
+
+function abrir(fid,nom){
+  var f=FILAS.filter(function(x){return x.id===fid;})[0]; if(!f) return;
+  var c=f.casillas.filter(function(x){return x.nombre===nom;})[0]; if(!c) return;
+  SEL=fid+'|'+nom; pintar();
+  var h='<div class="dcab"><span class="ruta">'+esc(f.nombre)+(c.sigla?' · '+esc(c.sigla):'')+(c.meta?' · '+esc(c.meta):'')+'</span><h3>'+esc(c.nombre)+'</h3></div>';
+  c.tarjetas.slice().sort(function(a,b){ return (a._f?a._f:9e15)-(b._f?b._f:9e15); }).forEach(function(t){
+    var d=dias(t._f);
+    h+='<div class="fila" data-id="'+esc(t.id)+'">'
+     +'<span class="id">'+esc(t.id)+'</span>'
+     +'<span class="q">'+esc(String(t.actividad||'').slice(0,120))+(t._dec?' <span class="pin d">decisión sin ejecutar</span>':'')+'</span>'
+     +'<span class="qn">'+esc(t.responsable||'sin dueño')+'</span>'
+     +'<span class="es">'+esc(t.estado||'')+'</span>'
+     +'<span class="fe '+(d!==null&&d>0?'mal':'')+'">'+(t._f?(fmtDias(d)+(d>0?' tarde':'')):'sin fecha')+'</span>'
+     +'<span class="ac">'+(t._dec?'<button class="bfirmar" data-firmar="'+esc(t.id)+'">firmar ejecutada</button>':'')+'</span></div>';
+  });
+  h+='<div class="dpie">'+c.cuantas+' TARJETAS · '+esc(c.sigla||'')+' · MATRÍCULA '+esc(matricula(c.tarjetas[0],c.nombre))+'</div>';
+  var el=$('#detalle'); el.innerHTML=h; el.hidden=false;
+  Array.prototype.forEach.call(el.querySelectorAll('[data-firmar]'),function(b){
+    b.addEventListener('click',function(){ firmar(b.dataset.firmar,b); });
+  });
+  el.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+/* ── escribir en el tablero, con TU sesión del Portero ── */
+async function llamar(action,payload){
+  var cuerpo=Object.assign({action:action,k:credencial()},payload||{});
+  var r=await fetch(EXEC,{method:'POST',credentials:'omit',redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(cuerpo)});
+  var t=await r.text();
+  try{ return JSON.parse(t); }catch(e){ throw new Error('El tablero contestó algo que no entiendo'); }
+}
+
+async function firmar(id,btn){
+  var t=TAREAS.filter(function(x){return x.id===id;})[0]; if(!t) return;
+  if(!credencial()){ alert('Primero entra con el Portero: sin credencial el tablero no deja escribir.'); return; }
+  var hoy=new Date().toISOString().slice(0,10);
+  var texto='🤖 Ejecutado (Despacho, '+hoy+'): firmada por Alejandro desde El Despacho.';
+  if(!confirm('Se va a escribir en la tarjeta '+id+':\n\n'+texto+'\n\n¿Lo firmo?')) return;
+  btn.disabled=true; btn.textContent='escribiendo…';
+  try{
+    var prev=String(t.comentarios||'');
+    var linea='Claudet~'+hoy+'~'+texto;
+    var nuevo=prev? (prev+'|||'+linea) : linea;
+    var r=await llamar('update',{id:id,patch:{comentarios:nuevo}});
+    if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
+    t.comentarios=nuevo; t._dec=false;
+    btn.textContent='firmada ✓';
+    construir(TAREAS); pintar();
+    var f=SEL.split('|'); abrir(f[0],f[1]);
+  }catch(e){
+    btn.disabled=false; btn.textContent='firmar ejecutada';
+    alert('No se pudo escribir: '+e.message);
+  }
+}
+
+/* ── arranque ── */
+async function cargar(){
+  var b=$('#banner');
+  try{
+    var r=await llamar('getAll',{});
+    if(!r || !r.ok) throw new Error(r&&r.error?r.error:'sin respuesta');
+    TAREAS=r.tasks||[];
+    var n=construir(TAREAS);
+    $('#led').className='led ok';
+    $('#estado').innerHTML='<b>'+n+' tarjetas vivas</b> · leído del tablero ahora mismo';
+    b.hidden=true;
+    pintar();
+  }catch(e){
+    $('#led').className='led mal';
+    $('#estado').textContent='no pude leer el tablero';
+    b.hidden=false; b.className='aviso mal';
+    b.textContent = credencial()
+      ? ('El tablero no contestó: '+e.message+'. Vuelve a cargar en un momento.')
+      : 'Todavía no entras: el Portero pide tu acceso. En cuanto entres, este tablero se llena solo.';
+  }
+}
+cargar();
+</script>
+<script src="https://yodesarrollomx.github.io/potenciales-yod/portero.js"></script>
+<script src="https://yodesarrollomx.github.io/yod-portal/os/shell.js"></script>
+</body>
+</html>
