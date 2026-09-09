@@ -244,41 +244,6 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .at b{display:block;font-size:14px;color:var(--ink)}
 .at span{font-size:12.5px;color:var(--rojo)}
 
-/* ── los tres momentos ── */
-.moms{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap}
-.mom{display:flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--hair);
-  border-radius:15px;padding:10px 16px;transition:.15s;min-width:150px}
-.mom b{font-family:var(--serif);font-size:17px;color:var(--dim);font-weight:400}
-.mom span{font-size:11px;color:var(--faint)}
-.mom:hover{border-color:var(--hair2)}
-.mom.on{background:var(--oroS);border-color:var(--oro)}
-.mom.on b{color:var(--oro2)} .mom.on span{color:var(--dim)}
-[data-mom]{display:none} [data-mom].verse{display:block}
-.tres[data-mom].verse{display:grid} .dos[data-mom].verse{display:grid}
-.acuerdo .n em.mal{color:var(--rojo)}
-.acuerdo .n small{font-size:19px;color:var(--dim);font-family:var(--sans)}
-/* ── Aurum al frente ── */
-.aurum{margin-top:14px;background:var(--panel);border:1px solid #3A3020;border-radius:22px;padding:18px}
-.aurFila{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--hair)}
-.aurFila:last-child{border-bottom:0}
-.aurFila .t{flex:1;font-size:13.5px;color:var(--ink2);line-height:1.4}
-.etapa{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;padding:4px 9px;border-radius:8px;
-  border:1px solid var(--hair2);color:var(--dim);white-space:nowrap}
-.etapa.f{color:var(--verde);border-color:#2C5138}
-/* ── el bloque que se copia ── */
-.wp{background:var(--panel2);border:1px solid var(--hair2);border-radius:16px;padding:15px 16px;margin-bottom:11px}
-.wp h4{font-family:var(--serif);font-size:18px;color:var(--ink);font-weight:400}
-.wp .q{font-size:11.5px;color:var(--faint);margin:2px 0 10px}
-.wp pre{background:var(--bg);border:1px solid var(--hair);border-radius:12px;padding:12px 13px;
-  font-family:var(--sans);font-size:13px;color:var(--ink2);line-height:1.5;white-space:pre-wrap;margin:0 0 10px}
-.bCopiar{background:var(--oro);color:#14100A;font-weight:600;font-size:12.5px;padding:9px 15px;border-radius:12px}
-.bCopiar.ok{background:var(--verdeS);color:var(--verde);border:1px solid #2C5138}
-/* ── la caja del ejecutor: sin esto no se firma ── */
-.quien{margin-top:11px;background:var(--panel3);border:1px solid var(--hair2);border-radius:14px;padding:13px;display:none}
-.quien.on{display:block}
-.quien p{font-size:12.5px;color:var(--dim);margin-bottom:8px}
-.quien textarea{min-height:60px}
-
 </style>
 </head>
 <body>
@@ -301,20 +266,11 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <p class="sub" id="acuerdoSub">—</p>
   </section>
 
-  <div class="moms" id="moms"></div>
-
   <div class="aviso" id="banner" hidden></div>
-  <div id="riesgos" data-mom="arranque firma"></div>
-
-  <!-- Aurum al frente: 5 de 46 tarjetas, pero carga una de las cinco metas -->
-  <section class="aurum" id="aurum" data-mom="arranque firma" hidden>
-    <h2 style="font-family:var(--serif);font-size:21px;color:var(--ink)">Aurum al frente</h2>
-    <span class="sub" style="display:block;font-size:12px;color:var(--faint);margin:2px 0 12px">3 contratos nuevos antes del 28 de febrero · no se pierden entre las de YoDesarrollo</span>
-    <div id="aurumL"></div>
-  </section>
+  <div id="riesgos"></div>
 
   <!-- 2 · las tres charolas -->
-  <div class="tres" data-mom="arranque firma">
+  <div class="tres">
     <section class="zona entrada">
       <h2>Charola de entrada</h2>
       <span class="sub">lo crudo que soltaste y todavía no acomodo</span>
@@ -348,15 +304,8 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     </section>
   </div>
 
-  <!-- el cierre de las 9: lo que se movió y lo que hay que mandar -->
-  <section class="zona salida" id="zCierre" data-mom="cierre" style="margin-top:14px">
-    <h2>Lo que hay que mandar</h2>
-    <span class="sub">un bloque por persona, listo para copiar · la app nunca manda nada</span>
-    <div id="mandar"></div>
-  </section>
-
   <!-- 3 · lo que salió y lo que se atora -->
-  <div class="dos" data-mom="firma cierre">
+  <div class="dos">
     <section class="zona salida">
       <h2>Charola de salida</h2>
       <span class="sub">lo que firmaste hoy y adónde se fue</span>
@@ -393,23 +342,6 @@ function credencial(){ try{ return localStorage.getItem(PORTERO_LSK) || ""; }cat
 var DICC = {"sujetos": {"Admin": "ADM", "Ayuda Social": "AYS", "Casa Alysa": "CAA", "Casa María": "CAM", "Decisiones": "DEC", "La Cercada": "CER", "RNM": "RNM", "Real de Miramar Guaymas": "RMG", "Torre Ruiseñor": "TOR"}, "personas": {"Alejandro": "ALE", "Alma": "ALM", "Claude": "CLA", "Fernando": "FER", "Genaro": "GEN", "Mariana": "MAR", "PG Arquitectos": "PGA", "Sayri": "SAY"}, "metas": {"Admin": "MC", "Admin ": "MC", "Ayuda Social": "MC", "Ayuda Social ": "MC", "Casa Alysa": "ME", "Casa Maria": "MB", "Casa María": "MB", "Decisiones": "MC", "Gastos": "MC", "La Cercada": "MD", "Nómina": "MC", "RNM": "MB", "Real de Miramar Guaymas": "MA", "Sin proyecto": "MC", "Torre Ruiseñor": "MD"}, "metas_nombre": {"MA": "Real de Miramar en Preventa III (31-mar-2027)", "MB": "Aurum: 3 contratos nuevos de Arquitectura de Autor (28-feb-2027)", "MC": "Dos meses de operación en bolsa y nada por cobrar a más de 60 días (31-dic-2026)", "MD": "Dos aportaciones de terreno en co-desarrollo firmadas (31-dic-2026)", "ME": "Casa Alysa entregada al 100% con sus estimaciones (30-nov-2026)"}};
 var MAPA = {"proyectos": ["Casa Alysa", "Casa María", "Real de Miramar Guaymas", "RNM", "Casa Maria"], "nuevos": ["La Cercada", "Torre Ruiseñor", "Gym ECOS", "Depas Guaymas"], "interno": ["Admin", "Admin ", "Ayuda Social", "Ayuda Social ", "Nómina", "Gastos"], "brokers_personas": ["Franco", "Lupita"], "alias_tema": {"la cercada": "La Cercada", "casa alysa": "Casa Alysa", "casa maria": "Casa María", "real de miramar": "Real de Miramar Guaymas", "rnm": "RNM", "torre ruiseñor": "Torre Ruiseñor", "nomina de mariana": "Nómina", "caja yod": "Gastos", "flujo yod": "Gastos", "rodriguez": "Gastos", "credito puente bbva": "Real de Miramar Guaymas", "manjarrez": "Gastos"}, "no_son_sujeto": ["Claude", "Claudet"], "decisiones_se_disuelven": true};
 var RIESGOS = [{"fecha": "2026-09-14", "titulo": "Respuesta de GoDaddy al caso 01919954", "que": "Dijeron que puede tardar una semana o más. Si no llega, el dominio sigue sin poder recuperarse y el reloj de la redención sigue corriendo.", "cae": "nada todavía, pero es el que destraba lo demás", "nivel": "aviso"}, {"fecha": "2026-10-05", "titulo": "Tarjeta válida en el Workspace de Aurum", "que": "La Visa terminación 1049 fue rechazada. Si no hay tarjeta buena ese día, Google suspende el Workspace completo.", "cae": "el correo de las cinco cuentas, los borradores de Gmail, TODOS los Apps Script (incluido el Portero) y con ellos la escritura al tablero", "nivel": "grave"}, {"fecha": "2026-10-05", "titulo": "Se cierra la redención de aurumarquitectos.com", "que": "Venció el 25 de julio y entró en redención el 5 de septiembre. Ese periodo dura alrededor de treinta días; la fecha exacta no está documentada.", "cae": "si se libera, el dominio se pierde para siempre: correo, ligas y la identidad de Aurum", "nivel": "grave"}, {"fecha": "2026-11-17", "titulo": "Vence el registro de yodesarrollo.mx", "que": "Registrador Neubox. Su Workspace ya está suspendido desde febrero, pero el sitio y el correo dependen de este registro.", "cae": "el sitio yodesarrollo.mx y su correo", "nivel": "aviso"}];
-
-/* ══════════ EL CIERRE ══════════
-   Proyectos congelados: siguen vivos en el Sheet pero NO cuentan como vencidos
-   ni ensucian la mesa. La Cercada la paus0 Alejandro el 28-ago y aun asi cargaba
-   19 de 46 tarjetas (41%) y cuatro de las seis mas viejas: inflaba la sensacion
-   de crisis con trabajo que nadie iba a tocar. */
-var CONGELADOS = { 'La Cercada': '28 de agosto' };
-/* El dia tiene tres momentos y la pantalla cambia de cara en cada uno.
-   Se puede mover a mano; la hora solo decide con cual abre. */
-var MOMENTOS = [
-  ['arranque','Arranque','7 de la mañana · qué te espera hoy'],
-  ['firma','Firma','mediodía · lo que se cierra'],
-  ['cierre','Cierre','9 de la noche · qué se movió y qué mandas']
-];
-function momentoDeLaHora(){ var h=new Date().getHours(); return h<11?'arranque':(h<19?'firma':'cierre'); }
-var MOMENTO = momentoDeLaHora();
-function congelado(r){ return !!CONGELADOS[String(r.proyecto||'').trim()]; }
 
 var CARRILES = [
   ['proyectos','Proyectos','lo que ya está en obra'],
@@ -544,7 +476,6 @@ function construir(tasks){
     var dn=dinero(r); r._din=dn[0]; r._dinTxt=dn[1];
     var _ed=estadoDecision(r); r._dec=(_ed==='tetoca'); r._esp=(_ed==='esperando');
     r._mio=String(r.responsable||'').trim()==='Alejandro';
-    r._frio=congelado(r);   /* proyecto en pausa: no cuenta como vencido */
   });
   var sujetos={};
   function add(carril,nombre,r){
@@ -673,41 +604,18 @@ function ramaDe(r){
 }
 
 /* ── 1 · el acuerdo del día ── */
-/* ── 1 · el numero doloroso ──
-   Una regla fija, no un tablero: lo que mas duele hoy es lo que se ve mas grande.
-   Vencidas SIN lo congelado, porque un proyecto en pausa no es una urgencia. */
 function acuerdo(){
-  var venc=VIVAS.filter(function(r){ return !r._frio && r._f && r._f<HOY; }).length;
-  var frias=VIVAS.filter(function(r){ return r._frio; }).length;
   var porFirmar=MESA.filter(function(x){return x.clase==='firmar';}).length;
   var deVuelta =MESA.filter(function(x){return x.clase==='vuelta';}).length;
   var min=Math.max(1,Math.round((porFirmar*1.5)+(deVuelta*0.5)));
-  var ayer=null; try{ ayer=JSON.parse(localStorage.getItem('cierre_vencidas')||'null'); }catch(e){}
-  var comp='';
-  if(ayer && ayer.n!=null && ayer.f!==hoyLocal()){
-    var dif=ayer.n-venc;
-    comp = dif>0 ? (' <small>(eran '+ayer.n+' — bajaron '+dif+')</small>')
-         : dif<0 ? (' <small>(eran '+ayer.n+' — subieron '+(-dif)+')</small>')
-         : ' <small>(igual que ayer)</small>';
-  }
-  $('#acuerdo').hidden=false;
-  $('#acuerdoN').innerHTML = venc
-    ? ('<em class="mal">'+venc+'</em> vencidas'+comp+' · <em>'+MESA.length+'</em> por cerrar hoy')
-    : ('<em>Nada vencido.</em> '+MESA.length+' por cerrar hoy');
-  var r0=riesgoMasProximo();
-  $('#acuerdoSub').textContent =
-      (MESA.length? ('te toma unos '+min+' min · ') : '')
-    + (frias? (frias+' congeladas de La Cercada, fuera de la cuenta · ') : '')
-    + (r0? ('el riesgo más próximo cae '+r0) : VIVAS.length+' tarjetas vivas');
-  try{ localStorage.setItem('cierre_vencidas_hoy',JSON.stringify({f:hoyLocal(),n:venc})); }catch(e){}
-}
-function riesgoMasProximo(){
-  var R=(RIESGOS||[]).map(function(x){
-    var p=String(x.fecha).split('-'); var f=new Date(+p[0],+p[1]-1,+p[2]);
-    return {t:x.titulo,d:Math.round((f-HOY)/86400000)};
-  }).sort(function(a,b){ return a.d-b.d; })[0];
-  if(!R) return '';
-  return (R.d<0?('hace '+(-R.d)+' d'):(R.d===0?'HOY':('en '+R.d+' d')))+': '+R.t;
+  var sinSalir=VIVAS.filter(function(r){ return r._esp; }).length;
+  var a=$('#acuerdo'); a.hidden=false;
+  $('#acuerdoN').innerHTML = MESA.length
+    ? ('<em>'+MESA.length+'</em> '+(MESA.length===1?'tarjeta espera tu firma':'tarjetas esperan tu firma')+' · <em>'+min+'</em> min')
+    : 'Nada espera tu firma. <em>La mesa está limpia.</em>';
+  $('#acuerdoSub').textContent = (porFirmar? porFirmar+' por firmar · ':'')
+    + (deVuelta? deVuelta+' de vuelta (ya salieron y nadie contestó) · ':'')
+    + sinSalir+' decisiones esperando a otra persona · '+VIVAS.length+' tarjetas vivas';
 }
 
 /* ── 2 · la charola de entrada ── */
@@ -725,7 +633,6 @@ var MESA=[];
 function armarMesa(){
   MESA=[];
   VIVAS.forEach(function(r){
-    if(r._frio) return;            /* lo congelado no sube a la mesa */
     var d=dias(r._f), ap=aplazos(r);
     if(r._dec)      MESA.push({r:r, clase:'firmar', ap:ap});
     else if(r._esp && d!==null && d>7) MESA.push({r:r, clase:'vuelta', ap:ap});
@@ -759,27 +666,9 @@ function pintarMesa(){
         +'<textarea id="cx_'+esc(r.id)+'" placeholder="Dicta o escribe la corrección…"></textarea>'
         +'<div class="dicPie"><button class="bOtro" data-dictar="'+esc(r.id)+'">🎙 Dictar</button>'
         +'<button class="bp" data-guardar="'+esc(r.id)+'" style="padding:9px 15px;font-size:13px">Guardar el cambio</button></div>'
-      +'</div>'
-      /* Sin esto no se firma. Es el hallazgo que los cinco expertos vieron igual:
-         9 de 10 decisiones llevaban desde agosto decididas y sin que NADIE las
-         cerrara, porque al firmar no quedaba escrito quien la ejecuta. */
-      +'<div class="quien" id="qn_'+esc(r.id)+'">'
-        +'<p>Antes de firmar: <b style="color:var(--ink)">¿quién lo ejecuta y para cuándo?</b></p>'
-        +'<textarea id="qx_'+esc(r.id)+'" placeholder="Alma lo ingresa el viernes · Sayri le llama mañana…"></textarea>'
-        +'<div class="dicPie"><button class="bOtro" data-dicquien="'+esc(r.id)+'">🎙 Dictar</button>'
-        +'<button class="bp" data-firmarya="'+esc(r.id)+'" style="padding:9px 15px;font-size:13px">Firmar</button>'
-        +'<button class="bOtro" data-cancelfirma="'+esc(r.id)+'">Cancelar</button></div>'
       +'</div></div>';
   }).join('');
-  Array.prototype.forEach.call(c.querySelectorAll('[data-firmar]'),function(b){ b.onclick=function(){
-    var q=document.getElementById('qn_'+b.dataset.firmar); q.classList.add('on');
-    document.getElementById('qx_'+b.dataset.firmar).focus();
-  }; });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-cancelfirma]'),function(b){ b.onclick=function(){
-    document.getElementById('qn_'+b.dataset.cancelfirma).classList.remove('on');
-  }; });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-firmarya]'),function(b){ b.onclick=function(){ firmar(b.dataset.firmarya,b); }; });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-dicquien]'),function(b){ b.onclick=function(){ dictarEn(document.getElementById('qx_'+b.dataset.dicquien), b); }; });
+  Array.prototype.forEach.call(c.querySelectorAll('[data-firmar]'),function(b){ b.onclick=function(){ firmar(b.dataset.firmar,b); }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-despues]'),function(b){ b.onclick=function(){ aplazar(b.dataset.despues,b); }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-cambiar]'),function(b){ b.onclick=function(){
     var cj=document.getElementById('cj_'+b.dataset.cambiar); cj.classList.toggle('on');
@@ -840,89 +729,11 @@ function pintarAtoro(){
       }).join('');
 }
 
-/* ── el conmutador de los tres momentos ── */
-function pintarMomentos(){
-  var c=$('#moms'); if(!c) return;
-  c.innerHTML = MOMENTOS.map(function(m){
-    return '<button class="mom'+(m[0]===MOMENTO?' on':'')+'" data-mom-btn="'+m[0]+'" type="button">'
-      +'<b>'+esc(m[1])+'</b><span>'+esc(m[2])+'</span></button>';
-  }).join('');
-  Array.prototype.forEach.call(c.querySelectorAll('[data-mom-btn]'),function(b){
-    b.onclick=function(){ MOMENTO=b.dataset.momBtn; pintar(); window.scrollTo({top:0,behavior:'smooth'}); };
-  });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-mom]'),function(z){
-    z.classList.toggle('verse', z.dataset.mom.split(' ').indexOf(MOMENTO)>=0);
-  });
-}
-
-/* ── Aurum al frente ──
-   5 de 46 tarjetas, pero carga la meta MB (3 contratos antes del 28-feb-2027).
-   Perdidas entre las 41 de YoDesarrollo, esa meta se descubre tarde. */
-var ETAPAS=[['prospect','Prospecto'],['contact','Contacto'],['propuesta','Propuesta'],['firmado','Firmado']];
-function etapaDe(r){
-  var t=(String(r.actividad||'')+' '+String(r.estado||'')+' '+String(r.comentarios||'')).toLowerCase();
-  if(/firmad|contrato firm|anticipo/.test(t)) return ['Firmado',true];
-  if(/propuesta|cotiza|honorar|presupuesto/.test(t)) return ['Propuesta',false];
-  if(/reuni|llamada|cita|visita/.test(t)) return ['Contacto',false];
-  return ['Prospecto',false];
-}
-function pintarAurum(){
-  var z=$('#aurum'); if(!z) return;
-  var l=VIVAS.filter(function(r){ return /aurum/i.test(String(r.empresa||'')); });
-  z.hidden=false;
-  if(!l.length){ $('#aurumL').innerHTML='<div class="vacio">Ni una tarjeta viva de Aurum. La meta de 3 contratos nuevos no se está trabajando en ningún lado que este tablero pueda ver.</div>'; return; }
-  var firm=l.filter(function(r){ return etapaDe(r)[1]; }).length;
-  $('#aurumL').innerHTML = l.map(function(r){
-    var e=etapaDe(r), d=dias(r._f);
-    return '<div class="aurFila"><span class="etapa'+(e[1]?' f':'')+'">'+esc(e[0]).toUpperCase()+'</span>'
-      +'<span class="t">'+esc(String(r.actividad||'').slice(0,90))+'</span>'
-      +'<span class="etapa">'+esc(r.responsable||'sin dueño')+(d!==null&&d>0?(' · '+d+' d'):'')+'</span></div>';
-  }).join('') + '<div class="micEst" style="text-align:left;margin:11px 0 0">'
-    +firm+' de 3 contratos · faltan '+Math.max(0,3-firm)+' antes del 28 de febrero</div>';
-}
-
-/* ── el cierre de las 9: un bloque por persona, listo para copiar ──
-   La app NUNCA manda nada. Redacta y él copia: es la regla de la casa. */
-function pintarMandar(){
-  var c=$('#mandar'); if(!c) return;
-  var por={};
-  VIVAS.forEach(function(r){
-    if(r._frio) return;
-    var q=String(r.responsable||'').trim();
-    if(!q || q==='Alejandro' || q==='Claude' || q==='Claudet') return;
-    var d=dias(r._f); if(d===null || d<=0) return;
-    (por[q]=por[q]||[]).push({r:r,d:d});
-  });
-  var nombres=Object.keys(por).sort(function(a,b){
-    return Math.max.apply(null,por[b].map(function(x){return x.d;})) - Math.max.apply(null,por[a].map(function(x){return x.d;}));
-  });
-  if(!nombres.length){ c.innerHTML='<div class="vacio">Nadie te debe nada vencido. No hay que mandar ni un mensaje.</div>'; return; }
-  c.innerHTML = nombres.map(function(n,i){
-    var l=por[n].sort(function(a,b){ return b.d-a.d; });
-    var t='Hola '+n+', buenas tardes. Te paso lo que traigo pendiente de tu lado:\n\n'
-      + l.slice(0,5).map(function(x,k){ return (k+1)+'. '+String(x.r.actividad||'').slice(0,110)+' — lleva '+x.d+' días.'; }).join('\n')
-      + '\n\n¿En qué punto va cada uno? Si algo ya no aplica, dímelo y lo cierro.';
-    return '<div class="wp"><h4>'+esc(n)+'</h4>'
-      +'<p class="q">'+l.length+(l.length===1?' pendiente vencido':' pendientes vencidos')+' · el más viejo lleva '+l[0].d+' días</p>'
-      +'<pre id="wp'+i+'">'+esc(t)+'</pre>'
-      +'<button class="bCopiar" data-copiar="'+i+'" type="button">Copiar para WhatsApp</button></div>';
-  }).join('');
-  Array.prototype.forEach.call(c.querySelectorAll('[data-copiar]'),function(b){
-    b.onclick=function(){
-      var t=document.getElementById('wp'+b.dataset.copiar).textContent;
-      try{ navigator.clipboard.writeText(t).then(function(){
-        b.classList.add('ok'); b.textContent='copiado ✓ — pégalo en WhatsApp';
-      }); }catch(e){ b.textContent='no pude copiar: selecciónalo a mano'; }
-    };
-  });
-}
-
 function pintar(){
   armarMesa();
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
   acuerdo(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
-  pintarAurum(); pintarMandar(); pintarMomentos();
   var f=new Date();
   $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
   var h=f.getHours();
@@ -1020,16 +831,9 @@ async function firmar(id,btn){
   var t=TAREAS.filter(function(x){return x.id===id;})[0]; if(!t) return;
   if(!credencial()){ alert('Primero entra con el Portero: sin credencial el tablero no deja escribir.'); return; }
   var hoy=hoyLocal();
-  var msj=document.getElementById('fm_'+id);
-  var caja=document.getElementById('qx_'+id);
-  var quien=caja?String(caja.value||'').trim():'';
-  if(!quien){
-    if(msj){ msj.className='smsg mal'; msj.textContent='Falta lo único que importa: quién lo ejecuta y para cuándo.'; }
-    if(caja) caja.focus();
-    return;
-  }
-  var texto='🤖 Ejecutado (Despacho, '+hoy+'): firmada por Alejandro. Lo ejecuta: '+quien;
+  var texto='🤖 Ejecutado (Despacho, '+hoy+'): firmada por Alejandro desde El Despacho.';
   if(!confirm('Se va a escribir en la tarjeta '+id+':\n\n'+texto+'\n\n¿Lo firmo?')) return;
+  var msj=document.getElementById('fm_'+id);
   btn.disabled=true; btn.textContent='leyendo la tarjeta…';
   try{
     /* Releer ANTES de escribir. El patch reemplaza la columna 'comentarios'
