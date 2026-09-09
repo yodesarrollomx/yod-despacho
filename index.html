@@ -109,6 +109,7 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .pin{font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:3px 8px;border:1px solid;border-radius:8px}
 .pin.d{color:var(--rojo);border-color:var(--rojo);background:var(--rojoS)}
 .pin.v{color:var(--ambar);border-color:#4A3C1E}
+.pin.e{color:var(--azul);border-color:#2A3A4A;background:#121820}
 .pin.m{color:var(--oro);border-color:var(--hair2)}
 .limpio{border:1px dashed var(--hair2);border-radius:20px;padding:20px;display:flex;align-items:center;gap:12px;color:var(--faint);font-size:13.5px}
 .limpio i{width:8px;height:8px;border-radius:50%;background:var(--verde);display:block;flex:none}
@@ -303,7 +304,22 @@ function dinero(r){
   }
   return [mx,txt];
 }
-function decisionSinEjecutar(r){ var c=String(r.comentarios||''); return (c.indexOf('DECISIÓN')>=0||c.indexOf('DECISION')>=0) && c.indexOf('Ejecutado')<0; }
+/* Una decision tomada tiene TRES estados, no dos, y confundirlos es la razon
+   por la que "el pendiente casi nunca muere":
+     te toca   -> la decidiste y nadie ha redactado nada: es tuya, hoy.
+     esperando -> ya se redacto lo que salia de esa decision y ahora depende de
+                  otra persona. Sigue viva, pero NO te esta pidiendo nada.
+     ejecutada -> se cerro. Deja de contar.
+   Antes las dos primeras se contaban juntas y el numero grande nunca bajaba,
+   asi que dejaba de significar algo. */
+function estadoDecision(r){
+  var c=String(r.comentarios||'');
+  if(c.indexOf('DECISIÓN')<0 && c.indexOf('DECISION')<0) return '';
+  if(c.indexOf('Ejecutado')>=0) return 'ejecutada';
+  if(c.indexOf('Redactado')>=0) return 'esperando';
+  return 'tetoca';
+}
+function decisionSinEjecutar(r){ return estadoDecision(r)==='tetoca'; }
 function carrilDe(p){
   var ps=sinac(p);
   var g=['proyectos','nuevos','interno'];
@@ -362,7 +378,8 @@ function construir(tasks){
   viv.forEach(function(r){
     var fr=fechaReal(r); r._f=fr[0]; r._como=fr[1];
     var dn=dinero(r); r._din=dn[0]; r._dinTxt=dn[1];
-    r._dec=decisionSinEjecutar(r); r._mio=String(r.responsable||'').trim()==='Alejandro';
+    var _ed=estadoDecision(r); r._dec=(_ed==='tetoca'); r._esp=(_ed==='esperando');
+    r._mio=String(r.responsable||'').trim()==='Alejandro';
   });
   var sujetos={};
   function add(carril,nombre,r){
@@ -386,17 +403,17 @@ function construir(tasks){
     for(var k in sujetos){
       var s=sujetos[k]; if(s.carril!==C[0]) continue;
       var ts=s.tarjetas;
-      var dmax=null, din=0, dinTxt='', dec=0, mios=0, venc=0, sf=0;
+      var dmax=null, din=0, dinTxt='', dec=0, esp=0, mios=0, venc=0, sf=0;
       ts.forEach(function(t){
         var d=dias(t._f);
         if(d!==null && (dmax===null||d>dmax)) dmax=d;
         if(t._din>din){ din=t._din; dinTxt=t._dinTxt; }
-        if(t._dec) dec++; if(t._mio) mios++;
+        if(t._dec) dec++; if(t._esp) esp++; if(t._mio) mios++;
         if(t._f && t._f<HOY) venc++;
         if(!t._f) sf++;
       });
       ss.push({nombre:s.nombre,cuantas:ts.length,mias:mios,vencidas:venc,dias:dmax,sinFecha:sf,
-               dinero:din,dineroTxt:dinTxt,decisiones:dec,tarjetas:ts,
+               dinero:din,dineroTxt:dinTxt,decisiones:dec,esperando:esp,tarjetas:ts,
                sigla:DICC.sujetos[s.nombre]||DICC.personas[s.nombre]||'',
                meta:DICC.metas[s.nombre]||'',
                puntos:(din?1000:0)+dec*100+(dmax||0)+ts.length});
@@ -416,6 +433,7 @@ function construir(tasks){
   var sinFecha=viv.filter(function(r){ return !r._f && r.estado!=='En standby'; });
   var standby=viv.filter(function(r){ return !r._f && r.estado==='En standby'; });
   var decs=viv.filter(function(r){ return r._dec; }).length;
+  var esps=viv.filter(function(r){ return r._esp; }).length;
   var vis=0; FILAS.forEach(function(f){ vis+=f.casillas.length; });
   var limpios=FILAS.filter(function(f){ return !f.casillas.length; }).map(function(f){ return f.nombre; });
   var colas=FILAS.filter(function(f){ return f.cola; }).map(function(f){ return f.nombre+' '+f.cola; }).join(' · ');
@@ -428,7 +446,7 @@ function construir(tasks){
     {ok:!sinFecha.length, t:'ninguna tarjeta viva sin fecha de verdad',
      d:sinFecha.length?(sinFecha.length+' sin fecha legible'):((viv.length-standby.length)+' con fecha'+(standby.length?(' · '+standby.length+' en standby sin fecha, a propósito'):''))},
     {ok:vis<=15, t:'nunca más de 15 casillas a la vista', d:vis+' casillas'},
-    {ok:decs<=5, t:'la bandeja de decisiones no está atorada', d:decs+' decisiones tomadas sin ejecutar (tope 5)'}
+    {ok:decs<=5, t:'la bandeja de decisiones no está atorada', d:decs+' esperan algo tuyo (tope 5)'+(esps?(' · '+esps+' ya salieron y esperan a otra persona'):'')}
   ];
   return viv.length;
 }
@@ -476,6 +494,7 @@ function pintar(){
           +'<span class="pt" style="left:'+pct+'%;background:'+col+';box-shadow:0 0 0 3px '+(c.dias>14?'rgba(216,105,90,.18)':'rgba(224,172,74,.16)')+'"></span></div>')
        +((c.decisiones||c.vencidas||c.mias)?'<div class="pins">'
           +(c.decisiones?'<span class="pin d">'+c.decisiones+' sin ejecutar</span>':'')
+          +(c.esperando?'<span class="pin e">'+c.esperando+' esperando a otro</span>':'')
           +(c.vencidas?'<span class="pin v">'+c.vencidas+' vencidas</span>':'')
           +(c.mias?'<span class="pin m">'+c.mias+' tuyas</span>':'')+'</div>':'')
        +'</button>';
@@ -494,7 +513,8 @@ function pintar(){
   TAREAS.forEach(function(){});
   FILAS.forEach(function(){});
   vivas=VIVAS.length;
-  VIVAS.forEach(function(r){ if(r._mio)mias++; if(r._dec)dec++; if(r._f&&r._f<HOY)venc++; });
+  var esp=0;
+  VIVAS.forEach(function(r){ if(r._mio)mias++; if(r._dec)dec++; if(r._esp)esp++; if(r._f&&r._f<HOY)venc++; });
   $('#nVivas').textContent=vivas; $('#nMias').textContent=mias;
   $('#nDec').textContent=dec; $('#nVenc').textContent=venc;
   var b=''; for(var k=0;k<15;k++){
@@ -505,7 +525,9 @@ function pintar(){
   }
   $('#barras').innerHTML=b;
   var ocup=0; FILAS.forEach(function(f){ ocup+=f.casillas.length; });
-  $('#heroPie').textContent=ocup+' casillas ocupadas de 15 · '+dec+(dec===1?' decisión espera':' decisiones esperan')+' tu firma';
+  $('#heroPie').textContent=ocup+' casillas ocupadas de 15 · '
+    +dec+(dec===1?' decisión espera':' decisiones esperan')+' tu firma'
+    +(esp?(' · '+esp+(esp===1?' ya salió y espera':' ya salieron y esperan')+' a otro'):'');
   $('#hero').hidden=false;
   riesgos();
 }
@@ -528,10 +550,11 @@ function abrir(fid,nom){
    +'</div><div class="hLista">';
   c.tarjetas.slice().sort(function(a,b){ return (a._f?a._f:9e15)-(b._f?b._f:9e15); }).forEach(function(t){
     var d=dias(t._f);
-    var col=t._dec?'var(--rojo)':(d!==null&&d>14?'var(--rojo)':(d!==null&&d>0?'var(--ambar)':'#3A3223'));
+    var col=t._dec?'var(--rojo)':(t._esp?'var(--azul)':(d!==null&&d>14?'var(--rojo)':(d!==null&&d>0?'var(--ambar)':'#3A3223')));
     h+='<div class="row"><span class="b" style="background:'+col+'"></span><div class="c">'
      +'<b>'+esc(String(t.actividad||'').slice(0,140))+'</b>'
      +(t._dec?'<span class="pin d" style="align-self:flex-start">decidida, sin ejecutar</span>':'')
+     +(t._esp?'<span class="pin e" style="align-self:flex-start">ya se redactó · espera a la otra parte</span>':'')
      +'<span class="mm">'+esc(matricula(t,c.nombre))+' · '+esc(t.responsable||'sin dueño')+' · '+esc(t.estado||'')
      +' · '+(t._f?(fmtDias(d)+(d>0?' tarde':'')):'sin fecha')+'</span></div>'
      +'<span class="ac">'+(t._dec?'<button class="bFirmar" data-firmar="'+esc(t.id)+'">Firmar</button>':'')+'</span></div>';
