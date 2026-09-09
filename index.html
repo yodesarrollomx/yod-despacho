@@ -148,7 +148,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* una fecha que el motor dedujo, marcada: nunca se lee como dato del Sheet */
 #acuerdoDin .cmp{font-family:var(--sans);font-size:.42em;color:var(--dim);font-weight:400;letter-spacing:0}
 .estim{font-style:normal;color:var(--ambar);border:1px solid rgba(200,150,60,.34);
-  border-radius:6px;padding:1px 6px;font-size:9.5px;letter-spacing:.06em;margin-left:5px}
+  border-radius:6px;padding:1px 7px;font-size:11.5px;letter-spacing:.06em;margin-left:6px}
 .firma .acc{display:flex;gap:7px;flex-wrap:wrap}
 .bFirmar{background:var(--oro);color:#14100A;font-weight:600;font-size:12.5px;padding:9px 15px;border-radius:12px}
 .bOtro{background:transparent;border:1px solid var(--hair2);color:var(--ink2);font-size:12.5px;padding:9px 14px;border-radius:12px}
@@ -251,6 +251,12 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* piso de 11.5px para TODO lo informativo: a las nueve de la noche, cansado,
    9.5px en gris no se lee. Y el pie pasa de --mute (2.7:1) a --faint (5.2:1). */
 .etapa,.firma .rama,.ramaT,.hoja2 .cu,.hoja2 .cuD,.acuerdo .k,.acuerdo .din .k,.viva span,.mom span{font-size:11.5px}
+.bLink{background:transparent;border:0;border-bottom:1px solid var(--oro);color:var(--oro);
+  font:inherit;font-size:inherit;padding:0 0 1px;cursor:pointer}
+.bLink:hover{border-bottom-width:2px}
+.masMesa{font-size:12.5px;color:var(--dim);padding:12px 2px 0;line-height:1.5}
+.salDin{font-size:13px;color:var(--ink2);margin:2px 0 11px;padding-bottom:10px;
+  border-bottom:1px solid var(--hair2)}
 .pie{font-size:11.5px;color:var(--faint)}
 .wp .q{font-size:12.5px}
 
@@ -358,6 +364,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <section class="zona salida">
       <h2>Charola de salida</h2>
       <span class="sub">lo que firmaste hoy y adónde se fue</span>
+      <div id="salidaDin" class="salDin" hidden></div>
       <div id="salida"></div>
     </section>
     <section class="zona atora">
@@ -613,7 +620,7 @@ function construir(tasks){
     }
     ss.sort(function(a,b){ return b.puntos-a.puntos; });
     ss.forEach(function(c){ if(!c.meta){ var mm={}; c.tarjetas.forEach(function(t){ var x=matricula(t,c.nombre).split('-')[3]; if(x&&x!=='M?') mm[x]=(mm[x]||0)+1; }); var best='',n=0; for(var k in mm) if(mm[k]>n){best=k;n=mm[k];} c.meta=best; } });
-    return {id:C[0],nombre:C[1],sub:C[2],casillas:ss.slice(0,3),cola:Math.max(0,ss.length-3),
+    return {id:C[0],nombre:C[1],sub:C[2],casillas:ss.slice(0,3),todos:ss,cola:Math.max(0,ss.length-3),
             colaNombres:ss.slice(3).map(function(x){return x.nombre;}), carga:0};
   });
   var tot=viv.length;
@@ -628,8 +635,12 @@ function construir(tasks){
   var decs=viv.filter(function(r){ return r._dec; }).length;
   var esps=viv.filter(function(r){ return r._esp; }).length;
   var vis=0, enCasilla={};
+  /* OJO: 'tener carril' NO es lo mismo que 'tener casilla visible'. Antes esto
+     recorria solo f.casillas (el top-3 que se dibuja) y daba por huerfana a
+     cualquier tarjeta de la cola — el propio chequeo que existe para que te
+     puedas fiar del tablero, mintiendo. Ahora se recorren TODOS los sujetos. */
   FILAS.forEach(function(f){ vis+=f.casillas.length;
-    f.casillas.forEach(function(c){ c.tarjetas.forEach(function(t){ enCasilla[t.id]=1; }); }); });
+    (f.todos||f.casillas).forEach(function(c){ c.tarjetas.forEach(function(t){ enCasilla[t.id]=1; }); }); });
   var sinCarril=viv.filter(function(r){ return !enCasilla[r.id]; });
   var limpios=FILAS.filter(function(f){ return !f.casillas.length; }).map(function(f){ return f.nombre; });
   var colas=FILAS.filter(function(f){ return f.cola; }).map(function(f){ return f.nombre+' '+f.cola; }).join(' · ');
@@ -699,6 +710,22 @@ function loQueDecidiste(r){
 function loQueSalio(r){
   var c=comentarios(r).filter(function(x){ return x.texto.indexOf('Redactado')>=0; }).pop();
   return c ? c.texto.replace(/^🤖\s*Redactado:?\s*/,'').trim() : '';
+}
+/* Desde CUANDO espera a otro. No es la fecha de vencimiento de la tarjeta (eso
+   contaba dias de mas y decia una cifra que no era): es el dia en que se
+   redacto lo que ahora esta en manos de esa persona. */
+function esperandoDesde(r){
+  var c=comentarios(r).filter(function(x){ return x.texto.indexOf('Redactado')>=0; }).pop();
+  if(!c || !c.fecha) return null;
+  return dias(new Date(c.fecha+'T12:00:00'));
+}
+/* La frase completa de la meta, y una version corta para el renglon. */
+function metaNombre(m){ return (DICC.metas_nombre||{})[m] || m; }
+function metaCorta(m){
+  var t=metaNombre(m);
+  if(t===m) return m;
+  return t.replace(/\s*\([^)]*\)\s*$/,'')      /* fuera la fecha entre parentesis */
+          .replace(/^Aurum:\s*/,'').trim().slice(0,42);
 }
 function ramaDe(r){
   var p=String(r.proyecto||'').trim(), t=(sinac(p)==='decisiones')?temaDecision(r):p;
@@ -831,13 +858,31 @@ function armarMesa(){
 }
 function pintarMesa(){
   var c=$('#mesa');
+  /* Si estabas escribiendo «quién lo ejecuta» y el tablero se refresco, tu
+     texto se borraba con el innerHTML. Se guarda antes y se repone despues:
+     nunca se pierde lo que ya habias tecleado o dictado. */
+  var abiertas={};
+  Array.prototype.forEach.call(c.querySelectorAll('.quien.on'),function(q){
+    var id=q.id.slice(3), tx=document.getElementById('qx_'+id), sl=document.getElementById('qd_'+id);
+    abiertas[id]={t:tx?tx.value:'', d:sl?sl.value:''};
+  });
   if(!MESA.length){ c.innerHTML='<div class="vacio">La mesa está limpia. Cuando sueltes algo en la charola, aquí te lo dejo listo para firmar.</div>'; return; }
-  c.innerHTML = MESA.map(function(m){
-    var r=m.r, ra=ramaDe(r), d=dias(r._f);
+  /* La mesa era el unico de los cuatro renders sin tope. Nueve tarjetas de
+     firma en fila cansan y ninguna se ve urgente; MESA ya viene ordenada por
+     dinero y edad, asi que cortar por arriba no esconde lo importante. */
+  var TOPE=8, resto=Math.max(0,MESA.length-TOPE);
+  c.innerHTML = MESA.slice(0,TOPE).map(function(m){
+    var r=m.r, ra=ramaDe(r);
     var esVuelta=m.clase==='vuelta';
+    /* la de vuelta cuenta desde que se redacto; la tuya, desde que vencio */
+    var d=esVuelta ? esperandoDesde(r) : dias(r._f);
+    if(esVuelta && d===null) d=dias(r._f);
     var que=esVuelta?loQueSalio(r):loQueDecidiste(r);
     return '<div class="firma'+(m.ap>=2?' hot':'')+(esVuelta?' vuelta':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
-      +'<div class="rama">'+esc(ra.sujeto)+(ra.meta?(' · '+esc(ra.meta)):'')+'</div>'
+      /* la meta se dice, no se codifica: DICC.metas_nombre existia desde
+         siempre y nunca se leyo. 'MD' no le dice nada a nadie. */
+      +'<div class="rama">'+esc(ra.sujeto)+(ra.meta?(' · <span title="'+esc(metaNombre(ra.meta))
+        +'">'+esc(metaCorta(ra.meta))+'</span>'):'')+'</div>'
       +'<h3>'+esc(String(r.actividad||'').slice(0,120))+'</h3>'
       +(que?('<p class="por"><b>'+(esVuelta?'Ya salió esto:':'Lo que decidiste:')+'</b> '+esc(que.slice(0,220))+'</p>'):'')
       +(r._dinTxt?('<div class="din">'+esc(r._dinTxt)+' <span>mencionado en esta tarjeta</span></div>'):'')
@@ -873,7 +918,15 @@ function pintarMesa(){
         +'<button class="bp" data-firmarya="'+esc(r.id)+'" data-etiqueta="'+(esVuelta?'Cerrarla':'Firmar')+'" style="padding:9px 15px;font-size:13px">'+(esVuelta?'Cerrarla':'Firmar')+'</button>'
         +'<button class="bOtro" data-cancelfirma="'+esc(r.id)+'">Cancelar</button></div>'
       +'</div></div>';
-  }).join('');
+  }).join('')
+  + (resto ? ('<div class="masMesa">Hay '+resto+' más esperando tu firma, debajo de éstas por '
+              +'dinero y por antigüedad. Se suben solas conforme cierres las de arriba.</div>') : '');
+  Object.keys(abiertas).forEach(function(id){
+    var q=document.getElementById('qn_'+id); if(!q) return;
+    q.classList.add('on');
+    var tx=document.getElementById('qx_'+id); if(tx) tx.value=abiertas[id].t;
+    var sl=document.getElementById('qd_'+id); if(sl && abiertas[id].d) sl.value=abiertas[id].d;
+  });
   Array.prototype.forEach.call(c.querySelectorAll('[data-firmar]'),function(b){ b.onclick=function(){
     var q=document.getElementById('qn_'+b.dataset.firmar); q.classList.add('on');
     document.getElementById('qx_'+b.dataset.firmar).focus();
@@ -887,6 +940,16 @@ function pintarMesa(){
     var m=document.getElementById('fm_'+id); if(m) m.textContent='';
   }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-firmarya]'),function(b){ b.onclick=function(){ firmar(b.dataset.firmarya,b); }; });
+  /* Cmd+Enter (o Ctrl+Enter) dispara el mismo boton: escribir y firmar sin
+     soltar el teclado. Enter solo NO firma — se escriben frases de dos lineas. */
+  Array.prototype.forEach.call(c.querySelectorAll('textarea[id^="qx_"]'),function(tx){
+    tx.addEventListener('keydown',function(e){
+      if(e.key==='Enter' && (e.metaKey||e.ctrlKey)){
+        e.preventDefault();
+        var b=c.querySelector('[data-firmarya="'+tx.id.slice(3)+'"]'); if(b) b.click();
+      }
+    });
+  });
   Array.prototype.forEach.call(c.querySelectorAll('[data-dicquien]'),function(b){ b.onclick=function(){ dictarEn(document.getElementById('qx_'+b.dataset.dicquien), b); }; });
   /* Cambiar a quien queda la tarjeta invalida la vista previa igual que cambiar
      el texto: si no, se firmaria una cosa habiendo leido otra. */
@@ -947,6 +1010,24 @@ function pintarSalida(){
   VIVAS.concat(TAREAS.filter(function(t){return VIVAS.indexOf(t)<0;})).forEach(function(r){
     salioHoy(r).forEach(function(c){ l.push({id:r.id, texto:c.texto, act:String(r.actividad||'').slice(0,70)}); });
   });
+  /* Cerrar el dia tambien dice cuanto dinero se movio, no solo cuantas
+     tarjetas salieron: es lo unico que conecta el trabajo con facturar. */
+  var cob=0,pag=0;
+  VIVAS.concat(TAREAS.filter(function(t){return VIVAS.indexOf(t)<0;})).forEach(function(r){
+    salioHoy(r).forEach(function(c){
+      if(c.texto.indexOf('Ejecutado')<0) return;
+      if(c.texto.indexOf('cobrada')>=0) cob+=(r._din||dinero(r)[0]||0);
+      else if(c.texto.indexOf('pagada')>=0) pag+=(r._din||dinero(r)[0]||0);
+    });
+  });
+  var elS=$('#salidaDin');
+  if(elS){
+    elS.innerHTML = (cob||pag)
+      ? ('Hoy se movió '+(cob?('<b style="color:var(--verde)">'+esc(pesos(cob))+' cobrado</b>'):'')
+         +(cob&&pag?' · ':'')+(pag?('<b>'+esc(pesos(pag))+' pagado</b>'):''))
+      : '';
+    elS.hidden = !(cob||pag);
+  }
   $('#salida').innerHTML = !l.length
     ? '<div class="vacio">Todavía no sale nada hoy. En cuanto firmes algo, aquí queda el rastro.</div>'
     : l.slice(0,8).map(function(x){
@@ -995,9 +1076,20 @@ function pintarMomentos(){
   });
   var toca=momentoDeLaHora(), av=$('#momAviso');
   if(av){
-    av.textContent = MOMENTO===toca ? '' :
-      ('Estás en '+MOMENTOS.filter(function(m){return m[0]===MOMENTO;})[0][1]
-       +', pero a esta hora normalmente verías '+MOMENTOS.filter(function(m){return m[0]===toca;})[0][1]+'.');
+    if(MOMENTO===toca){ av.textContent=''; av.hidden=true; }
+    else{
+      var nomT=MOMENTOS.filter(function(m){return m[0]===toca;})[0][1];
+      av.hidden=false;
+      /* antes esto era solo un renglon: te decia el desfase y te dejaba
+         buscar el boton hasta arriba. Ahora se arregla desde aqui. */
+      av.innerHTML='Estás en '+esc(MOMENTOS.filter(function(m){return m[0]===MOMENTO;})[0][1])
+        +', pero a esta hora normalmente verías '+esc(nomT)+'. '
+        +'<button class="bLink" id="irMom" type="button">Ir a '+esc(nomT)+'</button>';
+      var ib=document.getElementById('irMom');
+      if(ib) ib.onclick=function(){ MOMENTO=toca;
+        try{ sessionStorage.setItem('cierre_momento',MOMENTO); }catch(e){}
+        pintar(); window.scrollTo({top:0,behavior:'smooth'}); };
+    }
   }
 }
 
@@ -1272,7 +1364,7 @@ async function firmar(id,btn){
                   +'. Escógelo en «Queda a nombre de» si va para otra persona.</b>')));
     /* La caja promete «quién lo ejecuta Y para cuándo» pero solo exigia el nombre.
        No se bloquea por una fecha (a veces de verdad no hay), pero se dice. */
-    if(!/\b(hoy|mañana|manana|pasado|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|semana|mes|quincena|ahorita|ya|antes de|el d[ií]a|el \d|\d{1,2}\s*(de|\/)|en \d+)\b/i.test(quien))
+    if(!/\b(hoy|mañana|manana|pasado|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|semana|mes|quincena|ahorita|ya|noche|tarde|ma[ñn]ana|medioda|antes de|al rato|en cuanto|el d[ií]a|el \d|\d{1,2}\s*(de|\/)|en \d+)\b/i.test(quien))
       aviso += '<br><b style="color:var(--ambar)">No vi para cuándo. Si de veras no tiene fecha, dale otra vez; si no, agrégala.</b>';
     av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
       +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso+'</p>';
