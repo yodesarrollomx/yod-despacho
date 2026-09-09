@@ -144,7 +144,11 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .firma h3{font-family:var(--serif);font-size:19px;line-height:1.2;color:var(--ink);margin:5px 0 9px}
 .firma .por{font-size:13.5px;color:var(--ink2);line-height:1.5;border-left:2px solid var(--hair2);padding-left:11px;margin-bottom:10px}
 .firma .por b{color:var(--ink);font-weight:600}
-.firma .meta{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-bottom:12px}
+.firma .meta{font-family:var(--mono);font-size:11px;color:var(--ink2);margin-bottom:12px}
+/* una fecha que el motor dedujo, marcada: nunca se lee como dato del Sheet */
+#acuerdoDin .cmp{font-family:var(--sans);font-size:.42em;color:var(--dim);font-weight:400;letter-spacing:0}
+.estim{font-style:normal;color:var(--ambar);border:1px solid rgba(200,150,60,.34);
+  border-radius:6px;padding:1px 6px;font-size:9.5px;letter-spacing:.06em;margin-left:5px}
 .firma .acc{display:flex;gap:7px;flex-wrap:wrap}
 .bFirmar{background:var(--oro);color:#14100A;font-weight:600;font-size:12.5px;padding:9px 15px;border-radius:12px}
 .bOtro{background:transparent;border:1px solid var(--hair2);color:var(--ink2);font-size:12.5px;padding:9px 14px;border-radius:12px}
@@ -199,6 +203,8 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .etapa{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;padding:4px 9px;border-radius:8px;
   border:1px solid var(--hair2);color:var(--dim);white-space:nowrap}
 .etapa.f{color:var(--verde);border-color:#2C5138}
+/* la pildora es SOLO para la etapa del flujo; el dueño y los dias son texto */
+.etapa.quien{border:0;padding:4px 0;color:var(--faint);letter-spacing:.04em}
 /* ── el bloque que se copia ── */
 .wp{background:var(--panel2);border:1px solid var(--hair2);border-radius:16px;padding:15px 16px;margin-bottom:11px}
 .wp h4{font-family:var(--serif);font-size:18px;color:var(--ink);font-weight:400}
@@ -258,7 +264,9 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 
 /* el grave se ve grave; el aviso, aviso */
 .rzf.grave b{color:var(--rojo)}
-.rzf.grave .d{color:var(--rojo);font-weight:600}
+/* el grave se distingue de verdad: fondo y filo propios, no solo el mismo rojo */
+.rzf.grave{background:rgba(200,60,50,.07);border-left:3px solid var(--rojo);padding-left:11px}
+.rzf.grave .d{color:var(--rojo);font-weight:700;font-size:1.06em}
 /* la que espera a otro no es la que te espera a ti */
 .firma.vuelta{border-left:3px solid var(--azul)}
 .firma.vuelta .rama{color:var(--azul)}
@@ -459,7 +467,11 @@ function fechaReal(r){
 }
 
 function dinero(r){
-  var t=[r.actividad,r.observaciones,r.entregable,r.comentarios].join(' ');
+  /* NO se lee r.comentarios: ahi vive el historial '|||' de toda la vida de la
+     tarjeta, y una cifra vieja ya superada seguia contando como «en juego» hoy
+     por ser la mas grande del texto. El dinero sale de lo que la tarjeta DICE
+     que es, no de lo que alguna vez se comento. */
+  var t=[r.actividad,r.observaciones,r.entregable].join(' ');
   var re=/\$\s?(\d[\d,\.]*)\s?([kKmM]{1,2}|mil|millones)?/g, mx=0, txt='', m;
   while((m=re.exec(t))){
     var num=m[1].replace(/[.,]+$/,''), suf=(m[2]||'').toLowerCase();
@@ -726,16 +738,15 @@ function acuerdo(){
   if(MESA.length) l1.push('te toma unos '+min+' min');
   var aur=VIVAS.filter(function(r){ return /aurum/i.test(String(r.empresa||'')); });
   var firm=aur.filter(function(r){ return etapaDe(r)[1]; }).length;
-  l1.push('Aurum '+firm+' de 3 contratos');       /* visible en los tres momentos */
-  $('#acuerdoSub').textContent = l1.join(' · ');
-  var l2=[];
+  /* «Aurum X de 3» sale del hero: ya vive en su propia franja, y aqui competia
+     con el numero doloroso. Bajo el numero va UNA sola linea de contexto. */
   var nomFrias=Object.keys(CONGELADOS);
-  if(frias) l2.push(frias+' congeladas de '+nomFrias.join(' y ')+', fuera de la cuenta');
-  /* El riesgo ya se cuenta entero en su propia tarjeta. Aqui solo si es inminente
-     (una semana o menos), y en ambar para que no se lea como nota de rutina. */
+  if(frias) l1.push(frias+' congeladas de '+nomFrias.join(' y ')+', fuera de la cuenta');
+  $('#acuerdoSub').textContent = l1.join(' · ');
+  /* El riesgo solo si es inminente (una semana o menos), en ambar, y solo. */
   var r0=riesgoMasProximo(true);
-  $('#acuerdoSub2').innerHTML = l2.join(' · ')
-    + (r0 ? ((l2.length?' · ':'')+'<span style="color:var(--ambar)">'+esc(r0)+'</span>') : '');
+  $('#acuerdoSub2').innerHTML = r0 ? '<span style="color:var(--ambar)">'+esc(r0)+'</span>' : '';
+  $('#acuerdoSub2').hidden = !r0;
 
   /* El dinero: separado en lo que se cobra y lo que se paga (tipoDe ya existe). */
   var cobra=0,paga=0,suelto=0;
@@ -748,13 +759,28 @@ function acuerdo(){
   if(cobra) det.push(pesos(cobra)+' por cobrar');
   if(paga) det.push(pesos(paga)+' por pagar');
   if(suelto) det.push(pesos(suelto)+' sin saber si entra o sale');
+  /* El mismo trato honesto que las vencidas: cuanto habia la ultima vez. */
+  var dAyer = (ayer && ayer.d!=null && ayer.f!==hoyLocal()) ? ayer.d : null;
+  var dcomp = '';
+  if(dAyer!=null && suma!==dAyer)
+    dcomp = ' <span class="cmp">(' + (suma>dAyer?'+':'−') + esc(pesos(Math.abs(suma-dAyer)))
+          + ' que la última vez)</span>';
   $('#acuerdoDin').innerHTML = suma
-    ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(suma))+'</b>'
+    ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(suma))+'</b>'+dcomp
        +'<span class="q">'+(det.length?(det.join(' · ')+' — '):'')
        +'lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma, leído de sus palabras: no es una cifra del contador</span>')
     : '';
   $('#acuerdoDin').hidden = !suma;
-  try{ localStorage.setItem('cierre_vencidas',JSON.stringify({f:hoyLocal(),n:venc})); }catch(e){}
+  /* Se guarda tambien el dinero del dia, y se conservan los ultimos 7 dias
+     ABIERTOS (no dias del calendario): es un dato para comparar, no una racha
+     — no hay contador que se rompa ni premio por abrirlo diario. */
+  try{
+    var h=[]; try{ h=JSON.parse(localStorage.getItem('cierre_hist')||'[]')||[]; }catch(e2){}
+    h=h.filter(function(x){ return x && x.f!==hoyLocal(); });
+    h.push({f:hoyLocal(),n:venc,d:suma});
+    localStorage.setItem('cierre_hist',JSON.stringify(h.slice(-7)));
+    localStorage.setItem('cierre_vencidas',JSON.stringify({f:hoyLocal(),n:venc,d:suma}));
+  }catch(e){}
 }
 function riesgoMasProximo(soloInminente){
   /* «el mas proximo» es el mas proximo POR VENIR. Uno que ya paso y sigue en la
@@ -792,9 +818,15 @@ function armarMesa(){
   });
   MESA.sort(function(a,b){
     if(a.clase!==b.clase) return a.clase==='firmar'?-1:1;
+    /* El dinero pesa de verdad, no solo como desempate: una tarjeta de seis
+       cifras se firma antes que una de cero aunque sea tres dias mas nueva.
+       Se compara por tramos (0 / hasta 50k / hasta 500k / arriba) para que la
+       edad siga mandando entre tarjetas del mismo tamaño. */
+    var t=function(x){ var d=x.r._din||0; return d>=5e5?3:(d>=5e4?2:(d>0?1:0)); };
+    var dt=t(b)-t(a); if(dt) return dt;
     var dd=(dias(b.r._f)||0)-(dias(a.r._f)||0);
     if(dd) return dd;
-    return (b.r._din||0)-(a.r._din||0);   /* a igual edad, primero la mas cara */
+    return (b.r._din||0)-(a.r._din||0);
   });
 }
 function pintarMesa(){
@@ -809,8 +841,12 @@ function pintarMesa(){
       +'<h3>'+esc(String(r.actividad||'').slice(0,120))+'</h3>'
       +(que?('<p class="por"><b>'+(esVuelta?'Ya salió esto:':'Lo que decidiste:')+'</b> '+esc(que.slice(0,220))+'</p>'):'')
       +(r._dinTxt?('<div class="din">'+esc(r._dinTxt)+' <span>mencionado en esta tarjeta</span></div>'):'')
-      +'<div class="meta">'+esc(matricula(r,ra.sujeto))+' · '+esc(r.responsable||'sin dueño')
-        +(d!==null?(' · '+(esVuelta?('lleva '+d+' d esperando a '+esc(r.responsable||'alguien')):(fmtDias(d)+(d>0?' tarde':'')))):' · sin fecha')
+      /* La matricula (YD-CER-D003-MD-ALE) es jerga de control: vive en el
+         title, para poder buscarla, pero no se le lee encima al renglon. */
+      +'<div class="meta" title="'+esc(matricula(r,ra.sujeto))+'">'+esc(r.responsable||'sin dueño')
+        +(d!==null?(' · '+(esVuelta?('lleva '+d+' d esperando a '+esc(r.responsable||'alguien')):(fmtDias(d)+(d>0?' tarde':'')))
+            /* una fecha que YO deduje no se lee igual que una escrita en el Sheet */
+            +(r._como&&r._como!=='explicita'?' <i class="estim" title="'+esc(r._como)+'">fecha estimada</i>':'')):' · sin fecha')
         +(m.ap?(' · aplazada '+m.ap+(m.ap===1?' vez':' veces')):'')+'</div>'
       +'<div class="acc">'
         +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(esVuelta?'Cerrarla':'Firmar')+'</button>'
@@ -988,7 +1024,7 @@ function pintarAurum(){
     var e=etapaDe(r), d=dias(r._f);
     return '<div class="aurFila"><span class="etapa'+(e[1]?' f':'')+'">'+esc(e[0]).toUpperCase()+'</span>'
       +'<span class="t">'+esc(String(r.actividad||'').slice(0,90))+'</span>'
-      +'<span class="etapa">'+esc(r.responsable||'sin dueño')+(d!==null&&d>0?(' · '+d+' d'):'')+'</span></div>';
+      +'<span class="etapa quien">'+esc(r.responsable||'sin dueño')+(d!==null&&d>0?(' · '+d+' d'):'')+'</span></div>';
   }).join('') + '<div class="micEst" style="text-align:left;margin:11px 0 0">'
     +firm+' de 3 contratos · faltan '+Math.max(0,3-firm)+' antes del 28 de febrero'
     +'<br>La etapa la leo de las palabras de cada tarjeta, no de una columna: si alguna se ve mal, dímelo.</div>';
@@ -1152,8 +1188,12 @@ function opsPersonas(actual){
   var yo=String(actual||'').trim();
   var l=Object.keys(DICC.personas||{}).filter(function(n){ return (MAPA.no_son_sujeto||[]).indexOf(n)<0; });
   if(yo && l.indexOf(yo)<0) l.unshift(yo);
-  return '<option value="">— lo que diga el renglón —</option>'
-   + l.map(function(n){ return '<option'+(n===yo?' selected':'')+'>'+esc(n)+'</option>'; }).join('');
+  /* NUNCA nace con alguien escogido. Si naciera con el dueño de hoy puesto,
+     firmar() leeria ese valor y quienNombras() jamas correria: dictabas «que
+     Alma lo haga» y la tarjeta se quedaba a tu nombre sin decirte nada. Manda
+     lo que dictas; el desplegable solo esta para corregirlo. */
+  return '<option value="">— el que nombres al dictar —</option>'
+   + l.map(function(n){ return '<option>'+esc(n)+'</option>'; }).join('');
 }
 function quienNombras(txt){
   var t=String(txt||''), mejor='', pos=1e9;
@@ -1176,7 +1216,7 @@ async function firmar(id,btn){
   var caja=document.getElementById('qx_'+id);
   var quien=caja?String(caja.value||'').trim():'';
   if(!quien){
-    if(msj){ msj.className='smsg mal'; msj.textContent='Falta lo único que importa: quién lo ejecuta y para cuándo.'; }
+    if(msj){ msj.className='smsg mal'; msj.textContent='Escribe quién lo ejecuta y para cuándo. Sin eso no se firma.'; }
     if(caja) caja.focus();
     return;
   }
@@ -1211,20 +1251,29 @@ async function firmar(id,btn){
        dueño — que antes se escribia sin avisar. Y si no reconoci a nadie, se
        dice, para que el traspaso no falle en silencio. */
     var sel0=document.getElementById('qd_'+id);
-    var nd=(sel0?String(sel0.value||'').trim():'')||quienNombras(quien);
-    var duenoAhora=String(t.responsable||'').trim();
-    /* Si dictaste un nombre y el selector dice otro, gana el selector — pero se
-       dice antes de escribir, no despues de descubrirlo en el Sheet. */
+    var escogido=sel0?String(sel0.value||'').trim():'';
     var dicho=quienNombras(quien);
-    var choque = dicho && nd && dicho!==nd
-      ? '<b style="color:var(--ambar)">Dijiste «'+esc(dicho)+'» pero el selector dice «'+esc(nd)+'». Manda el selector.</b><br>'
+    var nd=escogido||dicho;                       /* manda lo dictado; el select corrige */
+    var duenoAhora=String(t.responsable||'').trim();
+    /* Si escogiste a alguien en el desplegable Y dictaste otro nombre, gana el
+       desplegable — pero se dice ANTES de escribir, con el verbo del control
+       que hay que mover, no como reproche. */
+    var choque = escogido && dicho && dicho!==escogido
+      ? '<b style="color:var(--ambar)">Escogiste a '+esc(escogido)+' en «Queda a nombre de»: eso manda sobre el «'
+        +esc(dicho)+'» que dictaste. Si querías a '+esc(dicho)+', regresa el desplegable a «el que nombres al dictar».</b><br>'
       : '';
     var aviso = choque + (nd && nd!==duenoAhora
-      ? '<b style="color:var(--verde)">También pasa a ser de '+esc(nd)+'.</b>'
+      ? '<b style="color:var(--verde)">Pasa a ser de '+esc(nd)+'.</b>'
       : (nd ? '<span>Sigue siendo de '+esc(nd)+'.</span>'
             : (duenoAhora==='Alejandro' || !duenoAhora
-                ? '<span>Sigue siendo tuya.</span>'
-                : '<b style="color:var(--ambar)">No reconocí a quién nombraste: sigue siendo de '+esc(duenoAhora)+'.</b>')));
+                ? '<b style="color:var(--ambar)">No nombraste a nadie: se queda tuya. Si va para alguien más, '
+                  +'escógelo en «Queda a nombre de» aquí abajo.</b>'
+                : '<b style="color:var(--ambar)">No reconocí a quién nombraste: sigue siendo de '+esc(duenoAhora)
+                  +'. Escógelo en «Queda a nombre de» si va para otra persona.</b>')));
+    /* La caja promete «quién lo ejecuta Y para cuándo» pero solo exigia el nombre.
+       No se bloquea por una fecha (a veces de verdad no hay), pero se dice. */
+    if(!/\b(hoy|mañana|manana|pasado|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|semana|mes|quincena|ahorita|ya|antes de|el d[ií]a|el \d|\d{1,2}\s*(de|\/)|en \d+)\b/i.test(quien))
+      aviso += '<br><b style="color:var(--ambar)">No vi para cuándo. Si de veras no tiene fecha, dale otra vez; si no, agrégala.</b>';
     av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
       +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso+'</p>';
     btn.dataset.confirmado='1'; btn.dataset.visto=quien;
@@ -1252,6 +1301,8 @@ async function firmar(id,btn){
     var patch={comentarios:nuevo};
     var sel=document.getElementById('qd_'+id);
     var elegido=sel?String(sel.value||'').trim():'';
+    /* Lo dictado manda; el desplegable solo sobreescribe cuando lo tocaste.
+       Al reves (como estaba) el traspaso NUNCA ocurria. */
     var nuevoDueno=elegido||quienNombras(quien);
     if(nuevoDueno && nuevoDueno!==String(actual.responsable||'').trim()) patch.responsable=nuevoDueno;
     var r=await llamar('update',{id:id,patch:patch});
