@@ -1250,6 +1250,7 @@ async function soltar(){
 }
 
 /* ── arranque ── */
+var _fallos=0;
 async function cargar(){
   var b=$('#banner');
   try{
@@ -1260,16 +1261,29 @@ async function cargar(){
     $('#viva').className='viva';
     var mias=VIVAS.filter(function(r){return r._mio;}).length;
     $('#estado').textContent=mias+' de '+n+' son tuyas · leído ahora mismo';
-    b.hidden=true;
+    b.hidden=true; _fallos=0;
     pintar();
     llenarSoltar();
   }catch(e){
     $('#viva').className='viva mal';
     $('#estado').textContent='no pude leer el tablero';
     b.hidden=false; b.className='aviso mal';
-    b.textContent = credencial()
-      ? ('El tablero no contestó: '+e.message+'. Vuelve a cargar en un momento.')
-      : 'Todavía no entras: el Portero pide tu acceso. En cuanto entres, este tablero se llena solo.';
+    if(!credencial()){
+      b.textContent='Todavía no entras: el Portero pide tu acceso. En cuanto entres, este tablero se llena solo.';
+      return;
+    }
+    /* El Apps Script parpadea de vez en cuando y contesta «liga» aunque la
+       credencial este bien. Antes la pantalla se quedaba muerta hasta que
+       alguien recargaba a mano; ahora lo reintenta dos veces y lo dice. */
+    _fallos=(_fallos||0)+1;
+    if(_fallos<=2){
+      b.textContent='El tablero no contestó ('+e.message+'). Lo intento otra vez en '+(_fallos*4)+' s…';
+      setTimeout(cargar,_fallos*4000);
+    }else{
+      b.textContent='El tablero lleva tres intentos sin contestar ('+e.message+'). '
+        +'Suele ser Google, no tú: espera un minuto y recarga. Nada de lo que escribiste se perdió.';
+      _fallos=0;
+    }
   }
 }
 document.addEventListener('DOMContentLoaded',function(){ var b=$('#sBtn'); if(b) b.addEventListener('click',soltar); });
