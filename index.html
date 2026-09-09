@@ -808,9 +808,11 @@ function marcador(){
   var hoy=hoyLocal();
   var hoyN=por[hoy]||0;
 
-  /* el record: el mejor dia de la casa, y cuando fue */
+  /* El record es el mejor dia ANTERIOR a hoy. Si contara hoy, hoy jamas podria
+     batirlo: cada cierre subiria el record al mismo tiempo que la cuenta, y
+     siempre diria «igualaste». Un record que se mueve contigo no es un record. */
   var record=0, cuandoRecord='';
-  dias.forEach(function(d){ if(por[d]>record){ record=por[d]; cuandoRecord=d; } });
+  dias.forEach(function(d){ if(d!==hoy && por[d]>record){ record=por[d]; cuandoRecord=d; } });
 
   /* la racha: dias SEGUIDOS con al menos un cierre, contando hacia atras desde
      hoy. Si hoy no has cerrado nada, la racha viva es la que traes de ayer:
