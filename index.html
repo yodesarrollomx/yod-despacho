@@ -269,6 +269,44 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .bLink{background:transparent;border:0;border-bottom:1px solid var(--oro);color:var(--oro);
   font:inherit;font-size:inherit;padding:0 0 1px;cursor:pointer}
 .bLink:hover{border-bottom-width:2px}
+/* ── el marcador ──
+   Se ve como el resto del tablero, no como un videojuego: mismos tonos, misma
+   tipografia. Lo que lo hace juego no es el brillo, es que hay un record que
+   batir y una racha que se puede romper — y los dos salen del Sheet. */
+#marcador{margin-top:14px}
+.mk{background:linear-gradient(160deg,#1B1710 0%,#141109 65%);border:1px solid var(--hair);
+  border-radius:20px;padding:20px 22px}
+.mkCab{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mkCab .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.19em;color:var(--oro2)}
+.mkOff{background:transparent;border:0;color:var(--mute);font-size:11.5px;
+  border-bottom:1px dotted var(--hair2);padding:0 0 1px;cursor:pointer}
+.mkOff:hover{color:var(--faint)}
+.mkOn{background:transparent;border:1px dashed var(--hair2);color:var(--faint);
+  font-size:12.5px;padding:8px 15px;border-radius:12px;margin-top:12px;cursor:pointer}
+.mkGrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:1px;background:var(--hair);
+  border:1px solid var(--hair);border-radius:14px;overflow:hidden}
+.mkC{background:#16130D;padding:14px 16px;display:flex;flex-direction:column;gap:5px}
+.mkC .e{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;color:var(--mute)}
+.mkC b{font-family:var(--serif);font-size:26px;line-height:1.06;color:var(--ink);font-weight:400}
+.mkC p{font-size:12px;line-height:1.5;color:var(--faint);margin:0}
+.mkMis b{color:var(--oro)}
+.mkMis.hecho b{color:var(--verde)}
+.barra{height:7px;background:#241E14;border-radius:4px;overflow:hidden;margin-top:7px}
+.barra i{display:block;height:100%;background:var(--oro2);border-radius:4px;
+  transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.barra.full i{background:var(--verde)}
+.mkMis.hecho .barra i{background:var(--verde)}
+.metas{margin-top:16px;padding-top:15px;border-top:1px solid var(--hair)}
+.metas .k{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;
+  color:var(--mute);margin-bottom:12px}
+.metaF{margin-bottom:13px}
+.metaT{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.metaT b{font-size:13px;color:var(--ink2);font-weight:500}
+.metaT span{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap}
+.metaQ{display:block;font-size:11.5px;color:var(--mute);margin-top:4px}
+@media (max-width:900px){ .mkGrid{grid-template-columns:1fr 1fr} }
+@media (prefers-reduced-motion:reduce){ .barra i{transition:none} }
+
 /* los ultimos dias: numeros con una barrita de apoyo, no una grafica */
 .hist{display:flex;align-items:flex-end;gap:12px;margin-top:14px;padding-top:13px;
   border-top:1px solid var(--hair2);flex-wrap:wrap}
@@ -335,6 +373,9 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <div class="din" id="acuerdoDin" hidden></div>
     <div class="hist" id="acuerdoHist" hidden></div>
   </section>
+
+  <div id="marcador" hidden></div>
+  <button class="mkOn" id="mkOn" type="button" hidden>volver a prender el marcador</button>
 
   <div class="moms" id="moms"></div>
   <p class="momAviso" id="momAviso"></p>
@@ -448,6 +489,8 @@ var MOMENTOS = [
 function momentoDeLaHora(){ var h=new Date().getHours(); return h<11?'arranque':(h<19?'firma':'cierre'); }
 /* El momento que eliges a mano sobrevive la recarga (dentro de la pestaña) y
    se avisa cuando no es el que toca por la hora, para que no se sienta roto. */
+/* El marcador se puede apagar y no vuelve a salir hasta que lo prendas. */
+var JUEGO = (function(){ try{ return localStorage.getItem('cierre_juego')!=='no'; }catch(e){ return true; } })();
 var MOMENTO = (function(){ try{ var m=sessionStorage.getItem('cierre_momento');
   return (m && ['arranque','firma','cierre'].indexOf(m)>=0) ? m : momentoDeLaHora(); }
   catch(e){ return momentoDeLaHora(); } })();
@@ -731,6 +774,171 @@ function construir(tasks){
 }
 
 /* ── pintar ── */
+/* ══════════════════ EL MARCADOR ══════════════════
+   Nada de esto se inventa ni se guarda aparte: sale de las 92 tarjetas que ya
+   estan cerradas en el Sheet, cada una con su fechaTerminado. Si Sayri cierra
+   algo, cuenta igual — es el marcador de la casa, no el tuyo solo.
+   Se apaga con el interruptor y no vuelve a aparecer. */
+function diaDe(v){
+  if(!v) return null;
+  var d=new Date(v); if(isNaN(d)) return null;
+  var z=function(n){ return (n<10?'0':'')+n; };
+  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+}
+function historialDeCierres(){
+  /* dia -> cuantas se cerraron ese dia, leido del Sheet */
+  var por={};
+  TAREAS.forEach(function(r){
+    if(String(r.archivada)==='true' || String(r.borrada)==='true') return;
+    var d=diaDe(r.fechaTerminado);
+    if(d) por[d]=(por[d]||0)+1;
+  });
+  return por;
+}
+function marcador(){
+  var por=historialDeCierres();
+  var dias=Object.keys(por).sort();
+  var hoy=hoyLocal();
+  var hoyN=por[hoy]||0;
+
+  /* el record: el mejor dia de la casa, y cuando fue */
+  var record=0, cuandoRecord='';
+  dias.forEach(function(d){ if(por[d]>record){ record=por[d]; cuandoRecord=d; } });
+
+  /* la racha: dias SEGUIDOS con al menos un cierre, contando hacia atras desde
+     hoy. Si hoy no has cerrado nada, la racha viva es la que traes de ayer:
+     no se rompe hasta que el dia se acaba sin cerrar nada. */
+  function menos(d,n){ var p=d.split('-'); var x=new Date(+p[0],+p[1]-1,+p[2]);
+    x.setDate(x.getDate()-n); var z=function(k){return (k<10?'0':'')+k;};
+    return x.getFullYear()+'-'+z(x.getMonth()+1)+'-'+z(x.getDate()); }
+  var racha=0, cursor=hoy;
+  if(!por[hoy]) cursor=menos(hoy,1);
+  while(por[cursor]){ racha++; cursor=menos(cursor,1); }
+
+  /* la semana: de lunes a hoy, contra la semana pasada */
+  var hd=new Date(hoy+'T12:00:00'), dow=(hd.getDay()+6)%7;
+  var lunes=menos(hoy,dow), lunesPasado=menos(lunes,7);
+  var estaSem=0, pasadaSem=0;
+  dias.forEach(function(d){
+    if(d>=lunes && d<=hoy) estaSem+=por[d];
+    else if(d>=lunesPasado && d<lunes) pasadaSem+=por[d];
+  });
+
+  /* el dinero que de verdad se cobro, leido de los sellos del Despacho */
+  var cobrado=0, cerradasDespacho=0;
+  TAREAS.forEach(function(r){
+    comentarios(r).forEach(function(c){
+      if(c.texto.indexOf('Ejecutado')<0) return;
+      cerradasDespacho++;
+      if(c.texto.indexOf('cobrada')>=0) cobrado+=(dinero(r)[0]||0);
+    });
+  });
+
+  return {hoy:hoyN, record:record, cuandoRecord:cuandoRecord, racha:racha,
+          estaSem:estaSem, pasadaSem:pasadaSem, totalCerradas:dias.reduce(function(a,d){return a+por[d];},0),
+          diasConCierre:dias.length, cobrado:cobrado, cerradasDespacho:cerradasDespacho, por:por};
+}
+/* Las cinco metas de la casa, con su avance real: cuantas de sus tarjetas ya
+   estan cerradas. Es el «nivel» de cada frente, medido con lo que hay. */
+function metasDeLaCasa(){
+  var m={};
+  TAREAS.forEach(function(r){
+    if(String(r.archivada)==='true' || String(r.borrada)==='true') return;
+    var k=DICC.metas[String(r.proyecto||'').trim()];
+    if(!k && sinac(String(r.proyecto||''))==='decisiones'){
+      var t=temaDecision(r); if(t) k=DICC.metas[t];
+    }
+    if(!k) return;
+    m[k]=m[k]||{hechas:0,total:0,vencidas:0,dinero:0};
+    m[k].total++;
+    if(r.estado==='Terminado' || r.estado==='Hecho') m[k].hechas++;
+    else {
+      var f=fechaReal(r)[0];
+      if(f && f<HOY && !congelado(r)) m[k].vencidas++;
+      m[k].dinero+=(dinero(r)[0]||0);
+    }
+  });
+  return m;
+}
+function pintarMarcador(){
+  var caja=$('#marcador'); if(!caja) return;
+  if(!JUEGO){ caja.hidden=true; return; }
+  caja.hidden=false;
+  var M=marcador(), MT=metasDeLaCasa();
+
+  /* LA MISIÓN DE HOY. Concreta, alcanzable y con una razón: no es un reto
+     inventado, es lo que de verdad tienes enfrente. */
+  var falta=Math.max(0, M.record-M.hoy);
+  var mision, porQue, listo=false;
+  if(M.hoy>M.record){ mision='Récord nuevo: '+M.hoy+'.'; porQue='Nunca se habían cerrado tantas en un día. El anterior era '+M.record+'.'; listo=true; }
+  else if(M.hoy===M.record && M.record>0){ mision='Igualaste tu récord: '+M.record+'.'; porQue='Una más y es nuevo récord.'; listo=true; }
+  else if(!MESA.length){ mision='La mesa está limpia.'; porQue='Nada que cerrar hoy. Suelta lo que traigas en la charola.'; listo=true; }
+  else {
+    var meta=Math.min(MESA.length, M.record||3);
+    mision='Cierra '+meta+' hoy';
+    porQue = M.record
+      ? ('Tu mejor día fueron '+M.record+', el '+fechaBonita(M.cuandoRecord)+'. Llevas '+M.hoy+'.')
+      : ('Hay '+MESA.length+' esperando tu firma. Llevas '+M.hoy+'.');
+  }
+  var pct=Math.min(100, M.record? Math.round(M.hoy/M.record*100) : (MESA.length?Math.round(M.hoy/(M.hoy+MESA.length)*100):100));
+
+  var h='<div class="mk"><div class="mkCab">'
+    +'<span class="k">EL MARCADOR DE LA CASA</span>'
+    +'<button class="mkOff" id="mkOff" type="button" title="Se apaga y no vuelve a salir">apagar</button></div>'
+    +'<div class="mkGrid">';
+
+  /* 1 · la misión */
+  h+='<div class="mkC mkMis'+(listo?' hecho':'')+'"><span class="e">HOY</span>'
+    +'<b>'+esc(mision)+'</b><p>'+esc(porQue)+'</p>'
+    +'<div class="barra"><i style="width:'+pct+'%"></i></div></div>';
+
+  /* 2 · la racha, con la verdad de qué la rompe */
+  var rTxt = M.racha>1 ? (M.racha+' días seguidos') : (M.racha===1?'1 día':'sin racha');
+  h+='<div class="mkC"><span class="e">RACHA</span><b>'+esc(rTxt)+'</b>'
+    +'<p>'+(M.racha
+        ? ('Días seguidos en que la casa cerró algo. Se corta si hoy termina sin cerrar ni una.')
+        : ('Cierra una hoy y empieza. Cuenta lo que cierre cualquiera, no solo tú.'))+'</p></div>';
+
+  /* 3 · el récord */
+  h+='<div class="mkC"><span class="e">RÉCORD DE UN DÍA</span><b>'+M.record+'</b>'
+    +'<p>'+(M.record? ('El '+esc(fechaBonita(M.cuandoRecord))+'. En total llevan '+M.totalCerradas
+        +' cerradas en '+M.diasConCierre+' días distintos.') : 'Todavía no hay.')+'</p></div>';
+
+  /* 4 · la semana contra la pasada */
+  var dS=M.estaSem-M.pasadaSem;
+  h+='<div class="mkC"><span class="e">ESTA SEMANA</span><b>'+M.estaSem+'</b>'
+    +'<p>'+(M.pasadaSem
+        ? ('La semana pasada '+M.pasadaSem+'. '+(dS>0?('Vas '+dS+' arriba.'):(dS<0?('Vas '+(-dS)+' abajo.'):'Van iguales.')))
+        : 'Es la primera semana con cuenta.')+'</p></div>';
+
+  h+='</div>';
+
+  /* 5 · las cinco metas como niveles reales */
+  var ORD=['MA','MB','MC','MD','ME'];
+  var filas=ORD.filter(function(k){ return MT[k] && MT[k].total; }).map(function(k){
+    var x=MT[k], pc=Math.round(x.hechas/x.total*100);
+    return '<div class="metaF"><div class="metaT"><b>'+esc(metaCorta(k))+'</b>'
+      +'<span>'+x.hechas+' de '+x.total+'</span></div>'
+      +'<div class="barra'+(pc>=100?' full':'')+'"><i style="width:'+pc+'%"></i></div>'
+      +'<span class="metaQ">'+(x.vencidas?(x.vencidas+(x.vencidas===1?' vencida':' vencidas')):'nada vencido')
+      +(x.dinero?(' · '+esc(pesos(x.dinero))+' en juego'):'')+'</span></div>';
+  }).join('');
+  if(filas) h+='<div class="metas"><span class="k">LAS CINCO METAS DE LA CASA · lo cerrado de cada una</span>'+filas+'</div>';
+
+  h+='</div>';
+  caja.innerHTML=h;
+  var off=document.getElementById('mkOff');
+  if(off) off.onclick=function(){
+    JUEGO=false; try{ localStorage.setItem('cierre_juego','no'); }catch(e){}
+    caja.hidden=true; var b=document.getElementById('mkOn'); if(b) b.hidden=false;
+  };
+}
+function fechaBonita(d){
+  if(!d) return '';
+  var p=String(d).split('-'), mes=['enero','febrero','marzo','abril','mayo','junio','julio',
+    'agosto','septiembre','octubre','noviembre','diciembre'];
+  return (+p[2])+' de '+mes[(+p[1])-1];
+}
 function riesgos(){
   var caja=$('#riesgos'); if(!caja) return;
   var R=(RIESGOS||[]).map(function(x){
@@ -1380,7 +1588,7 @@ function pintar(){
   armarMesa();
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
-  acuerdo(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
+  acuerdo(); pintarMarcador(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
   pintarAurum(); pintarMandar(); pintarPendiente(); pintarMomentos();
   var f=new Date();
   $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
@@ -1826,7 +2034,13 @@ async function cargar(){
     if(_fallos<=esperas.length) setTimeout(cargar,esperas[_fallos-1]*1000);
   }
 }
-document.addEventListener('DOMContentLoaded',function(){ var b=$('#sBtn'); if(b) b.addEventListener('click',soltar); });
+document.addEventListener('DOMContentLoaded',function(){
+  var b=$('#sBtn'); if(b) b.addEventListener('click',soltar);
+  var on=$('#mkOn');
+  if(on){ on.hidden=JUEGO;
+    on.onclick=function(){ JUEGO=true; try{ localStorage.setItem('cierre_juego','si'); }catch(e){}
+      on.hidden=true; pintarMarcador(); }; }
+});
 (function(){
   var h=HOY.getHours?new Date().getHours():9;
   $('#saludo').textContent=(h<12?'Buenos días':(h<19?'Buenas tardes':'Buenas noches'))+', Alejandro';
