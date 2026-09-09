@@ -71,12 +71,6 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .soltar select option{background:var(--panel);color:var(--ink)}
 .smsg{font-family:var(--mono);font-size:10.5px;color:var(--faint);width:100%}
 .smsg.mal{color:var(--rojo)}.smsg.ok{color:var(--verde)}
-/* carriles + fichas */
- box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 16px 34px rgba(0,0,0,.3);transition:border-color .15s,transform .15s}
-.pins{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
-/* hoja de detalle */
- box-shadow:0 -18px 44px rgba(0,0,0,.55);display:none;flex-direction:column;overflow:hidden}
-.hX{width:34px;height:34px;border-radius:12px;background:var(--panel3);display:flex;align-items:center;justify-content:center;flex:none}
 .bFirmar{background:var(--oro);color:#14100A;font-weight:600;font-size:12.5px;padding:9px 14px;border-radius:12px}
 .bFirmar[disabled]{opacity:.45;cursor:default}
 /* focos */
@@ -94,8 +88,7 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 @media(max-width:900px){.fichas{grid-template-columns:1fr}.hStats{grid-template-columns:repeat(2,1fr)}}
 
 /* Anclaje de tema. portero.js inyecta su hoja DESPUES de esta y en claro
-   repinta .hero (con !important) y .pie. Aqui vuelven al oscuro aprobado. */
-html[data-tema][data-tema] .hero{background:linear-gradient(160deg,#221C13 0%,#17140F 62%)!important}
+   repinta el fondo, la tinta y .pie. Aqui vuelven al oscuro aprobado. */
 html[data-tema][data-tema] .pie{background:none}
 /* El shell de YOD OS pinta su lienzo claro (.yod-canvas{background:#f6f3ed})
    y su tinta oscura (.yod-shell{color:var(--ytext)}) porque los demas
@@ -248,7 +241,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .sal .h,.firma .meta,.micEst{font-size:11.5px}
 /* piso de 11.5px para TODO lo informativo: a las nueve de la noche, cansado,
    9.5px en gris no se lee. Y el pie pasa de --mute (2.7:1) a --faint (5.2:1). */
-.etapa,.firma .rama,.ramaT,.hoja2 .cu,.hoja2 .cuD,.acuerdo .k,.acuerdo .din .k{font-size:11.5px}
+.etapa,.firma .rama,.ramaT,.hoja2 .cu,.hoja2 .cuD,.acuerdo .k,.acuerdo .din .k,.viva span,.mom span{font-size:11.5px}
 .pie{font-size:11.5px;color:var(--faint)}
 .wp .q{font-size:12.5px}
 
@@ -262,7 +255,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 <body>
 <div class="top"><div class="topin">
   <span class="marca">El Despacho</span>
-  <span class="viva" id="viva"><span class="p"></span><span id="estado">leyendo tu tablero…</span></span>
+  <span class="viva" id="viva"><span class="p"></span><span id="estado">conectando…</span></span>
   <span class="yo">AP</span>
 </div></div>
 
@@ -723,10 +716,13 @@ function acuerdo(){
   try{ localStorage.setItem('cierre_vencidas',JSON.stringify({f:hoyLocal(),n:venc})); }catch(e){}
 }
 function riesgoMasProximo(){
-  var R=(RIESGOS||[]).map(function(x){
+  /* «el mas proximo» es el mas proximo POR VENIR. Uno que ya paso y sigue en la
+     lista es un aviso viejo, no una alarma: se dice aparte. */
+  var todos=(RIESGOS||[]).map(function(x){
     var p=String(x.fecha).split('-'); var f=new Date(+p[0],+p[1]-1,+p[2]);
     return {t:x.titulo,d:Math.round((f-HOY)/86400000)};
-  }).sort(function(a,b){ return a.d-b.d; })[0];
+  }).sort(function(a,b){ return a.d-b.d; });
+  var R=todos.filter(function(x){ return x.d>=0; })[0] || todos[todos.length-1];
   if(!R) return '';
   return (R.d<0?('hace '+(-R.d)+' d'):(R.d===0?'HOY':('en '+R.d+' d')))+': '+R.t;
 }
@@ -774,7 +770,7 @@ function pintarMesa(){
         +(d!==null?(' · '+(esVuelta?('lleva '+d+' d esperando a '+esc(r.responsable||'alguien')):(fmtDias(d)+(d>0?' tarde':'')))):' · sin fecha')
         +(m.ap?(' · aplazada '+m.ap+(m.ap===1?' vez':' veces')):'')+'</div>'
       +'<div class="acc">'
-        +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(esVuelta?'Darla por cerrada':'Firmar')+'</button>'
+        +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(esVuelta?'Cerrarla':'Firmar')+'</button>'
         +'<button class="bOtro" data-cambiar="'+esc(r.id)+'">Cambiar</button>'
         +'<button class="bOtro" data-despues="'+esc(r.id)+'">Después</button>'
         +'<span class="smsg" id="fm_'+esc(r.id)+'"></span>'
@@ -804,7 +800,7 @@ function pintarMesa(){
     cj.classList.remove('on');
     var av=cj.querySelector('.confirma'); if(av) av.remove();
     var bf=c.querySelector('[data-firmarya="'+id+'"]');
-    if(bf){ bf.dataset.confirmado=''; bf.textContent=bf.dataset.etiqueta||'Firmar'; }
+    if(bf){ bf.dataset.confirmado=''; bf.dataset.visto=''; bf.textContent=bf.dataset.etiqueta||'Firmar'; }
     var m=document.getElementById('fm_'+id); if(m) m.textContent='';
   }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-firmarya]'),function(b){ b.onclick=function(){ firmar(b.dataset.firmarya,b); }; });
@@ -909,7 +905,9 @@ function pintarMomentos(){
 var ETAPAS=[['prospect','Prospecto'],['contact','Contacto'],['propuesta','Propuesta'],['firmado','Firmado']];
 function etapaDe(r){
   var t=(String(r.actividad||'')+' '+String(r.estado||'')+' '+String(r.comentarios||'')).toLowerCase();
-  if(/firmad|contrato firm|anticipo/.test(t)) return ['Firmado',true];
+  /* «anticipo» salia de aqui: «pendiente de anticipo» se contaba como contrato
+     firmado y le subia el marcador de Aurum sin que nadie hubiera firmado nada. */
+  if(/firmad|contrato firm/.test(t)) return ['Firmado',true];
   if(/propuesta|cotiza|honorar|presupuesto/.test(t)) return ['Propuesta',false];
   if(/reuni|llamada|cita|visita/.test(t)) return ['Contacto',false];
   return ['Prospecto',false];
@@ -950,7 +948,8 @@ function pintarMandar(){
     var hh=new Date().getHours();
     var sal = hh<12?'buenos días':(hh<19?'buenas tardes':'buenas noches');
     var t='Hola '+n+', '+sal+'. Te paso lo que traigo pendiente de tu lado:\n\n'
-      + l.slice(0,5).map(function(x,k){ return (k+1)+'. '+String(x.r.actividad||'').slice(0,110)+' — lleva '+x.d+' días.'; }).join('\n')
+      + l.slice(0,5).map(function(x,k){ return (k+1)+'. '+String(x.r.actividad||'').slice(0,110)
+          +' — lleva '+x.d+' días'+(x.r._dinTxt?(' · '+x.r._dinTxt):'')+'.'; }).join('\n')
       + '\n\n¿En qué punto va cada uno? Si algo ya no aplica, dímelo y lo cierro.';
     return '<div class="wp"><h4>'+esc(n)+'</h4>'
       +'<p class="q">'+l.length+(l.length===1?' pendiente vencido':' pendientes vencidos')+' · el más viejo lleva '+l[0].d+' días</p>'
@@ -1094,10 +1093,23 @@ async function firmar(id,btn){
     if(caja) caja.focus();
     return;
   }
-  var texto='🤖 Ejecutado (Despacho, '+hoy+'): firmada por Alejandro. Lo ejecuta: '+quien;
+  /* El boton trae su etiqueta en data-etiqueta: es la fuente. Antes se leia el
+     textContent buscando «cerrada» y nunca coincidia (el boton dice «Cerrarla»),
+     asi que el Sheet decia «firmada» hasta en lo que se estaba cerrando. */
+  var esCierre = btn.dataset.etiqueta==='Cerrarla';
+  var verbo = esCierre?'cerrada':'firmada';
+  var texto='🤖 Ejecutado (Despacho, '+hoy+'): '+verbo+' por Alejandro. Lo ejecuta: '+quien;
   /* Antes aqui saltaba el confirm() gris del navegador, con su voz de sistema,
      justo en el clic que mas deberia sentirse tuyo. Ahora la confirmacion vive
      en la misma caja, con las mismas palabras del resto de la pantalla. */
+  /* Si editas el renglon DESPUES de ver la vista previa, lo que se escribe ya no
+     seria lo que la caja te enseño. Se guarda lo previsualizado y, si cambio, se
+     vuelve a enseñar en vez de escribir a ciegas. */
+  if(btn.dataset.confirmado==='1' && btn.dataset.visto!==quien){
+    btn.dataset.confirmado='';
+    var m1=document.getElementById('fm_'+id);
+    if(m1){ m1.className='smsg'; m1.textContent='Cambiaste el renglón: míralo otra vez antes de firmar.'; }
+  }
   if(btn.dataset.confirmado!=='1'){
     var cj=document.getElementById('qn_'+id);
     var av=cj.querySelector('.confirma');
@@ -1110,10 +1122,13 @@ async function firmar(id,btn){
     var aviso = nd && nd!==duenoAhora
       ? '<b style="color:var(--verde)">También pasa a ser de '+esc(nd)+'.</b>'
       : (nd ? '<span>Sigue siendo de '+esc(nd)+'.</span>'
-            : '<b style="color:var(--ambar)">No reconocí a quién nombraste: la tarjeta sigue siendo tuya.</b>');
+            : (duenoAhora==='Alejandro' || !duenoAhora
+                ? '<span>Sigue siendo tuya.</span>'
+                : '<b style="color:var(--ambar)">No reconocí a quién nombraste: sigue siendo de '+esc(duenoAhora)+'.</b>'));
     av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
       +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso+'</p>';
-    btn.dataset.confirmado='1'; btn.textContent=(String(btn.textContent).indexOf('cerrada')>=0?'Sí, cerrarla':'Sí, firmar');
+    btn.dataset.confirmado='1'; btn.dataset.visto=quien;
+    btn.textContent=esCierre?'Sí, cerrarla':'Sí, firmar';
     return;
   }
   btn.disabled=true; btn.textContent='leyendo la tarjeta…';
@@ -1127,7 +1142,7 @@ async function firmar(id,btn){
     var actual=(fresco.tasks||[]).filter(function(x){return x.id===id;})[0];
     if(!actual) throw new Error('esa tarjeta ya no esta en el tablero');
     var prev=String(actual.comentarios||'');
-    if(prev.indexOf('Ejecutado')>=0) throw new Error('ya estaba firmada desde otra pantalla');
+    if(prev.indexOf('Ejecutado')>=0) throw new Error('ya la '+(esCierre?'cerraron':'firmaron')+' desde otra pantalla');
     var linea='Claudet~'+hoy+'~'+texto;
     var nuevo=prev? (prev+'|||'+linea) : linea;
     btn.textContent='escribiendo…';
@@ -1139,12 +1154,12 @@ async function firmar(id,btn){
     if(nuevoDueno && nuevoDueno!==String(actual.responsable||'').trim()) patch.responsable=nuevoDueno;
     var r=await llamar('update',{id:id,patch:patch});
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
-    btn.textContent='firmada ✓';
+    btn.textContent=esCierre?'cerrada ✓':'firmada ✓';
     if(msj){ msj.className='smsg ok';
-      msj.textContent='firmada'+(nuevoDueno?(' · ahora es de '+nuevoDueno):'')+' · quedó escrita en la tarjeta'; }
+      msj.textContent=verbo+(nuevoDueno?(' · ahora es de '+nuevoDueno):'')+' · quedó escrita en la tarjeta'; }
     await cargar();       /* la mesa se rehace con lo que de verdad quedo escrito */
   }catch(e){
-    btn.disabled=false; btn.textContent='Firmar'; btn.dataset.confirmado='';
+    btn.disabled=false; btn.textContent=btn.dataset.etiqueta||'Firmar'; btn.dataset.confirmado='';
     if(msj){ msj.className='smsg mal'; msj.textContent='No se pudo: '+e.message+'. No se escribió nada.'; }
   }
 }
