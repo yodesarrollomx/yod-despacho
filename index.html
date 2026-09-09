@@ -26,7 +26,6 @@
 }
 *{box-sizing:border-box;margin:0}
 /* el shell del OS trae su propio CSS global: aqui reclamamos lo nuestro */
-.w svg,.hoja svg{max-width:none}
 .w h1,.w h2,.w h3{color:var(--ink)}
 html,body{background:var(--bg)}
 body{color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
@@ -52,15 +51,6 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .hola{padding:26px 0 4px}
 .hola .d{font-size:13.5px;color:var(--dim)}
 .hola h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,40px);line-height:1.05;margin-top:2px}
-.hero{margin-top:16px;background:linear-gradient(160deg,#221C13 0%,#17140F 62%);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:18px}
-.heroTop{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.heroTop .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--oro)}
-.heroTop .n{font-family:var(--serif);font-size:clamp(42px,7vw,58px);line-height:.92}
-.heroTop .n small{font-size:22px;color:var(--dim)}
-.barras{display:flex;gap:7px}
-.barras i{flex:1;height:5px;border-radius:3px;background:var(--panel3);display:block}
-.heroPie{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.heroPie p{font-size:13.5px;color:var(--dim)}
 .bp{background:var(--oro);color:#14100A;font-weight:600;font-size:14px;padding:12px 20px;border-radius:16px;display:inline-flex;align-items:center;gap:9px}
 .bp[disabled]{opacity:.45;cursor:default}
 .bo{border:1px solid var(--hair2);color:var(--ink2);font-size:13.5px;padding:11px 16px;border-radius:16px}
@@ -82,67 +72,13 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 .smsg{font-family:var(--mono);font-size:10.5px;color:var(--faint);width:100%}
 .smsg.mal{color:var(--rojo)}.smsg.ok{color:var(--verde)}
 /* carriles + fichas */
-.lane{margin-top:26px}
-.laneCab{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
-.laneCab h2{font-family:var(--serif);font-weight:400;font-size:24px;color:var(--ink)}
-.laneCab span{font-size:12.5px;color:var(--faint)}
-.laneCab .cola{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
-.fichas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.ficha{background:linear-gradient(180deg,#151109 0%,#110E08 100%);border:1px solid var(--hair);border-radius:20px;padding:17px;display:flex;flex-direction:column;gap:14px;width:100%;
  box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 16px 34px rgba(0,0,0,.3);transition:border-color .15s,transform .15s}
-.ficha:hover{border-color:var(--hair2);transform:translateY(-2px)}
-.ficha.hot{border-color:#4A2A24}
-.ficha.sel{border-color:var(--oro)}
-.fCab{display:flex;gap:12px;align-items:flex-start}
-.fCab svg{width:52px;height:52px;border-radius:12px;flex:none;display:block}
-.fCab .t{min-width:0;display:flex;flex-direction:column;gap:4px}
-.fCab h3{font-family:var(--serif);font-weight:400;font-size:21px;line-height:1.1}
-.fCab .m{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--oro)}
-.marcas{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #1F1A11;padding-top:12px}
-.mrc{display:flex;flex-direction:column;gap:3px}
-.mrc b{font-family:var(--mono);font-size:19px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
-.mrc b.al{color:var(--rojo)}.mrc b.am{color:var(--ambar)}.mrc b.na{color:var(--faint);font-size:13px}
-.mrc b.or{color:var(--oro);font-size:15px}
-.mrc span{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint)}
-.riel{position:relative;height:4px;background:#1F1A11;border-radius:2px}
-.riel .zona{position:absolute;left:47%;right:0;top:0;bottom:0;border-radius:0 2px 2px 0}
-.riel .pt{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%}
 .pins{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
-.pin{font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:3px 8px;border:1px solid;border-radius:8px}
-.pin.d{color:var(--rojo);border-color:var(--rojo);background:var(--rojoS)}
-.pin.v{color:var(--ambar);border-color:#4A3C1E}
-.pin.e{color:var(--azul);border-color:#2A3A4A;background:#121820}
-.pin.m{color:var(--oro);border-color:var(--hair2)}
-.limpio{border:1px dashed var(--hair2);border-radius:20px;padding:20px;display:flex;align-items:center;gap:12px;color:var(--faint);font-size:13.5px}
-.limpio i{width:8px;height:8px;border-radius:50%;background:var(--verde);display:block;flex:none}
 /* hoja de detalle */
-.velo{position:fixed;inset:0;background:rgba(6,5,4,.6);z-index:40;display:none}
-.velo.on{display:block}
-.hoja{position:fixed;left:0;right:0;bottom:0;max-height:88vh;background:#100E0A;border-radius:28px 28px 0 0;z-index:50;
  box-shadow:0 -18px 44px rgba(0,0,0,.55);display:none;flex-direction:column;overflow:hidden}
-.hoja.on{display:flex}
-.grab{display:flex;justify-content:center;padding:11px 0 4px}
-.grab i{width:38px;height:4px;border-radius:3px;background:#2C2519;display:block}
-.hCab{padding:8px 22px 16px;display:flex;gap:14px;align-items:flex-start;max-width:1180px;margin:0 auto;width:100%}
-.hCab svg{width:56px;height:56px;border-radius:14px;flex:none;display:block}
-.hCab .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
-.hCab h3{font-family:var(--serif);font-weight:400;font-size:28px;line-height:1.05}
-.hCab .m{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--oro)}
 .hX{width:34px;height:34px;border-radius:12px;background:var(--panel3);display:flex;align-items:center;justify-content:center;flex:none}
-.hStats{padding:0 22px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:1180px;margin:0 auto;width:100%}
-.hStats div{background:var(--panel);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:3px}
-.hStats b{font-family:var(--mono);font-size:20px;font-weight:600;line-height:1}
-.hStats span{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--faint)}
-.hLista{flex:1;overflow:auto;padding:0 22px 8px;max-width:1180px;margin:0 auto;width:100%}
-.row{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #1C1811}
-.row .b{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:none}
-.row .c{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.row .c b{font-size:14.5px;font-weight:400}
-.row .c .mm{font-family:var(--mono);font-size:10px;color:var(--faint)}
-.row .ac{flex:none}
 .bFirmar{background:var(--oro);color:#14100A;font-weight:600;font-size:12.5px;padding:9px 14px;border-radius:12px}
 .bFirmar[disabled]{opacity:.45;cursor:default}
-.hPie{padding:14px 22px 26px;border-top:1px solid #1C1811;font-family:var(--mono);font-size:10px;color:var(--faint);max-width:1180px;margin:0 auto;width:100%}
 /* focos */
 .focos{margin-top:34px}
 .focos h2{font-family:var(--serif);font-weight:400;font-size:24px;margin-bottom:12px;color:var(--ink)}
@@ -284,7 +220,8 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* ── lo que se calculaba y no se veia: el dinero ── */
 .acuerdo .din{display:flex;flex-direction:column;gap:2px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hair2)}
 .acuerdo .din .k{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--oro)}
-.acuerdo .din b{font-family:var(--serif);font-size:32px;color:var(--oro2);font-weight:400;line-height:1.1}
+/* 19px, no 32: el dinero acompaña al número doloroso, no compite con él. */
+.acuerdo .din b{font-family:var(--serif);font-size:19px;color:var(--oro2);font-weight:400;line-height:1.2}
 .acuerdo .din .q{font-size:12.5px;color:var(--dim)}
 .firma .din{font-family:var(--serif);font-size:20px;color:var(--oro2);margin-bottom:8px}
 .firma .din span{font-family:var(--sans);font-size:11.5px;color:var(--faint)}
@@ -309,7 +246,16 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 /* ── legibilidad: nada informativo por debajo de 11.5px ── */
 .zona>.sub,.aurum .sub{font-size:12.5px;color:var(--faint)}
 .sal .h,.firma .meta,.micEst{font-size:11.5px}
+/* piso de 11.5px para TODO lo informativo: a las nueve de la noche, cansado,
+   9.5px en gris no se lee. Y el pie pasa de --mute (2.7:1) a --faint (5.2:1). */
+.etapa,.firma .rama,.ramaT,.hoja2 .cu,.hoja2 .cuD,.acuerdo .k,.acuerdo .din .k{font-size:11.5px}
+.pie{font-size:11.5px;color:var(--faint)}
 .wp .q{font-size:12.5px}
+
+.momAviso{font-size:12px;color:var(--ambar);margin-top:8px}
+.momAviso:empty{display:none}
+.confirma .dueno{margin-top:8px;font-size:12.5px;color:var(--dim)}
+.acuerdo .sub+.sub{margin-top:3px}
 
 </style>
 </head>
@@ -327,14 +273,16 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   </div>
 
   <!-- 1 · EL ACUERDO DEL DÍA: lo único que importa hoy -->
-  <section class="acuerdo" id="acuerdo" hidden>
+  <section class="acuerdo" id="acuerdo">
     <div class="k">EL ACUERDO DEL DÍA</div>
-    <div class="n" id="acuerdoN">—</div>
-    <p class="sub" id="acuerdoSub">—</p>
+    <div class="n" id="acuerdoN">leyendo tu tablero…</div>
+    <p class="sub" id="acuerdoSub"></p>
+    <p class="sub" id="acuerdoSub2"></p>
     <div class="din" id="acuerdoDin" hidden></div>
   </section>
 
   <div class="moms" id="moms"></div>
+  <p class="momAviso" id="momAviso"></p>
 
   <div class="aviso" id="banner" hidden></div>
 
@@ -413,8 +361,6 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   <p class="pie">LEE Y ESCRIBE EL MISMO SHEET DE SIEMPRE, POR EL APPS SCRIPT DEL TABLERO · EL PORTERO DECIDE QUIÉN ENTRA · NADA VIVE FUERA DEL SISTEMA</p>
 </div>
 
-<div class="velo" id="velo"></div>
-<div class="hoja" id="hoja"></div>
 
 <script>
 /* ─────────────────────────────────────────────────────────────
@@ -444,7 +390,11 @@ var MOMENTOS = [
   ['cierre','Cierre','9 de la noche · qué se movió y qué mandas']
 ];
 function momentoDeLaHora(){ var h=new Date().getHours(); return h<11?'arranque':(h<19?'firma':'cierre'); }
-var MOMENTO = momentoDeLaHora();
+/* El momento que eliges a mano sobrevive la recarga (dentro de la pestaña) y
+   se avisa cuando no es el que toca por la hora, para que no se sienta roto. */
+var MOMENTO = (function(){ try{ var m=sessionStorage.getItem('cierre_momento');
+  return (m && ['arranque','firma','cierre'].indexOf(m)>=0) ? m : momentoDeLaHora(); }
+  catch(e){ return momentoDeLaHora(); } })();
 function congelado(r){ return !!CONGELADOS[String(r.proyecto||'').trim()]; }
 
 var CARRILES = [
@@ -641,12 +591,19 @@ function construir(tasks){
   var standby=viv.filter(function(r){ return !r._f && r.estado==='En standby'; });
   var decs=viv.filter(function(r){ return r._dec; }).length;
   var esps=viv.filter(function(r){ return r._esp; }).length;
-  var vis=0; FILAS.forEach(function(f){ vis+=f.casillas.length; });
+  var vis=0, enCasilla={};
+  FILAS.forEach(function(f){ vis+=f.casillas.length;
+    f.casillas.forEach(function(c){ c.tarjetas.forEach(function(t){ enCasilla[t.id]=1; }); }); });
+  var sinCarril=viv.filter(function(r){ return !enCasilla[r.id]; });
   var limpios=FILAS.filter(function(f){ return !f.casillas.length; }).map(function(f){ return f.nombre; });
   var colas=FILAS.filter(function(f){ return f.cola; }).map(function(f){ return f.nombre+' '+f.cola; }).join(' · ');
   FOCOS=[
-    {ok:true, t:'toda tarjeta viva tiene carril', d:'las '+viv.length+' reparten'},
-    {ok:true, t:'cada renglón enseña su #1 o dice limpio', d:limpios.length?('limpios: '+limpios.join(', ')):'los cinco con contenido'},
+    /* Antes estos dos decian ok:true fijo — afirmaban sin comprobar nada.
+       Ahora se cuenta de verdad cuantas tarjetas cayeron en algun carril. */
+    {ok:!sinCarril.length, t:'toda tarjeta viva tiene carril',
+     d:sinCarril.length?(sinCarril.length+' se quedaron fuera de los cinco carriles'):('las '+viv.length+' reparten')},
+    {ok:limpios.length<CARRILES.length, t:'cada renglón enseña su #1 o dice limpio',
+     d:limpios.length?('limpios: '+limpios.join(', ')):'los cinco con contenido'},
     {ok:true, t:'lo que firmas se escribe en el tablero', d:'por el mismo Apps Script del board, con tu sesión del Portero'},
     {ok:true, t:'la cola de cada renglón está a la vista', d:colas||'sin cola'},
     {ok:true, t:'una sola bandeja', d:'este tablero lee y escribe el Sheet del board: no hay copia aparte'},
@@ -667,7 +624,7 @@ function riesgos(){
   }).filter(function(x){ return x.dias<=75; }).sort(function(a,b){ return a.dias-b.dias; });
   if(!R.length){ caja.innerHTML=''; return; }
   var h='<div class="rz"><h2>Lo que puede tumbar el sistema</h2>'
-    +'<p class="rzq">Estas cuatro fechas las llevo yo a mano — no salen del tablero. Si algo ya se resolvió, dímelo y lo quito.</p>';
+    +'<p class="rzq">Estas '+R.length+(R.length===1?' fecha la llevo':' fechas las llevo')+' yo a mano — no salen del tablero. Si algo ya se resolvió, dímelo y lo quito.</p>';
   R.forEach(function(x){
     var cuando = x.dias<0 ? ('hace '+(-x.dias)+' d') : (x.dias===0?'HOY':('en '+x.dias+' d'));
     h+='<div class="rzf"><span class="d">'+esc(cuando)+'</span><div><b>'+esc(x.titulo)+'</b>'
@@ -728,32 +685,41 @@ function acuerdo(){
   var ayer=null; try{ ayer=JSON.parse(localStorage.getItem('cierre_vencidas')||'null'); }catch(e){}
   var comp='';
   if(ayer && ayer.n!=null && ayer.f!==hoyLocal()){
+    /* Si pasaron varios dias sin abrir, decir "ayer" seria mentira. */
+    var dd=Math.round((HOY-new Date(ayer.f+'T12:00:00'))/86400000);
+    var cuando = dd<=1?'ayer':('hace '+dd+' días');
     var dif=ayer.n-venc;
-    comp = dif>0 ? (' <small>(eran '+ayer.n+' — bajaron '+dif+')</small>')
-         : dif<0 ? (' <small>(eran '+ayer.n+' — subieron '+(-dif)+')</small>')
-         : ' <small>(igual que ayer)</small>';
+    var col = dif>0?'var(--verde)':(dif<0?'var(--rojo)':'var(--dim)');
+    comp = ' <small style="color:'+col+'">('+cuando+' eran '+ayer.n
+         + (dif>0?(' — bajaron '+dif):(dif<0?(' — subieron '+(-dif)):' — igual'))+')</small>';
   }
-  $('#acuerdo').hidden=false;
   $('#acuerdoN').innerHTML = venc
     ? ('<em class="mal">'+venc+'</em> vencidas'+comp+' · <em>'+MESA.length+'</em> por cerrar hoy')
     : ('<em>Nada vencido.</em> '+MESA.length+' por cerrar hoy');
-  var r0=riesgoMasProximo();
-  /* El dinero ya se calculaba en dinero() y jamas se pintaba: los cuatro
-     editores lo vieron igual y le pusieron la nota mas baja de la ronda. */
-  var dinMesa=0, dinTxt='';
-  MESA.forEach(function(m){ if(m.r._din>dinMesa){ dinMesa=m.r._din; dinTxt=m.r._dinTxt; } });
-  var sumaMesa=MESA.reduce(function(t,m){ return t+(m.r._din||0); },0);
-  $('#acuerdoDin').innerHTML = sumaMesa
-    ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(sumaMesa))+'</b>'
-       +'<span class="q">mencionado en las '+MESA.length+' tarjetas que esperan tu firma</span>')
+
+  /* Dos renglones cortos, no uno de ciento cuarenta caracteres con tres clausulas. */
+  var l1=[];
+  if(MESA.length) l1.push('te toma unos '+min+' min');
+  var aur=VIVAS.filter(function(r){ return /aurum/i.test(String(r.empresa||'')); });
+  var firm=aur.filter(function(r){ return etapaDe(r)[1]; }).length;
+  l1.push('Aurum '+firm+' de 3 contratos');       /* visible en los tres momentos */
+  $('#acuerdoSub').textContent = l1.join(' · ');
+  var l2=[];
+  var nomFrias=Object.keys(CONGELADOS);
+  if(frias) l2.push(frias+' congeladas de '+nomFrias.join(' y ')+', fuera de la cuenta');
+  var r0=riesgoMasProximo(); if(r0) l2.push('el riesgo más próximo cae '+r0);
+  $('#acuerdoSub2').textContent = l2.join(' · ');
+
+  /* El dinero: separado en lo que se cobra y lo que se paga (tipoDe ya existe). */
+  var cobra=0,paga=0;
+  MESA.forEach(function(m){ var t=tipoDe(m.r); if(t==='P') paga+=(m.r._din||0); else cobra+=(m.r._din||0); });
+  var suma=cobra+paga;
+  $('#acuerdoDin').innerHTML = suma
+    ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(suma))+'</b>'
+       +'<span class="q">'+(paga?('de eso, '+pesos(paga)+' son pagos · '):'')
+       +'lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma — no es una cifra del contador</span>')
     : '';
-  $('#acuerdoDin').hidden = !sumaMesa;
-  $('#acuerdoSub').textContent =
-      (MESA.length? ('te toma unos '+min+' min · ') : '')
-    + (frias? (frias+' congeladas de La Cercada, fuera de la cuenta · ') : '')
-    + (r0? ('el riesgo más próximo cae '+r0) : VIVAS.length+' tarjetas vivas');
-  /* la misma llave que lee arriba: antes escribia 'cierre_vencidas_hoy' y leia
-     'cierre_vencidas', asi que el «eran N ayer» nunca aparecio ni una vez. */
+  $('#acuerdoDin').hidden = !suma;
   try{ localStorage.setItem('cierre_vencidas',JSON.stringify({f:hoyLocal(),n:venc})); }catch(e){}
 }
 function riesgoMasProximo(){
@@ -787,7 +753,9 @@ function armarMesa(){
   });
   MESA.sort(function(a,b){
     if(a.clase!==b.clase) return a.clase==='firmar'?-1:1;
-    return (dias(b.r._f)||0)-(dias(a.r._f)||0);
+    var dd=(dias(b.r._f)||0)-(dias(a.r._f)||0);
+    if(dd) return dd;
+    return (b.r._din||0)-(a.r._din||0);   /* a igual edad, primero la mas cara */
   });
 }
 function pintarMesa(){
@@ -820,10 +788,10 @@ function pintarMesa(){
          9 de 10 decisiones llevaban desde agosto decididas y sin que NADIE las
          cerrara, porque al firmar no quedaba escrito quien la ejecuta. */
       +'<div class="quien" id="qn_'+esc(r.id)+'">'
-        +'<p>Antes de firmar: <b style="color:var(--ink)">¿quién lo ejecuta y para cuándo?</b></p>'
+        +'<p>Antes de '+(esVuelta?'cerrarla':'firmar')+': <b style="color:var(--ink)">¿quién lo ejecuta y para cuándo?</b></p>'
         +'<textarea id="qx_'+esc(r.id)+'" placeholder="Alma lo ingresa el viernes · Sayri le llama mañana…"></textarea>'
         +'<div class="dicPie"><button class="bOtro" data-dicquien="'+esc(r.id)+'">🎙 Dictar</button>'
-        +'<button class="bp" data-firmarya="'+esc(r.id)+'" style="padding:9px 15px;font-size:13px">Firmar</button>'
+        +'<button class="bp" data-firmarya="'+esc(r.id)+'" data-etiqueta="'+(esVuelta?'Cerrarla':'Firmar')+'" style="padding:9px 15px;font-size:13px">'+(esVuelta?'Cerrarla':'Firmar')+'</button>'
         +'<button class="bOtro" data-cancelfirma="'+esc(r.id)+'">Cancelar</button></div>'
       +'</div></div>';
   }).join('');
@@ -832,7 +800,12 @@ function pintarMesa(){
     document.getElementById('qx_'+b.dataset.firmar).focus();
   }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-cancelfirma]'),function(b){ b.onclick=function(){
-    document.getElementById('qn_'+b.dataset.cancelfirma).classList.remove('on');
+    var id=b.dataset.cancelfirma, cj=document.getElementById('qn_'+id);
+    cj.classList.remove('on');
+    var av=cj.querySelector('.confirma'); if(av) av.remove();
+    var bf=c.querySelector('[data-firmarya="'+id+'"]');
+    if(bf){ bf.dataset.confirmado=''; bf.textContent=bf.dataset.etiqueta||'Firmar'; }
+    var m=document.getElementById('fm_'+id); if(m) m.textContent='';
   }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-firmarya]'),function(b){ b.onclick=function(){ firmar(b.dataset.firmarya,b); }; });
   Array.prototype.forEach.call(c.querySelectorAll('[data-dicquien]'),function(b){ b.onclick=function(){ dictarEn(document.getElementById('qx_'+b.dataset.dicquien), b); }; });
@@ -893,7 +866,7 @@ function pintarAtoro(){
     ? '<div class="vacio" style="border-color:#3A231D">Nada aplazado tres veces. Bien.</div>'
     : l.slice(0,6).map(function(r){
         return '<div class="at"><b>'+esc(String(r.actividad||'').slice(0,80))+'</b>'
-          +'<span>aplazada '+aplazos(r)+' veces · decide hoy o se archiva</span></div>';
+          +'<span>aplazada '+aplazos(r)+' veces'+(r._dinTxt?(' · '+esc(r._dinTxt)):'')+' · decide hoy o se archiva</span></div>';
       }).join('');
 }
 
@@ -915,11 +888,19 @@ function pintarMomentos(){
       +'<b>'+esc(m[1])+'</b><span>'+esc(m[2])+'</span></button>';
   }).join('');
   Array.prototype.forEach.call(c.querySelectorAll('[data-mom-btn]'),function(b){
-    b.onclick=function(){ MOMENTO=b.dataset.momBtn; pintar(); window.scrollTo({top:0,behavior:'smooth'}); };
+    b.onclick=function(){ MOMENTO=b.dataset.momBtn;
+      try{ sessionStorage.setItem('cierre_momento',MOMENTO); }catch(e){}
+      pintar(); window.scrollTo({top:0,behavior:'smooth'}); };
   });
   Array.prototype.forEach.call(document.querySelectorAll('[data-mom]'),function(z){
     z.classList.toggle('verse', z.dataset.mom.split(' ').indexOf(MOMENTO)>=0);
   });
+  var toca=momentoDeLaHora(), av=$('#momAviso');
+  if(av){
+    av.textContent = MOMENTO===toca ? '' :
+      ('Estás en '+MOMENTOS.filter(function(m){return m[0]===MOMENTO;})[0][1]
+       +', pero a esta hora normalmente verías '+MOMENTOS.filter(function(m){return m[0]===toca;})[0][1]+'.');
+  }
 }
 
 /* ── Aurum al frente ──
@@ -966,7 +947,9 @@ function pintarMandar(){
   if(!nombres.length){ c.innerHTML='<div class="vacio">Nadie te debe nada vencido. No hay que mandar ni un mensaje.</div>'; return; }
   c.innerHTML = nombres.map(function(n,i){
     var l=por[n].sort(function(a,b){ return b.d-a.d; });
-    var t='Hola '+n+', buenas tardes. Te paso lo que traigo pendiente de tu lado:\n\n'
+    var hh=new Date().getHours();
+    var sal = hh<12?'buenos días':(hh<19?'buenas tardes':'buenas noches');
+    var t='Hola '+n+', '+sal+'. Te paso lo que traigo pendiente de tu lado:\n\n'
       + l.slice(0,5).map(function(x,k){ return (k+1)+'. '+String(x.r.actividad||'').slice(0,110)+' — lleva '+x.d+' días.'; }).join('\n')
       + '\n\n¿En qué punto va cada uno? Si algo ya no aplica, dímelo y lo cierro.';
     return '<div class="wp"><h4>'+esc(n)+'</h4>'
@@ -1083,6 +1066,18 @@ async function llamar(action,payload){
   try{ return JSON.parse(t); }catch(e){ throw new Error('El tablero contestó algo que no entiendo'); }
 }
 
+/* Quien nombraste en «quién lo ejecuta». Gana el que aparece PRIMERO en tu
+   frase, no el primero del diccionario: si dictas «que Alma le hable a Sayri»,
+   la tarjeta es de Alma. */
+function quienNombras(txt){
+  var t=String(txt||''), mejor='', pos=1e9;
+  Object.keys(DICC.personas||{}).forEach(function(n){
+    if(n==='Alejandro') return;
+    var m=t.match(new RegExp('\\b'+n+'\\b','i'));
+    if(m && m.index<pos){ pos=m.index; mejor=n; }
+  });
+  return mejor;
+}
 async function firmar(id,btn){
   var t=TAREAS.filter(function(x){return x.id===id;})[0]; if(!t) return;
   if(!credencial()){
@@ -1107,8 +1102,18 @@ async function firmar(id,btn){
     var cj=document.getElementById('qn_'+id);
     var av=cj.querySelector('.confirma');
     if(!av){ av=document.createElement('div'); av.className='confirma'; cj.appendChild(av); }
-    av.innerHTML='<p>Se va a escribir en '+esc(id)+':</p><pre>'+esc(texto)+'</pre>';
-    btn.dataset.confirmado='1'; btn.textContent='Sí, firmar';
+    /* El preview tiene que decir TODO lo que va a pasar, incluido el cambio de
+       dueño — que antes se escribia sin avisar. Y si no reconoci a nadie, se
+       dice, para que el traspaso no falle en silencio. */
+    var nd=quienNombras(quien);
+    var duenoAhora=String(t.responsable||'').trim();
+    var aviso = nd && nd!==duenoAhora
+      ? '<b style="color:var(--verde)">También pasa a ser de '+esc(nd)+'.</b>'
+      : (nd ? '<span>Sigue siendo de '+esc(nd)+'.</span>'
+            : '<b style="color:var(--ambar)">No reconocí a quién nombraste: la tarjeta sigue siendo tuya.</b>');
+    av.innerHTML='<p>En «'+esc(String(t.actividad||id).slice(0,70))+'» se va a escribir:</p>'
+      +'<pre>'+esc(texto)+'</pre><p class="dueno">'+aviso+'</p>';
+    btn.dataset.confirmado='1'; btn.textContent=(String(btn.textContent).indexOf('cerrada')>=0?'Sí, cerrarla':'Sí, firmar');
     return;
   }
   btn.disabled=true; btn.textContent='leyendo la tarjeta…';
@@ -1130,10 +1135,7 @@ async function firmar(id,btn){
        Antes el nombre se quedaba en la prosa del comentario y la tarjeta seguia
        a nombre de Alejandro: por eso 28 de 46 eran suyas y el traspaso no ocurria. */
     var patch={comentarios:nuevo};
-    var nuevoDueno='';
-    Object.keys(DICC.personas||{}).forEach(function(n){
-      if(!nuevoDueno && n!=='Alejandro' && new RegExp('\\b'+n+'\\b','i').test(quien)) nuevoDueno=n;
-    });
+    var nuevoDueno=quienNombras(quien);
     if(nuevoDueno && nuevoDueno!==String(actual.responsable||'').trim()) patch.responsable=nuevoDueno;
     var r=await llamar('update',{id:id,patch:patch});
     if(!r || r.ok===false) throw new Error(r&&r.error?r.error:'el tablero no lo aceptó');
@@ -1204,7 +1206,8 @@ async function cargar(){
     TAREAS=r.tasks||[];
     var n=construir(TAREAS);
     $('#viva').className='viva';
-    $('#estado').textContent=n+' tarjetas vivas · leído ahora mismo';
+    var mias=VIVAS.filter(function(r){return r._mio;}).length;
+    $('#estado').textContent=mias+' de '+n+' son tuyas · leído ahora mismo';
     b.hidden=true;
     pintar();
     llenarSoltar();
