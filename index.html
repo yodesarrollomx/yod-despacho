@@ -57,6 +57,7 @@ a{color:var(--oro);text-decoration:none}a:hover{color:var(--oro2)}
 /* tablero caido: lo que se ve es una foto vieja, no se firma contra una foto */
 .caido [data-firmarya],.caido [data-guardar],.caido [data-despues],.caido #sBtn{
   opacity:.38;pointer-events:none;filter:grayscale(1)}
+.bp[disabled]{opacity:.42;cursor:default;filter:grayscale(.7)}
 .bp{background:var(--oro);color:#14100A;font-weight:600;font-size:14px;padding:12px 20px;border-radius:16px;display:inline-flex;align-items:center;gap:9px}
 .bp[disabled]{opacity:.45;cursor:default}
 .bo{border:1px solid var(--hair2);color:var(--ink2);font-size:13.5px;padding:11px 16px;border-radius:16px}
@@ -358,7 +359,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
           <option value="semana" selected>esta semana</option>
           <option value="proxima">la próxima semana</option>
         </select>
-        <button class="bp" id="sBtn" type="button">Ponerlo en la charola</button>
+        <button class="bp" id="sBtn" type="button" disabled>cargando el tablero…</button>
         <span class="smsg" id="sMsg"></span>
       </div>
       <div id="entrada" style="margin-top:14px"></div>
@@ -1695,6 +1696,7 @@ async function firmar(id,btn){
 
 
 /* ── soltar un pendiente: nace como tarjeta en el Sheet, con tu sesión ── */
+var SOLTAR_LISTO=false;
 function llenarSoltar(){
   var proy={}, resp={};
   TAREAS.forEach(function(t){
@@ -1708,6 +1710,15 @@ function llenarSoltar(){
   }
   $('#sProy').innerHTML=ops(proy);
   $('#sResp').innerHTML=ops(resp,'Alejandro');
+  /* Se apaga hasta que haya con que acomodarla: mas vale un boton gris dos
+     segundos que una tarjeta huerfana para siempre. Grabar y escribir siguen
+     vivos — puedes ir dictando mientras carga. */
+  SOLTAR_LISTO = !!(Object.keys(proy).length && Object.keys(resp).length);
+  var sb=$('#sBtn');
+  if(sb){
+    sb.disabled=!SOLTAR_LISTO;
+    sb.textContent = SOLTAR_LISTO ? 'Ponerlo en la charola' : 'cargando el tablero…';
+  }
 }
 function fechaTexto(cual){
   var d=new Date(HOY), dow=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -1724,6 +1735,18 @@ async function soltar(){
   if(!credencial()){ m.className='smsg mal'; m.textContent='Entra con el Portero: sin credencial el tablero no deja escribir.'; return; }
   var f=fechaTexto($('#sFecha').value);
   var proy=$('#sProy').value, resp=$('#sResp').value;
+  /* Los dos desplegables nacen VACIOS y solo se llenan cuando contesta el
+     primer getAll. Si sueltas algo en ese segundo y medio —y es justo lo
+     primero que invita la pantalla— se creaba en el Sheet una tarjeta sin
+     proyecto y sin responsable: viva, contando, y que el arbol NUNCA podia
+     mostrar porque no cae en ningun carril. Y encima decia «Listo, yo la
+     acomodo», una promesa que el codigo no podia cumplir. */
+  if(!proy || !resp){
+    m.className='smsg mal';
+    m.textContent='Espérate un segundo a que cargue el tablero: sin proyecto ni responsable, '
+      +'la tarjeta nace suelta y no la puedo acomodar. Tu texto no se perdió.';
+    return;
+  }
   var emp=(TAREAS.filter(function(t){return String(t.proyecto||'').trim()===proy;})[0]||{}).empresa||'YoDesarrollo';
   b.disabled=true; m.className='smsg'; m.textContent='Escribiendo en el tablero…';
   try{
