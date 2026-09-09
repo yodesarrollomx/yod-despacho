@@ -731,7 +731,9 @@ function pintarAtoro(){
 
 function pintar(){
   armarMesa();
-  acuerdo(); pintarEntrada(); pintarMesa(); pintarArbol(); pintarSalida(); pintarAtoro(); riesgos();
+  /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
+     de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
+  acuerdo(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
   var f=new Date();
   $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
   var h=f.getHours();
