@@ -275,6 +275,8 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .rzf.grave .d{color:var(--rojo);font-weight:700;font-size:1.06em}
 /* la que espera a otro no es la que te espera a ti */
 .firma.vuelta{border-left:3px solid var(--azul)}
+/* ya redactada y TUYA: no espera a nadie, te toca a ti */
+.firma.cerrar{border-left:3px solid var(--verde)}
 .firma.vuelta .rama{color:var(--azul)}
 
 </style>
@@ -579,6 +581,11 @@ function construir(tasks){
     var dn=dinero(r); r._din=dn[0]; r._dinTxt=dn[1];
     var _ed=estadoDecision(r); r._dec=(_ed==='tetoca'); r._esp=(_ed==='esperando');
     r._mio=String(r.responsable||'').trim()==='Alejandro';
+    /* «Esperando» solo tiene sentido si la pelota esta en la cancha de OTRO.
+       Ya redactada y a tu nombre no esperas a nadie: te toca cerrarla, hoy.
+       (El tablero llego a decir «lleva 1 d esperando a Alejandro» ocho veces.) */
+    r._espAotro = r._esp && !r._mio;
+    r._miaCerrar = r._esp && r._mio;
     r._frio=congelado(r);   /* proyecto en pausa: no cuenta como vencido */
   });
   var sujetos={};
@@ -840,11 +847,20 @@ function armarMesa(){
   VIVAS.forEach(function(r){
     if(r._frio) return;            /* lo congelado no sube a la mesa */
     var d=dias(r._f), ap=aplazos(r);
-    if(r._dec)      MESA.push({r:r, clase:'firmar', ap:ap});
-    else if(r._esp && d!==null && d>7) MESA.push({r:r, clase:'vuelta', ap:ap});
+    if(r._dec)          MESA.push({r:r, clase:'firmar', ap:ap});
+    else if(r._miaCerrar) MESA.push({r:r, clase:'cerrar', ap:ap});
+    else if(r._espAotro){
+      /* se cuentan los dias desde que se REDACTO, no desde que vencio: es
+         cuando de verdad empezo a esperar esa persona. */
+      var de=esperandoDesde(r); if(de===null) de=d;
+      if(de!==null && de>7) MESA.push({r:r, clase:'vuelta', ap:ap});
+    }
   });
   MESA.sort(function(a,b){
-    if(a.clase!==b.clase) return a.clase==='firmar'?-1:1;
+    if(a.clase!==b.clase){
+      var o={firmar:0, cerrar:1, vuelta:2};
+      return o[a.clase]-o[b.clase];
+    }
     /* El dinero pesa de verdad, no solo como desempate: una tarjeta de seis
        cifras se firma antes que una de cero aunque sea tres dias mas nueva.
        Se compara por tramos (0 / hasta 50k / hasta 500k / arriba) para que la
@@ -873,28 +889,31 @@ function pintarMesa(){
   var TOPE=8, resto=Math.max(0,MESA.length-TOPE);
   c.innerHTML = MESA.slice(0,TOPE).map(function(m){
     var r=m.r, ra=ramaDe(r);
-    var esVuelta=m.clase==='vuelta';
-    /* la de vuelta cuenta desde que se redacto; la tuya, desde que vencio */
-    var d=esVuelta ? esperandoDesde(r) : dias(r._f);
-    if(esVuelta && d===null) d=dias(r._f);
-    var que=esVuelta?loQueSalio(r):loQueDecidiste(r);
-    return '<div class="firma'+(m.ap>=2?' hot':'')+(esVuelta?' vuelta':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
+    var esVuelta=m.clase==='vuelta', esCerrar=m.clase==='cerrar';
+    var yaSalio=esVuelta||esCerrar;
+    /* lo ya redactado cuenta desde que se redacto; lo demas, desde que vencio */
+    var d=yaSalio ? esperandoDesde(r) : dias(r._f);
+    if(yaSalio && d===null) d=dias(r._f);
+    var que=yaSalio?loQueSalio(r):loQueDecidiste(r);
+    return '<div class="firma'+(m.ap>=2?' hot':'')+(esVuelta?' vuelta':'')+(esCerrar?' cerrar':'')+'" data-rama="'+esc(ra.carril+'|'+ra.sujeto)+'">'
       /* la meta se dice, no se codifica: DICC.metas_nombre existia desde
          siempre y nunca se leyo. 'MD' no le dice nada a nadie. */
       +'<div class="rama">'+esc(ra.sujeto)+(ra.meta?(' · <span title="'+esc(metaNombre(ra.meta))
         +'">'+esc(metaCorta(ra.meta))+'</span>'):'')+'</div>'
       +'<h3>'+esc(String(r.actividad||'').slice(0,120))+'</h3>'
-      +(que?('<p class="por"><b>'+(esVuelta?'Ya salió esto:':'Lo que decidiste:')+'</b> '+esc(que.slice(0,220))+'</p>'):'')
+      +(que?('<p class="por"><b>'+(yaSalio?'Ya salió esto:':'Lo que decidiste:')+'</b> '+esc(que.slice(0,220))+'</p>'):'')
       +(r._dinTxt?('<div class="din">'+esc(r._dinTxt)+' <span>mencionado en esta tarjeta</span></div>'):'')
       /* La matricula (YD-CER-D003-MD-ALE) es jerga de control: vive en el
          title, para poder buscarla, pero no se le lee encima al renglon. */
       +'<div class="meta" title="'+esc(matricula(r,ra.sujeto))+'">'+esc(r.responsable||'sin dueño')
-        +(d!==null?(' · '+(esVuelta?('lleva '+d+' d esperando a '+esc(r.responsable||'alguien')):(fmtDias(d)+(d>0?' tarde':'')))
+        +(d!==null?(' · '+(esVuelta?('lleva '+d+' d esperando a '+esc(r.responsable||'alguien'))
+              :(esCerrar?('redactada hace '+d+' d · falta cerrarla')
+                        :(fmtDias(d)+(d>0?' tarde':''))))
             /* una fecha que YO deduje no se lee igual que una escrita en el Sheet */
             +(r._como&&r._como!=='explicita'?' <i class="estim" title="'+esc(r._como)+'">fecha estimada</i>':'')):' · sin fecha')
         +(m.ap?(' · aplazada '+m.ap+(m.ap===1?' vez':' veces')):'')+'</div>'
       +'<div class="acc">'
-        +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(esVuelta?'Cerrarla':'Firmar')+'</button>'
+        +'<button class="bFirmar" data-firmar="'+esc(r.id)+'">'+(yaSalio?'Cerrarla':'Firmar')+'</button>'
         +'<button class="bOtro" data-cambiar="'+esc(r.id)+'">Cambiar</button>'
         +'<button class="bOtro" data-despues="'+esc(r.id)+'">Después</button>'
         +'<span class="smsg" id="fm_'+esc(r.id)+'"></span>'
@@ -908,14 +927,14 @@ function pintarMesa(){
          9 de 10 decisiones llevaban desde agosto decididas y sin que NADIE las
          cerrara, porque al firmar no quedaba escrito quien la ejecuta. */
       +'<div class="quien" id="qn_'+esc(r.id)+'">'
-        +'<p>Antes de '+(esVuelta?'cerrarla':'firmar')+': <b style="color:var(--ink)">¿quién lo ejecuta y para cuándo?</b></p>'
+        +'<p>Antes de '+(yaSalio?'cerrarla':'firmar')+': <b style="color:var(--ink)">¿quién lo ejecuta y para cuándo?</b></p>'
         +'<textarea id="qx_'+esc(r.id)+'" placeholder="Alma lo ingresa el viernes · Sayri le llama mañana…"></textarea>'
         /* Red de seguridad: si el dictado no acierta el nombre exacto, el
            traspaso se hacia en silencio a nadie. Aqui se elige y se acabo. */
         +'<div class="dicPie" style="margin-top:8px"><span style="font-size:12px;color:var(--dim)">Queda a nombre de</span>'
         +'<select id="qd_'+esc(r.id)+'">'+opsPersonas(r.responsable)+'</select></div>'
         +'<div class="dicPie"><button class="bOtro" data-dicquien="'+esc(r.id)+'">🎙 Dictar</button>'
-        +'<button class="bp" data-firmarya="'+esc(r.id)+'" data-etiqueta="'+(esVuelta?'Cerrarla':'Firmar')+'" style="padding:9px 15px;font-size:13px">'+(esVuelta?'Cerrarla':'Firmar')+'</button>'
+        +'<button class="bp" data-firmarya="'+esc(r.id)+'" data-etiqueta="'+(yaSalio?'Cerrarla':'Firmar')+'" style="padding:9px 15px;font-size:13px">'+(yaSalio?'Cerrarla':'Firmar')+'</button>'
         +'<button class="bOtro" data-cancelfirma="'+esc(r.id)+'">Cancelar</button></div>'
       +'</div></div>';
   }).join('')
