@@ -296,8 +296,12 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .confirma pre{background:var(--bg);border:1px solid var(--hair);border-radius:11px;padding:11px;
   font-family:var(--sans);font-size:12.5px;color:var(--ink2);line-height:1.45;white-space:pre-wrap;margin:0}
 /* ── no se cierra el dia con la mesa puesta ── */
-.pendiente{margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+/* display en la clase .verse, no en .pendiente: si no, gana al [data-mom] que
+   la oculta (misma especificidad, y esta va despues) y la barra sale vacia. */
+.pendiente{margin-top:14px;align-items:center;gap:14px;flex-wrap:wrap;
   background:var(--oroS);border:1px solid var(--oro);border-radius:18px;padding:16px 18px}
+.pendiente.verse{display:flex}
+.pendiente[hidden]{display:none!important}
 .pendiente b{font-family:var(--serif);font-size:20px;color:var(--oro2);font-weight:400}
 .pendiente span{font-size:13px;color:var(--dim);flex:1}
 /* ── de donde salen los riesgos ── */
