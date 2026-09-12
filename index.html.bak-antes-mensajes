@@ -127,28 +127,6 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .zona.arbol{border-color:#2E2545}
 .zona.salida{border-color:#2A3A4A}
 .zona.atora{border-color:#4A2A24;background:var(--rojoS)}
-.zona.salientes{border-color:#1E3A34}
-.zona.enviados{border-color:#233A2E;margin-top:14px}
-.sal-msg{background:var(--panel2);border:1px solid var(--hair2);border-radius:16px;padding:15px 16px;margin-bottom:11px}
-.sal-msg .rama{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--oro);text-transform:uppercase}
-.sal-msg .dest{font-family:var(--serif);font-size:17px;color:var(--ink);margin:5px 0 8px}
-.sal-msg .dest b{font-weight:600}
-.sal-msg pre{background:var(--bg);border:1px solid var(--hair);border-radius:12px;padding:11px 12px;
-  font-family:var(--sans);font-size:13px;color:var(--ink2);white-space:pre-wrap;line-height:1.5;margin-bottom:10px}
-.sal-msg .acc{display:flex;gap:7px;flex-wrap:wrap}
-.bEnviar{background:var(--oro);color:#14100A;font-weight:600;font-size:12.5px;padding:9px 15px;border-radius:12px}
-.bEnviar[disabled]{opacity:.45;cursor:default}
-.sal-msg .caja{margin-top:11px;display:none}
-.sal-msg .caja.on{display:block}
-.sal-badge{font-family:var(--mono);font-size:10.5px;padding:3px 8px;border-radius:8px;border:1px solid var(--hair2);color:var(--dim)}
-.sal-badge.accepted{color:var(--dim)}
-.sal-badge.delivered{color:var(--azul);border-color:var(--azul)}
-.sal-badge.read{color:var(--verde);border-color:var(--verde)}
-.sal-badge.error{color:var(--rojo);border-color:var(--rojo)}
-.env-row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:12.5px;color:var(--ink2);
-  border-bottom:1px solid var(--hair2);padding:8px 0}
-.env-row:last-child{border-bottom:none}
-.env-row .q{color:var(--dim);font-size:11.5px}
 /* ── el boton grande de grabar ── */
 .mic{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:var(--verdeS);
   border:1px solid #2C5138;color:var(--verde);border-radius:18px;padding:18px;font-size:15px;font-weight:600;transition:.15s}
@@ -445,23 +423,6 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     </section>
   </div>
 
-  <!-- MÓDULO despacho (botón Enviar) — agregado por Claudet, operador/despacho.
-       Misma bandeja de siempre: lee las tarjetas cuyo último comentario relevante
-       es 📤 SALIENTE (redactadas y sin 📨 ENVIADO después). Enviar es un POST al
-       web app del webhook; nunca lo dispara nadie más que el clic de Alejandro. -->
-  <section class="zona salientes" data-mom="arranque firma cierre">
-    <h2>Mensajes por enviar</h2>
-    <span class="sub">redactados y con destinatario de WhatsApp · Enviar los saca de aquí de verdad, no es para copiar</span>
-    <div id="salientesAviso" class="smsg" hidden></div>
-    <div id="salientes"></div>
-  </section>
-
-  <section class="zona enviados" data-mom="arranque firma cierre">
-    <h2>Enviados hoy</h2>
-    <span class="sub">estado que reporta WhatsApp: accepted → delivered → read</span>
-    <div id="enviadosHoy"></div>
-  </section>
-
   <div id="riesgos" data-mom="arranque"></div>
 
   <!-- Aurum al frente: 5 de 46 tarjetas, pero carga una de las cinco metas -->
@@ -511,24 +472,6 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 var EXEC = "https://script.google.com/macros/s/AKfycbyZ1p7rGHuU01vWBbynGdmlKTnlyH9CIXyhKivqLHa4rLxcHNneJKsZHv7smnjLsfH1/exec";
 var PORTERO_LSK = "pyod_clave_v1";
 function credencial(){ try{ return localStorage.getItem(PORTERO_LSK) || ""; }catch(e){ return ""; } }
-
-/* ══════════ MÓDULO despacho: Mensajes por enviar ══════════
-   Nada aquí abajo vive hardcodeado: la URL del webhook y el fileId del Sheet
-   salen de config.despacho.json (mismo directorio). Si no carga, la zona lo
-   dice y se apaga sola — no inventa una URL. */
-var CFG_MSJ = null;
-async function cargarConfigMensajes(){
-  try{
-    var r = await fetch('config.despacho.json', {cache:'no-store'});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    CFG_MSJ = await r.json();
-  }catch(e){
-    CFG_MSJ = null;
-    var a=$('#salientesAviso');
-    if(a){ a.hidden=false; a.className='smsg mal';
-      a.textContent='No encontré config.despacho.json (URL del webhook / contactos): esta zona no puede enviar hasta que exista.'; }
-  }
-}
 
 var DICC = {"sujetos": {"Admin": "ADM", "Ayuda Social": "AYS", "Casa Alysa": "CAA", "Casa María": "CAM", "Decisiones": "DEC", "La Cercada": "CER", "RNM": "RNM", "Real de Miramar Guaymas": "RMG", "Torre Ruiseñor": "TOR"}, "personas": {"Alejandro": "ALE", "Alma": "ALM", "Claude": "CLA", "Fernando": "FER", "Franco": "FRA", "Genaro": "GEN", "Lupita": "LUP", "Mariana": "MAR", "PG Arquitectos": "PGA", "Rodolfo": "ROD", "Sayri": "SAY"}, "metas": {"Admin": "MC", "Admin ": "MC", "Ayuda Social": "MC", "Ayuda Social ": "MC", "Casa Alysa": "ME", "Casa Maria": "MB", "Casa María": "MB", "Decisiones": "MC", "Gastos": "MC", "La Cercada": "MD", "Nómina": "MC", "RNM": "MB", "Real de Miramar Guaymas": "MA", "Sin proyecto": "MC", "Torre Ruiseñor": "MD"}, "metas_nombre": {"MA": "Real de Miramar en Preventa III (31-mar-2027)", "MB": "Aurum: 3 contratos nuevos de Arquitectura de Autor (28-feb-2027)", "MC": "Dos meses de operación en bolsa y nada por cobrar a más de 60 días (31-dic-2026)", "MD": "Dos aportaciones de terreno en co-desarrollo firmadas (31-dic-2026)", "ME": "Casa Alysa entregada al 100% con sus estimaciones (30-nov-2026)"}};
 var MAPA = {"proyectos": ["Casa Alysa", "Casa María", "Real de Miramar Guaymas", "RNM", "Casa Maria"], "nuevos": ["La Cercada", "Torre Ruiseñor", "Gym ECOS", "Depas Guaymas"], "interno": ["Admin", "Admin ", "Ayuda Social", "Ayuda Social ", "Nómina", "Gastos"], "brokers_personas": ["Franco", "Lupita"], "alias_tema": {"la cercada": "La Cercada", "casa alysa": "Casa Alysa", "casa maria": "Casa María", "real de miramar": "Real de Miramar Guaymas", "rnm": "RNM", "torre ruiseñor": "Torre Ruiseñor", "nomina de mariana": "Nómina", "caja yod": "Gastos", "flujo yod": "Gastos", "rodriguez": "Gastos", "credito puente bbva": "Real de Miramar Guaymas", "manjarrez": "Gastos"}, "no_son_sujeto": ["Claude", "Claudet"], "decisiones_se_disuelven": true};
@@ -1060,34 +1003,6 @@ function esperandoDesde(r){
   var c=comentarios(r).filter(function(x){ return x.texto.indexOf('Redactado')>=0; }).pop();
   if(!c || !c.fecha) return null;
   return dias(new Date(c.fecha+'T12:00:00'));
-}
-
-/* ══════════ MÓDULO despacho: Mensajes por enviar ══════════
-   NO inventa bandeja propia: lee directo la hoja SALIENTES del webhook
-   (proyecto operador/webhook, Sheet "CLAUDET - Mensajes"), la MISMA que usa
-   `enviar_()`. Columnas reales (HOJAS.SALIENTES en su Code.gs):
-     id, fecha, para, texto, plantilla, requiere_firma, firmado_por,
-     fecha_firma, wamid, estado
-   "Por enviar" = wamid vacío. Si requiere_firma=true y firmado_por vacío,
-   el botón dice "Firmar y enviar" (dos llamadas: firmar, luego enviar); si
-   ya tiene firmado_por, o no requiere firma, dice "Enviar" a secas.
-   OJO — esto depende de DOS acciones que hoy NO existen en el Code.gs del
-   webhook (que solo tiene "encolar" y "enviar"): "listar" (leer SALIENTES
-   sin wamid) y "firmar" (escribir firmado_por+fecha_firma). Van propuestas,
-   sin desplegar, en webhook-Code.gs.patch-propuesto de esta misma carpeta.
-   Mientras no exista "listar", la zona lo dice y no rompe nada. */
-function saliente_(m){
-  return { id:m.id, fecha:m.fecha, para:m.para, texto:m.texto,
-    requiereFirma: (m.requiere_firma===true || String(m.requiere_firma).toLowerCase()==='true'),
-    firmadoPor: m.firmado_por||'', estado:m.estado||'' };
-}
-async function listarSalientes(){
-  if(!CFG_MSJ || !CFG_MSJ.webhook_url) return {ok:false, error:'sin config'};
-  var r=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify({action:'listar',k:credencial()})});
-  var t=await r.text();
-  try{ return JSON.parse(t); }catch(e){ return {ok:false, error:'el webhook contestó algo que no entiendo'}; }
 }
 /* La frase completa de la meta, y una version corta para el renglon. */
 function metaNombre(m){ return (DICC.metas_nombre||{})[m] || m; }
@@ -1675,123 +1590,6 @@ function pintarMandar(){
   });
 }
 
-/* ══════════ MÓDULO despacho: pintar + acciones de "Mensajes por enviar" ══════════ */
-var SALIENTES=[], SALIENTES_ERROR='';
-async function refrescarSalientes(){
-  if(!CFG_MSJ || !CFG_MSJ.webhook_url){ SALIENTES=[]; SALIENTES_ERROR='sin config.despacho.json (webhook_url)'; return; }
-  try{
-    var r=await listarSalientes();
-    if(!r || !r.ok) throw new Error((r&&r.error)||'el webhook no contestó ok');
-    SALIENTES=(r.rows||r.salientes||[]).map(saliente_).filter(function(s){ return !s.estado || s.estado.indexOf('enviado')<0; });
-    SALIENTES_ERROR='';
-  }catch(e){
-    SALIENTES=[];
-    SALIENTES_ERROR = /acci.n desconocida|listar/i.test(e.message)
-      ? 'el webhook todavía no tiene la acción "listar" (ver webhook-Code.gs.patch-propuesto) — nada que mostrar todavía'
-      : ('no pude leer SALIENTES: '+enCristiano(e.message));
-  }
-}
-function pintarSalientes(){
-  var c=$('#salientes'), av=$('#salientesAviso'); if(!c) return;
-  if(SALIENTES_ERROR){ av.hidden=false; av.className='smsg mal'; av.textContent=SALIENTES_ERROR; }
-  else if(av){ av.hidden=true; }
-  if(!SALIENTES.length){
-    c.innerHTML='<div class="vacio">No hay mensajes esperando salir. En cuanto el webhook encole uno (acción "encolar"), aparece aquí.</div>';
-    return;
-  }
-  c.innerHTML = SALIENTES.map(function(s){
-    var faltaFirma = s.requiereFirma && !s.firmadoPor;
-    return '<div class="sal-msg" data-id="'+esc(s.id)+'">'
-      +'<div class="rama">'+(s.requiereFirma?'REQUIERE FIRMA':'automático')+(s.firmadoPor?' · firmado por '+esc(s.firmadoPor):'')+'</div>'
-      +'<div class="dest">Para <b>'+esc(s.para)+'</b></div>'
-      +'<pre>'+esc(s.texto)+'</pre>'
-      +'<div class="acc">'
-        +'<button class="bEnviar" data-enviar="'+esc(s.id)+'" data-falta-firma="'+(faltaFirma?'1':'0')+'">'
-          +(faltaFirma?'Firmar y enviar':'Enviar')+'</button>'
-        +'<button class="bOtro" data-despuesSal="'+esc(s.id)+'">Después</button>'
-        +'<span class="smsg" id="sfm_'+esc(s.id)+'"></span>'
-      +'</div>'
-    +'</div>';
-  }).join('');
-  Array.prototype.forEach.call(c.querySelectorAll('[data-enviar]'),function(b){
-    b.onclick=function(){ enviarSaliente(b.dataset.enviar, b.dataset.faltaFirma==='1', b); };
-  });
-  Array.prototype.forEach.call(c.querySelectorAll('[data-despuesSal]'),function(b){
-    b.onclick=function(){ despuesSaliente(b.dataset.despuessal||b.dataset.despuesSal, b); };
-  });
-}
-function pintarEnviadosHoy(){
-  var c=$('#enviadosHoy'); if(!c) return;
-  var hoy=hoyLocal();
-  var filas=(ENVIADOS_HOY||[]).filter(function(e){ return String(e.fecha||'').slice(0,10)===hoy || e.estado==='enviado'; });
-  if(!filas.length){ c.innerHTML='<div class="vacio">Nada enviado hoy todavía.</div>'; return; }
-  c.innerHTML = filas.map(function(e){
-    var b = e.estado==='error'||/^error/.test(e.estado||'') ? 'error' : (e.estado||'accepted');
-    return '<div class="env-row"><span>'+esc(e.para||'—')+' <span class="q">— '+esc((e.texto||'').slice(0,70))+'</span></span>'
-      +'<span class="sal-badge '+esc(b)+'">'+esc(b)+'</span></div>';
-  }).join('');
-}
-var ENVIADOS_HOY=[];
-/* "Enviados hoy" viene del MISMO listar() si el webhook regresa también las
-   filas con wamid (no solo las pendientes) — se pide aparte para no forzar
-   al webhook a mandar de más en la llamada de arriba. Si el webhook no trae
-   esta segunda forma todavía, esta caja simplemente se queda vacía. */
-async function refrescarEnviadosHoy(){
-  if(!CFG_MSJ || !CFG_MSJ.webhook_url){ ENVIADOS_HOY=[]; return; }
-  try{
-    var r=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action:'listar',k:credencial(),incluir_enviados:true})});
-    var t=await r.text(); var j; try{ j=JSON.parse(t); }catch(e){ j=null; }
-    ENVIADOS_HOY = (j&&j.ok&&(j.rows||j.salientes)||[]).filter(function(m){ return m.wamid; });
-  }catch(e){ ENVIADOS_HOY=[]; }
-}
-async function enviarSaliente(id, faltaFirma, btn){
-  if(!credencial()){ var m0=document.getElementById('sfm_'+id); if(m0){m0.className='smsg mal';m0.textContent='Entra con el Portero primero.';} return; }
-  if(!CFG_MSJ || !CFG_MSJ.webhook_url){ var m1=document.getElementById('sfm_'+id); if(m1){m1.className='smsg mal';m1.textContent='Falta config.despacho.json: no sé a qué URL mandarlo.';} return; }
-  var m=document.getElementById('sfm_'+id);
-  if(!confirmarAntesSal(btn, id, faltaFirma?'Vas a FIRMAR (queda tu nombre) y ENVIAR este mensaje por WhatsApp.':'Vas a ENVIAR este mensaje por WhatsApp.', faltaFirma?'Sí, firmar y enviar':'Sí, enviar')) return;
-  limpiarConfirma(btn);
-  btn.disabled=true; var prevTxt=btn.textContent; btn.textContent='enviando…';
-  try{
-    if(faltaFirma){
-      var rf=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',
-        headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({action:'firmar',k:credencial(),id:id,firmado_por:'Alejandro'})});
-      var tf=await rf.text(); var jf; try{ jf=JSON.parse(tf); }catch(e){ throw new Error('el webhook contestó algo que no entiendo al firmar'); }
-      if(!jf.ok) throw new Error(jf.error||'no se pudo firmar');
-    }
-    var r=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action:'enviar',k:credencial(),id:id})});
-    var t=await r.text(); var j; try{ j=JSON.parse(t); }catch(e){ throw new Error('el webhook contestó algo que no entiendo'); }
-    if(!j.ok) throw new Error(j.error||'el webhook dijo que no');
-    if(m){ m.className='smsg ok'; m.textContent=j.ya?'ya estaba enviado ✓':'enviado ✓'; }
-    btn.textContent='enviado ✓';
-    setTimeout(async function(){ await refrescarSalientes(); await refrescarEnviadosHoy(); pintarSalientes(); pintarEnviadosHoy(); }, 600);
-  }catch(e){
-    btn.disabled=false; btn.textContent=prevTxt;
-    if(m){ m.className='smsg mal'; m.textContent='no se pudo: '+esc(e.message); }
-  }
-}
-function confirmarAntesSal(btn, id, textoQueSeEscribe, etiqueta){
-  var m=document.getElementById('sfm_'+id);
-  if(btn.dataset.confirmado==='1' && btn.dataset.visto===textoQueSeEscribe) return true;
-  if(m){ m.className='smsg'; m.innerHTML='<b>'+esc(textoQueSeEscribe)+'</b>'; }
-  btn.dataset.confirmado='1'; btn.dataset.visto=textoQueSeEscribe;
-  btn.dataset.antes=btn.dataset.antes||btn.textContent;
-  btn.textContent=etiqueta;
-  return false;
-}
-async function despuesSaliente(id,btn){
-  /* "Después" en esta zona no aplaza una tarjeta del board (no hay tarjeta:
-     es una fila de SALIENTES). Por ahora solo esconde el mensaje de la vista
-     hasta el próximo refresco — de verdad posponerlo (ej. mover su "fecha")
-     es otra acción que el webhook tendría que exponer; no inventarla aquí. */
-  var card = btn.closest('.sal-msg'); if(card) card.style.opacity='.35';
-  btn.disabled=true; btn.textContent='oculto por ahora';
-}
-
 function pintar(){
   /* Si el tablero esta caido, lo que se ve es una foto vieja: los botones que
      escriben se apagan a proposito, para que nadie firme contra una copia. */
@@ -1800,7 +1598,7 @@ function pintar(){
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
   acuerdo(); pintarMarcador(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
-  pintarAurum(); pintarMandar(); pintarSalientes(); pintarEnviadosHoy(); pintarPendiente(); pintarMomentos();
+  pintarAurum(); pintarMandar(); pintarPendiente(); pintarMomentos();
   var f=new Date();
   $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
   var h=f.getHours();
@@ -2279,12 +2077,6 @@ document.addEventListener('DOMContentLoaded',function(){
     var me=$('#micEst'); if(me) me.textContent='Este navegador no sabe oír. En Chrome sí funciona; mientras, escríbelo aquí abajo.';
   }
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && REC) REC.stop(); });
-})();
-(async function(){
-  await cargarConfigMensajes();
-  await refrescarSalientes();
-  await refrescarEnviadosHoy();
-  pintarSalientes(); pintarEnviadosHoy();
 })();
 cargar();
 </script>

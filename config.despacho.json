@@ -1,0 +1,22 @@
+{
+  "_comentario": "Config del módulo 'Mensajes por enviar' del Despacho. Nada de esto va hardcodeado en index.patched.html: si cambia la URL del webhook, se edita AQUÍ. Mientras webhook_url sea null, la zona lo dice, se apaga sola (no envía) y no inventa nada.",
+  "webhook_url": "https://script.google.com/macros/s/AKfycbzksegVdE2-owchrgxrA_Zt4gKrorrn2OIO5ecI9wIYpifgaz2vdiODYdVsFhA4qu2D/exec",
+  "_webhook_url_nota": "Pegar aquí la URL /exec del web app del proyecto operador/webhook (ver ~/.claudet/operador/webhook/PENDIENTES-CHROME.md — falta que Alejandro lo despliegue). Ese web app ya expone 'encolar' y 'enviar' de verdad; 'listar' y 'firmar' están PROPUESTOS, no implementados — ver webhook-Code.gs.patch-propuesto en esta carpeta.",
+  "spreadsheet_id_mensajes": "1x4OGX4N09VXb-UrSzDzxHk4IwQpK8wscpG6MQyFcbC0",
+  "_spreadsheet_nota": "Sheet 'CLAUDET - Mensajes' del propio módulo webhook — pestaña SALIENTES es la fuente de esta zona. No es el mismo Sheet del board-aurum.",
+  "board_exec_url": "https://script.google.com/macros/s/AKfycbyZ1p7rGHuU01vWBbynGdmlKTnlyH9CIXyhKivqLHa4rLxcHNneJKsZHv7smnjLsfH1/exec",
+  "_board_exec_url_nota": "El de siempre (getAll/update de tarjetas). Esta zona NO lo usa — solo lo dejo aquí porque el resto de index.patched.html sí depende de él, para que quede junto.",
+  "_fuente_unica": "Los ids y la URL del webhook viven tambien en ~/.claudet/operador/contratos.json. Si cambian, cambiarlos en AMBOS (contratos.json manda).",
+  "_columnas_salientes": [
+    "id",
+    "fecha",
+    "para",
+    "texto",
+    "plantilla",
+    "requiere_firma",
+    "firmado_por",
+    "fecha_firma",
+    "wamid",
+    "estado"
+  ]
+}
