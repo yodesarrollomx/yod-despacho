@@ -1925,13 +1925,21 @@ async function pedirCambio(id, btn){
 async function llamar(action,payload){
   var cuerpo=Object.assign({action:action,k:credencial()},payload||{});
   var r;
+  /* Google a veces deja el POST colgado minutos (14-sep: pendiente desde Chrome
+     mientras desde la Mac contestaba en 3 s). Sin tope, la pantalla se quedaba
+     en «conectando…» para siempre. Con tope, cae al reintento espaciado. */
+  var ctl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+  var tope = ctl ? setTimeout(function(){ ctl.abort(); }, 45000) : null;
   try{
-    r=await fetch(EXEC,{method:'POST',credentials:'omit',redirect:'follow',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(cuerpo)});
+    r=await fetch(EXEC,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(cuerpo),
+      signal: ctl ? ctl.signal : undefined});
   }catch(e){
+    if(tope) clearTimeout(tope);
     /* 'Failed to fetch' en ingles no le dice nada a nadie */
-    throw new Error('no hay conexión con el tablero ahorita');
+    throw new Error(e && e.name==='AbortError' ? 'Google tardó más de 45 segundos en contestar' : 'no hay conexión con el tablero ahorita');
   }
+  if(tope) clearTimeout(tope);
   var t=await r.text();
   try{ return JSON.parse(t); }catch(e){ throw new Error('el tablero contestó algo que no entiendo'); }
 }
@@ -2296,6 +2304,11 @@ document.addEventListener('DOMContentLoaded',function(){
   pintarSalientes(); pintarEnviadosHoy();
 })();
 cargar();
+/* Si el tablero se abrio en una pestaña de atras y Chrome le apago los relojes,
+   al volver a verla se carga en ese momento en vez de esperar al siguiente tick. */
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible' && !TAREAS.length && !CAIDO){ _fallos=0; cargar(); }
+});
 </script>
 <script src="https://yodesarrollomx.github.io/potenciales-yod/portero.js"></script>
 <script src="https://yodesarrollomx.github.io/yod-portal/os/shell.js"></script>
