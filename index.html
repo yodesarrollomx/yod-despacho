@@ -146,20 +146,24 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .ejeNom{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;color:var(--faint);
   text-transform:uppercase;margin-bottom:7px}
 /* la linea de eje: guion-punto, como en plano */
-.eje{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:9px;min-height:30px}
-.eje::before{content:'';position:absolute;left:0;right:0;top:15px;height:1px;
+.eje{position:relative;display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 4px;min-height:32px}
+.eje::before{content:'';position:absolute;left:0;right:0;top:16px;height:1px;
   background:repeating-linear-gradient(90deg,var(--hair2) 0 7px,transparent 7px 10px,var(--mute) 10px 11px,transparent 11px 14px)}
-/* marca de eje: el circulo numerado del plano */
-.marca{position:relative;display:inline-flex;align-items:center;justify-content:center;
-  width:30px;height:30px;border-radius:50%;background:var(--panel2);border:1px solid var(--hair2);
-  color:var(--ink2);font-family:var(--mono);font-size:12.5px;cursor:pointer;transition:.15s;flex:0 0 auto}
-.marca:hover{border-color:var(--oro);color:var(--oro);transform:translateY(-1px)}
-.marca.venc{border-color:var(--rojo);color:var(--rojo);background:var(--rojoS)}
-.marca.hoy{border-color:var(--ambar);color:var(--ambar)}
-.marca.fria{opacity:.4;border-style:dashed}
-.marca .nom{position:absolute;top:33px;left:50%;transform:translateX(-50%);white-space:nowrap;
-  font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--mute);pointer-events:none}
-.eje{padding-bottom:15px}
+/* marca de eje: el circulo numerado del plano, con su rotulo debajo. Cada
+   marca ocupa su propia columna para que los rotulos no se encaballen — el
+   14-sep se leian «AdmiAyuda Social» y «Real de MiramAlysa» encimados. */
+.marca{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
+  width:78px;background:transparent;border:0;padding:0;cursor:pointer;flex:0 0 auto}
+.marca em{display:flex;align-items:center;justify-content:center;width:32px;height:32px;
+  border-radius:50%;background:var(--panel2);border:1px solid var(--hair2);color:var(--ink2);
+  font-family:var(--mono);font-size:12.5px;font-style:normal;transition:.15s}
+.marca:hover em{border-color:var(--oro);color:var(--oro);transform:translateY(-1px)}
+.marca.venc em{border-color:var(--rojo);color:var(--rojo);background:var(--rojoS)}
+.marca.hoy em{border-color:var(--ambar);color:var(--ambar)}
+.marca.fria em{opacity:.42;border-style:dashed}
+.marca .nom{display:block;max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--mute);line-height:1.2}
+.marca:hover .nom{color:var(--faint)}
 .ejeVacio{font-size:12px;color:var(--mute);padding:6px 0}
 /* la cota: la letra y el total, al final del eje */
 .cota{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
@@ -2031,7 +2035,7 @@ function pintarPlanta(){
         if(!x.abiertas) cl='fria';
         h+='<button class="marca '+cl+'" data-emp="'+esc(emp)+'" data-car="'+car+'" data-proy="'+esc(x.nombre)+'" '
           +'title="'+esc(x.nombre)+' · '+x.abiertas+' abierto'+(x.abiertas===1?'':'s')+(x.frios?(' · '+x.frios+' en pausa'):'')+'">'
-          +(x.abiertas||x.frios)+'<span class="nom">'+esc(x.nombre.length>13?x.nombre.slice(0,12)+'…':x.nombre)+'</span></button>';
+          +'<em>'+(x.abiertas||x.frios)+'</em><span class="nom">'+esc(x.nombre)+'</span></button>';
       });
       h+='</div></div>'
         +'<button class="cota'+(ab?'':' cero')+'" data-emp="'+esc(emp)+'" data-car="'+car+'" '
