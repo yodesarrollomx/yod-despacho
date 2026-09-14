@@ -559,6 +559,88 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .firma.cerrar{border-left:3px solid var(--verde)}
 .firma.vuelta .rama{color:var(--azul)}
 
+/* ══════════════ LA PLANTA APRETADA · la cinta ══════════════
+   La planta grande costaba ~500 px de mobiliario en el iPhone para ensenar
+   seis numeros, y cuatro de las seis crujias cargan tres tarjetas o menos.
+   Aqui cada crujia es una cota que se aprieta con el pulgar (66 px) y la
+   proporcion la lleva la barra de adentro, no el ancho del boton. */
+.cinta{margin:20px 0 4px}
+.cnPredio{margin:0 0 14px}
+.cnCab{display:flex;align-items:center;gap:9px;margin:0 0 8px}
+.cnCab img{width:22px;height:22px;border-radius:7px;object-fit:cover;flex:none}
+.cnCab b{font-size:13px;color:var(--ink2);font-weight:500}
+.cnCab u{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint);
+ text-decoration:none;letter-spacing:.07em;text-align:right}
+.cnFila{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cnChip{background:var(--panel);border:1px solid var(--hair);border-radius:15px;
+ padding:11px 12px 10px;min-height:70px;display:flex;flex-direction:column;gap:5px;
+ transition:border-color .15s,background .15s}
+.cnChip .l{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--faint)}
+.cnChip .n{font-family:var(--serif);font-size:27px;line-height:.9;color:var(--ink)}
+.cnChip .n u{font-family:var(--mono);font-size:10px;color:var(--rojo);
+ text-decoration:none;margin-left:5px;vertical-align:super;letter-spacing:0}
+.cnChip .b{height:3px;border-radius:2px;background:var(--hair2);margin-top:auto}
+.cnChip .b i{display:block;height:100%;background:var(--oro);border-radius:2px}
+.cnChip.cero .n{color:var(--mute)}
+.cnChip.cero .b i{background:var(--mute)}
+.cnChip.on{border-color:var(--oro);background:var(--oroS)}
+.cnChip.on .l{color:var(--oro2)}
+
+/* ══════════════ LA PILA · lo abierto, un renglon por tarjeta ══════════════ */
+.pilaCab{display:flex;align-items:baseline;gap:10px;margin:22px 0 10px;flex-wrap:wrap}
+.pilaCab h2{font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:400}
+.pilaCab .q{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint)}
+.pilaCab .lp{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--oro);letter-spacing:.06em}
+.pila{display:flex;flex-direction:column;gap:7px}
+.plFila{display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:start;width:100%;
+ background:var(--panel);border:1px solid var(--hair);border-left:2px solid var(--hair2);
+ border-radius:14px;padding:13px 14px}
+.plFila:active{background:var(--panel2)}
+.plFila .d{font-family:var(--mono);font-size:10px;line-height:1.3;color:var(--faint);letter-spacing:.04em}
+.plFila .d b{display:block;font-family:var(--serif);font-size:20px;line-height:1;
+ color:var(--ink2);font-weight:400;margin-bottom:3px}
+.plFila.venc{border-left-color:var(--rojo)}
+.plFila.venc .d,.plFila.venc .d b{color:var(--rojo)}
+.plFila.hoy{border-left-color:var(--oro)}
+.plFila.hoy .d,.plFila.hoy .d b{color:var(--oro)}
+.plFila .c b{display:block;font-size:14.5px;line-height:1.35;color:var(--ink);font-weight:500}
+.plFila .c span{display:block;margin-top:5px;font-size:12px;color:var(--faint);line-height:1.35}
+.capaPausa{display:flex;align-items:center;gap:12px;width:100%;margin:12px 0 0;
+ background:var(--panel);border:1px dashed var(--hair2);border-radius:14px;padding:13px 15px}
+.capaPausa .n{font-family:var(--serif);font-size:22px;color:var(--dim);line-height:1;flex:none}
+.capaPausa .t{font-size:12.5px;color:var(--faint);line-height:1.35}
+.capaPausa .t b{display:block;color:var(--ink2);font-size:13px;font-weight:500}
+.capaPausa .v{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--oro);
+ letter-spacing:.06em;flex:none}
+
+/* ══════════════ EDITAR LA TARJETA desde aqui ══════════════
+   El backend siempre acepto cualquier campo en el patch; lo que faltaba era
+   la pantalla. Se escribe con el mismo camino de siempre: vista previa,
+   relectura, escritura y relectura para confirmar. */
+.edBloque{margin:18px 0 0;border-top:1px solid var(--hair);padding-top:16px}
+.edBloque>.k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+ color:var(--faint);margin-bottom:12px}
+.edCampo{display:grid;grid-template-columns:94px 1fr;gap:12px;align-items:center;
+ padding:8px 0;border-bottom:1px solid var(--hair)}
+.edCampo>span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--faint)}
+.edCampo input,.edCampo select,.edCampo textarea{width:100%;background:var(--panel2);
+ border:1px solid var(--hair2);border-radius:11px;padding:11px 12px;color:var(--ink);
+ font:inherit;font-size:14px;line-height:1.35}
+.edCampo textarea{min-height:80px;resize:vertical}
+.edCampo.cambiado input,.edCampo.cambiado select,.edCampo.cambiado textarea{border-color:var(--oro)}
+.edCampo.cambiado>span{color:var(--oro2)}
+.edPie{display:flex;gap:9px;align-items:center;margin-top:14px;flex-wrap:wrap}
+@media(max-width:520px){ .edCampo{grid-template-columns:1fr;gap:6px;padding:10px 0} }
+
+/* La planta grande es lenguaje de lamina: se queda para el escritorio. En el
+   telefono manda la cinta, que dice lo mismo en un sexto del espacio. */
+.vistaSw,.planta{display:none}
+@media(min-width:900px){
+  .cinta{display:none}
+  .vistaSw{display:flex}
+  .planta{display:grid}
+}
+
 </style>
 </head>
 <body>
@@ -616,12 +698,26 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
        con sus marcas numeradas (los proyectos) y la cota al final (la letra y
        el total abierto). Se pica una marca y sale el pendiente; se pica la
        cota y sale la crujia entera. -->
+  <!-- LA CINTA: la planta entera en dos renglones de tres cotas. Se aprieta
+       una y la pila de abajo se queda solo con esa crujia. -->
+  <section class="cinta" id="cinta"></section>
+
   <div class="vistaSw">
     <span>La planta, vista</span>
     <button class="bOtro on" data-vista="proyecto" type="button">por proyecto</button>
     <button class="bOtro" data-vista="persona" type="button">por persona</button>
   </div>
   <section class="planta" id="planta"></section>
+
+  <!-- LA PILA: lo que de verdad esta abierto, un renglon por tarjeta, en el
+       orden en que se esta pudriendo. Debajo, lo pausado en una sola linea. -->
+  <div class="pilaCab">
+    <h2 id="pilaT">Lo abierto</h2>
+    <span class="q" id="pilaQ"></span>
+    <button class="lp" id="pilaLimpiar" type="button" hidden>ver todo</button>
+  </div>
+  <section class="pila" id="pila"></section>
+  <button class="capaPausa" id="capaPausa" type="button" hidden></button>
 
   <!-- los dos paneles que se abren encima: la crujia y el pendiente -->
   <div class="panel" id="panelCrujia" hidden><div class="panelCaja"></div></div>
@@ -917,6 +1013,10 @@ function construir(tasks){
     r._espAotro = r._esp && !r._mio;
     r._miaCerrar = r._esp && r._mio;
     r._frio=congelado(r);   /* proyecto en pausa: no cuenta como vencido */
+    /* En pausa DE VERDAD = proyecto congelado O estado «En standby». Son dos
+       cosas distintas y juntas explican 20 de las 34 vivas: si se mezclan con
+       lo abierto, la pantalla te pide atencion para cosas que tu apagaste. */
+    r._pausa = r._frio || sinac(r.estado)==='en standby';
   });
   var sujetos={};
   function add(carril,nombre,r){
@@ -2057,7 +2157,7 @@ function pintarPlanta(){
       else P.forEach(function(x){
         var cl = x.vencidas?'venc' : (x.dmax===0?'hoy' : (x.abiertas?'':'fria'));
         if(!x.abiertas) cl='fria';
-        h+='<button class="marcaEje '+cl+'" data-emp=""'+esc(emp)+'" data-car="'+car+'" data-proy="'+esc(x.nombre)+'" '
+        h+='<button class="marcaEje '+cl+'" data-emp="'+esc(emp)+'" data-car="'+car+'" data-proy="'+esc(x.nombre)+'" '
           +'title="'+esc(x.nombre)+' · '+x.abiertas+' abierto'+(x.abiertas===1?'':'s')+(x.frios?(' · '+x.frios+' en pausa'):'')+'">'
           +'<em>'+(x.abiertas||x.frios)+'</em><span class="nom">'+esc(x.nombre)+'</span></button>';
       });
@@ -2071,6 +2171,142 @@ function pintarPlanta(){
     b.onclick=function(){ abrirCrujia(b.dataset.emp, b.dataset.car); }; });
   Array.prototype.forEach.call(c.querySelectorAll('.marcaEje'),function(b){
     b.onclick=function(){ abrirCrujia(b.dataset.emp, b.dataset.car, b.dataset.proy); }; });
+}
+
+/* ══════════════ LA CINTA · la planta apretada ══════════════
+   Lo mismo que la planta grande —dos predios, tres crujias— pero en dos
+   renglones de tres cotas. El numero grande es lo ABIERTO; el volado rojo,
+   lo vencido; la barrita de abajo, cuanto pesa esa crujia contra la mas
+   cargada. Se aprieta y la pila de abajo se queda solo con esa crujia. */
+var FILTRO=null;   /* {emp, car} o null */
+var ABC_CORTO={A:'INTERNA', B:'CLIENTES', C:'NUEVOS'};
+function deCrujia(emp, car){
+  return VIVAS.filter(function(r){ return empresaDe(r)===emp && carrilABC(r)===car; });
+}
+function pintarCinta(){
+  var c=$('#cinta'); if(!c) return;
+  if(!TAREAS.length){
+    c.innerHTML='<div class="vacio">Todavía no tengo tu tablero. '
+      +(CAIDO?'Google no está contestando: lo sigo intentando.':'Aquí se dibuja la planta en cuanto llegue.')+'</div>';
+    return;
+  }
+  var tope=1;
+  EMPRESAS.forEach(function(E){ ABC.forEach(function(A){
+    var n=deCrujia(E[0],A[0]).filter(function(r){ return !r._pausa; }).length;
+    if(n>tope) tope=n;
+  }); });
+  c.innerHTML=EMPRESAS.map(function(E){
+    var emp=E[0], V=VIVAS.filter(function(r){ return empresaDe(r)===emp; });
+    var ab=V.filter(function(r){ return !r._pausa; }).length, pa=V.length-ab;
+    var h='<div class="cnPredio"><div class="cnCab"><img src="'+esc(E[3])+'" alt="">'
+      +'<b>'+esc(E[1])+'</b><u>'+ab+' abierto'+(ab===1?'':'s')
+      +(pa?(' · '+pa+' en pausa'):'')+'</u></div><div class="cnFila">';
+    ABC.forEach(function(A){
+      var L=deCrujia(emp,A[0]);
+      var ns=L.filter(function(r){ return !r._pausa; });
+      var vn=ns.filter(function(r){ var d=dias(r._f); return d!==null && d>0; }).length;
+      var on=!!(FILTRO && FILTRO.emp===emp && FILTRO.car===A[0]);
+      h+='<button class="cnChip'+(ns.length?'':' cero')+(on?' on':'')+'" type="button"'
+        +' data-emp="'+esc(emp)+'" data-car="'+A[0]+'"'
+        +' title="'+esc(A[1]+' — '+A[2])+'">'
+        +'<span class="l">'+A[0]+' · '+(ABC_CORTO[A[0]]||'')+'</span>'
+        +'<span class="n">'+ns.length+(vn?('<u>'+vn+'</u>'):'')+'</span>'
+        +'<span class="b"><i style="width:'+Math.round(ns.length/tope*100)+'%"></i></span>'
+        +'</button>';
+    });
+    return h+'</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(c.querySelectorAll('.cnChip'),function(b){
+    b.onclick=function(){
+      var mismo = FILTRO && FILTRO.emp===b.dataset.emp && FILTRO.car===b.dataset.car;
+      FILTRO = mismo ? null : {emp:b.dataset.emp, car:b.dataset.car};
+      pintarCinta(); pintarPila();
+      if(!mismo){ var pl=$('#pila'); if(pl) pl.scrollIntoView({behavior:'smooth',block:'start'}); }
+    };
+  });
+}
+
+/* ══════════════ LA PILA · lo abierto, en el orden en que se pudre ══════════════ */
+function ordenPila(a,b){
+  var A=dias(a._f), B=dias(b._f);
+  if((A===null)!==(B===null)) return A===null?1:-1;   /* sin fecha, al final */
+  if(A===null) return 0;
+  return B-A;                                          /* la mas tarde, arriba */
+}
+function renglonPila(r){
+  var d=dias(r._f), cl='', big, chico;
+  if(d===null){ big='—'; chico='sin fecha'; }
+  else if(d>0){ big=d; chico='d tarde'; cl=' venc'; }
+  else if(d===0){ big='hoy'; chico=''; cl=' hoy'; }
+  else { big=(-d); chico='d faltan'; }
+  var pie=[String(r.responsable||'').trim()||'sin dueño', sujetoDe(r)];
+  if(r.estado && sinac(r.estado)!=='pendiente') pie.push(String(r.estado));
+  if(r._dinTxt) pie.push(r._dinTxt);
+  return '<button class="plFila'+cl+'" type="button" data-abrir="'+esc(r.id)+'">'
+    +'<span class="d"><b>'+esc(String(big))+'</b>'+esc(chico)+'</span>'
+    +'<span class="c"><b>'+esc(String(r.actividad||'sin texto').slice(0,120))+'</b>'
+    +'<span>'+esc(pie.join(' · '))+'</span></span></button>';
+}
+function pintarPila(){
+  var c=$('#pila'); if(!c) return;
+  var T=$('#pilaT'), Q=$('#pilaQ'), LP=$('#pilaLimpiar');
+  if(LP){ LP.hidden=!FILTRO; LP.onclick=function(){ FILTRO=null; pintarCinta(); pintarPila(); }; }
+  if(!TAREAS.length){
+    c.innerHTML='<div class="vacio">Aquí se apila tu trabajo en cuanto conteste el tablero.</div>';
+    if(Q) Q.textContent=''; pintarPausa(); return;
+  }
+  var L=VIVAS.filter(function(r){ return !r._pausa; });
+  if(FILTRO) L=L.filter(function(r){
+    return empresaDe(r)===FILTRO.emp && carrilABC(r)===FILTRO.car; });
+  L.sort(ordenPila);
+  if(T){
+    var A=(ABC.filter(function(x){return FILTRO&&x[0]===FILTRO.car;})[0]||[])[1];
+    T.textContent = FILTRO ? (FILTRO.emp.split(' ')[0]+' · '+A) : 'Lo abierto';
+  }
+  if(Q){
+    var vn=L.filter(function(r){ var d=dias(r._f); return d!==null&&d>0; }).length;
+    Q.textContent = L.length + (L.length===1?' TARJETA':' TARJETAS') + (vn?(' · '+vn+' VENCIDA'+(vn===1?'':'S')):'');
+  }
+  c.innerHTML = L.length ? L.map(renglonPila).join('')
+    : '<div class="vacio">'+(FILTRO?'Nada abierto en esta crujía.':'Nada abierto. Todo lo vivo está en pausa.')+'</div>';
+  Array.prototype.forEach.call(c.querySelectorAll('[data-abrir]'),function(b){
+    b.onclick=function(){ abrirPendiente(b.dataset.abrir); };
+  });
+  pintarPausa();
+}
+/* Lo pausado no merece un pixel del flujo: una linea, y ahi entras si quieres. */
+function pintarPausa(){
+  var b=$('#capaPausa'); if(!b) return;
+  var F=VIVAS.filter(function(r){ return r._pausa; });
+  if(FILTRO) F=F.filter(function(r){
+    return empresaDe(r)===FILTRO.emp && carrilABC(r)===FILTRO.car; });
+  if(!F.length || !TAREAS.length){ b.hidden=true; return; }
+  var por={}; F.forEach(function(r){ var k=sujetoDe(r); por[k]=(por[k]||0)+1; });
+  var top=Object.keys(por).sort(function(x,y){ return por[y]-por[x]; }).slice(0,2)
+    .map(function(k){ return k+' '+por[k]; }).join(' · ');
+  b.hidden=false;
+  b.innerHTML='<span class="n">'+F.length+'</span>'
+    +'<span class="t"><b>en pausa</b>'+esc(top)+'</span><span class="v">verlas</span>';
+  b.onclick=function(){ abrirPausa(F); };
+}
+function abrirPausa(F){
+  var h='<div class="pCab"><div class="t"><div class="k">FUERA DEL FLUJO</div>'
+    +'<h3>'+F.length+' en pausa</h3></div>'
+    +'<button class="pCerrar" data-cerrar="panelCrujia">cerrar</button></div>'
+    +'<p style="font-size:12.5px;color:var(--faint);margin:-6px 0 14px">'
+    +'Proyecto congelado o estado «En standby». No cuentan como vencidas y no te las pongo enfrente. '
+    +'Ábrela y cámbiale el estado para regresarla al flujo.</p>';
+  var por={}; F.forEach(function(r){ (por[sujetoDe(r)]=por[sujetoDe(r)]||[]).push(r); });
+  Object.keys(por).sort(function(a,b){ return por[b].length-por[a].length; }).forEach(function(k){
+    h+='<div style="margin:16px 0 4px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--oro)">'
+      +esc(k.toUpperCase())+' · '+por[k].length+'</div>';
+    por[k].forEach(function(r,i){
+      h+='<div class="pFila" data-abrir="'+esc(r.id)+'"><span class="n">'+(i+1)+'</span>'
+        +'<div class="c"><b>'+esc(String(r.actividad||'').slice(0,110))+'</b>'
+        +'<span>'+esc(String(r.responsable||'sin dueño'))+' · '+esc(String(r.estado||'—'))+'</span></div></div>';
+    });
+  });
+  mostrarPanel('panelCrujia', h);
 }
 
 /* ────────── panel 1: la crujia ────────── */
@@ -2148,6 +2384,7 @@ function abrirPendiente(id){
       +'<span>'+esc(x.q)+'</span></div></div>';
   });
   h+='</div><div class="pSalidas" id="pSalidas"></div><div class="pPrev" id="pPrev" hidden></div><div class="pMsg" id="pMsg"></div>';
+  h+=cajaEditar(r);
   mostrarPanel('panelPend', h);
   var caja=document.querySelector('#panelPend .panelCaja');
   caja.dataset.id=id;
@@ -2159,6 +2396,7 @@ function abrirPendiente(id){
   });
   var rec=caja.querySelector('.opcion.sel'); if(rec){ PEND_SEL=rec.dataset.op; }
   pintarSalidas(id);
+  prenderEditar(id);
 }
 function opActual(r){
   var P=propuestasDe(r);
@@ -2254,6 +2492,113 @@ async function salida(id, cual, btn){
 }
 /* Escribe en la tarjeta: ve antes, relee antes de escribir, y relee despues
    para decir ✓ solo si de verdad quedo. */
+/* ══════════════ EDITAR LA TARJETA DESDE AQUÍ ══════════════
+   El Apps Script del tablero siempre acepto cualquier columna en el patch:
+   lo unico que faltaba era la pantalla. Se escribe por el mismo camino que
+   todo lo demas —vista previa, relectura, escritura, relectura— y solo se
+   mandan los campos que de verdad cambiaste.
+
+   OJO con la fecha: el Sheet no guarda una fecha, guarda TRES columnas
+   (fecha «Viernes 26», mes y semana) y fechaReal() las deduce. Escribir solo
+   «fecha» dejaria el mes viejo y la tarjeta se iria meses atras sin avisar.
+   Por eso partesDeFecha() devuelve las tres y las tres se escriben juntas. */
+var ED_CAMPOS=[
+  ['actividad','QUÉ ES','area'],
+  ['responsable','QUIÉN','lista'],
+  ['proyecto','PROYECTO','lista'],
+  ['fecha','PARA CUÁNDO','fecha'],
+  ['estado','ESTADO','opc:Pendiente|En proceso|En standby|Terminado'],
+  ['prioridad','PRIORIDAD','opc:Alta|Media|Baja'],
+  ['entregable','ENTREGABLE','texto'],
+  ['observaciones','NOTAS','area']
+];
+function partesDeFecha(d){
+  var dow=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var mes=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto',
+           'Septiembre','Octubre','Noviembre','Diciembre'][d.getMonth()];
+  var jue=new Date(d); jue.setDate(d.getDate()+3-((d.getDay()+6)%7));
+  var sem=1+Math.round(((jue-new Date(jue.getFullYear(),0,4))/86400000-3
+        +((new Date(jue.getFullYear(),0,4).getDay()+6)%7))/7);
+  return {fecha:dow[d.getDay()]+' '+d.getDate(), mes:mes, semana:'Semana '+sem};
+}
+function isoDe(d){ if(!d) return ''; var z=function(n){return (n<10?'0':'')+n;};
+  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function opsDe(campo, actual){
+  var o={};
+  TAREAS.forEach(function(t){ var v=String(t[campo]||'').trim(); if(v) o[v]=(o[v]||0)+1; });
+  var ks=Object.keys(o).sort(function(a,b){ return o[b]-o[a]; });
+  var yo=String(actual||'').trim();
+  if(yo && ks.indexOf(yo)<0) ks.unshift(yo);
+  return ks.map(function(k){
+    return '<option'+(k===yo?' selected':'')+'>'+esc(k)+'</option>'; }).join('');
+}
+function cajaEditar(r){
+  var h='<button class="bOtro" id="edAbrir" type="button">Editar esta tarjeta</button>'
+    +'<div class="edBloque" id="edBloque" hidden><span class="k">CAMBIA LO QUE HAGA FALTA · '
+    +esc(r.id)+'</span>';
+  ED_CAMPOS.forEach(function(C){
+    var campo=C[0], rot=C[1], tipo=C[2], val=String(r[campo]||'');
+    h+='<label class="edCampo" data-campo="'+campo+'"><span>'+rot+'</span>';
+    if(tipo==='area') h+='<textarea data-ed="'+campo+'">'+esc(val)+'</textarea>';
+    else if(tipo==='lista') h+='<select data-ed="'+campo+'">'+opsDe(campo,val)+'</select>';
+    else if(tipo==='fecha') h+='<input type="date" data-ed="fecha" value="'+esc(isoDe(r._f))+'">';
+    else if(tipo.indexOf('opc:')===0){
+      h+='<select data-ed="'+campo+'">'+tipo.slice(4).split('|').map(function(o){
+        return '<option'+(sinac(o)===sinac(val)?' selected':'')+'>'+esc(o)+'</option>'; }).join('')+'</select>';
+    }
+    else h+='<input type="text" data-ed="'+campo+'" value="'+esc(val)+'">';
+    h+='</label>';
+  });
+  return h+'<div class="edPie"><button class="bFirmar" id="edGuardar" type="button">Guardar los cambios</button>'
+    +'<button class="bOtro" id="edCancelar" type="button">Dejarlo como estaba</button></div></div>';
+}
+function prenderEditar(id){
+  var caja=document.querySelector('#panelPend .panelCaja'); if(!caja) return;
+  var blq=caja.querySelector('#edBloque'), abrir=caja.querySelector('#edAbrir');
+  if(!blq||!abrir) return;
+  var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+  var original={}; 
+  Array.prototype.forEach.call(blq.querySelectorAll('[data-ed]'),function(el){
+    original[el.dataset.ed]=el.value;
+    var marca=function(){
+      el.closest('.edCampo').classList.toggle('cambiado', el.value!==original[el.dataset.ed]); };
+    el.addEventListener('input',marca); el.addEventListener('change',marca);
+  });
+  abrir.onclick=function(){
+    blq.hidden=!blq.hidden;
+    abrir.textContent = blq.hidden ? 'Editar esta tarjeta' : 'Cerrar la edición';
+    if(!blq.hidden) blq.scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
+  caja.querySelector('#edCancelar').onclick=function(){
+    Array.prototype.forEach.call(blq.querySelectorAll('[data-ed]'),function(el){
+      el.value=original[el.dataset.ed]; el.closest('.edCampo').classList.remove('cambiado'); });
+    blq.hidden=true; abrir.textContent='Editar esta tarjeta';
+    var m=$('#pMsg'); if(m){ m.className='pMsg'; m.textContent=''; }
+  };
+  var g=caja.querySelector('#edGuardar');
+  g.onclick=function(){
+    var patch={}, dichos=[];
+    Array.prototype.forEach.call(blq.querySelectorAll('[data-ed]'),function(el){
+      var campo=el.dataset.ed, v=el.value, antes=original[campo];
+      if(v===antes) return;
+      if(campo==='fecha'){
+        if(!v){ return; }
+        var pz=v.split('-'), d=new Date(+pz[0],+pz[1]-1,+pz[2]);
+        var P=partesDeFecha(d);
+        patch.fecha=P.fecha; patch.mes=P.mes; patch.semana=P.semana;
+        dichos.push('para cuándo: '+(String(r.fecha||'').trim()||'sin fecha')+' → '+P.fecha+' de '+P.mes);
+      } else {
+        patch[campo]=v;
+        dichos.push(campo+': '+(String(antes).trim()||'vacío')+' → '+(String(v).trim()||'vacío'));
+      }
+    });
+    if(!dichos.length){
+      var m=$('#pMsg'); m.className='pMsg'; m.textContent='No cambiaste nada todavía.'; return;
+    }
+    escribirEnTarjeta(id, patch, '✎ Editada desde el Despacho — '+dichos.join('; '),
+      'Quedó cambiada en el tablero.', g);
+  };
+}
 async function escribirEnTarjeta(id, patch, linea, dice, btn){
   var m=$('#pMsg'), pv=$('#pPrev');
   var firma=JSON.stringify(patch)+'|'+linea;
@@ -2497,7 +2842,7 @@ function pintar(){
   armarMesa();
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
-  acuerdo(); pintarPlanta(); pintarEntrada(); pintarMarcador();
+  acuerdo(); pintarPlanta(); pintarCinta(); pintarPila(); pintarEntrada(); pintarMarcador();
   try{ pintarLibro(); pintarBitacora(); }catch(e){ console.error('libro/bitacora',e); }
   pintarConstancias();
   var f=new Date();
