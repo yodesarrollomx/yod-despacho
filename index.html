@@ -2032,6 +2032,14 @@ function crujiaDe(emp, car){
 }
 function pintarPlanta(){
   var c=$('#planta'); if(!c) return;
+  /* Sin datos no se dibuja una planta en ceros: «0 abiertos · nada abierto»
+     se lee como «no tienes trabajo», y eso seria mentir por omision. Mientras
+     el tablero no conteste, la planta lo dice y no finge. */
+  if(!TAREAS.length){
+    c.innerHTML='<div class="vacio" style="grid-column:1/-1">Todavía no tengo tu tablero. '
+      +(CAIDO?'Google no está contestando: lo sigo intentando.':'Aquí se dibuja la planta en cuanto llegue.')+'</div>';
+    return;
+  }
   c.innerHTML = EMPRESAS.map(function(E){
     var emp=E[0];
     var todas=VIVAS.filter(function(r){ return empresaDe(r)===emp; });
@@ -2611,7 +2619,7 @@ async function llamar(action,payload){
      mientras desde la Mac contestaba en 3 s). Sin tope, la pantalla se quedaba
      en «conectando…» para siempre. Con tope, cae al reintento espaciado. */
   var ctl = (typeof AbortController!=='undefined') ? new AbortController() : null;
-  var tope = ctl ? setTimeout(function(){ ctl.abort(); }, 45000) : null;
+  var tope = ctl ? setTimeout(function(){ ctl.abort(); }, 75000) : null;
   try{
     r=await fetch(EXEC,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',
       headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(cuerpo),
@@ -2619,7 +2627,7 @@ async function llamar(action,payload){
   }catch(e){
     if(tope) clearTimeout(tope);
     /* 'Failed to fetch' en ingles no le dice nada a nadie */
-    throw new Error(e && e.name==='AbortError' ? 'Google tardó más de 45 segundos en contestar' : 'no hay conexión con el tablero ahorita');
+    throw new Error(e && e.name==='AbortError' ? 'Google tardó más de 75 segundos en contestar' : 'no hay conexión con el tablero ahorita');
   }
   if(tope) clearTimeout(tope);
   var t=await r.text();
