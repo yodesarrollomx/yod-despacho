@@ -205,6 +205,35 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .rama.on .hoja2.esa{background:var(--oroS);border-radius:0 10px 10px 0}
 .rama.on .hoja2.esa b{color:var(--oro2)}
 /* ── salida y atoro ── */
+.filtros{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+.filtros select{background:var(--panel2);color:var(--ink2);border:1px solid var(--hair2);border-radius:10px;padding:6px 10px;font-size:12.5px}
+/* el arbol: meta > proyecto > decision > pasos. Lineas finas, sin cajas encima de cajas */
+.lb-meta{margin:10px 0 4px;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--oro2)}
+.lb-proy{margin:6px 0 2px 10px;font-size:13.5px;color:var(--ink);font-weight:500;border-left:2px solid var(--hair2);padding-left:10px}
+.lb-dec{margin:6px 0 8px 22px;padding:10px 12px;background:var(--panel2);border:1px solid var(--hair);border-radius:12px}
+.lb-dec .cab{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lb-dec .cab b{font-size:13.5px;color:var(--ink);font-weight:500;flex:1;min-width:200px}
+.lb-dec .cab .f{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap}
+.lb-dec .cab .e{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:2px 8px;border-radius:8px;border:1px solid var(--hair2);color:var(--dim)}
+.lb-dec .e.ejecutada{color:var(--verde);border-color:#2C5138} .lb-dec .e.esperando{color:var(--azul);border-color:#2A4560}
+.lb-dec .e.tetoca{color:var(--oro);border-color:#5A4720} .lb-dec .e.aplazada{color:var(--ambar);border-color:#5A3C1A}
+.lb-paso{display:flex;gap:9px;margin:5px 0 0 6px;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.lb-paso .f{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap;min-width:78px}
+.lb-paso .q{color:var(--faint);white-space:nowrap}
+/* la bitacora: dia > proyecto > persona */
+.bt-dia{margin:12px 0 4px;display:flex;align-items:baseline;gap:10px}
+.bt-dia b{font-family:var(--serif);font-size:17px;color:var(--ink);font-weight:400}
+.bt-dia span{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.bt-dia button{margin-left:auto}
+.bt-proy{margin:4px 0 2px 10px;font-size:13px;color:var(--oro2);font-weight:500}
+.bt-pers{margin:2px 0 2px 22px;font-size:12.5px;color:var(--ink2)}
+.bt-acc{display:flex;gap:8px;margin:2px 0 2px 34px;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.bt-acc .t{font-family:var(--mono);font-size:10.5px;color:var(--faint);white-space:nowrap;min-width:46px}
+.bt-acc .id{font-family:var(--mono);font-size:10.5px;color:var(--mute);white-space:nowrap}
+.cs{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--hair);font-size:12.5px;color:var(--ink2);align-items:flex-start}
+.cs .f{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap;min-width:110px}
+.cs a{color:var(--oro2)}
+.cs .ok{color:var(--verde)} .cs .mal{color:var(--rojo)}
 .sal{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--hair)}
 .sal:last-child{border-bottom:0}
 .sal .h{font-family:var(--mono);font-size:10px;color:var(--faint);min-width:44px}
@@ -501,6 +530,41 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
       <div id="atora"></div>
     </section>
   </div>
+
+  <!-- El libro de decisiones: cada DECISIÓN que tomaste, con lo que paso despues,
+       como arbol Meta → Proyecto → Decision → pasos. Sale del Sheet, de los
+       comentarios con sello; no hay una segunda base de datos. -->
+  <section class="zona libro" id="zLibro" data-mom="arranque firma cierre">
+    <h2>El libro de decisiones <span class="sub" style="display:inline;margin-left:8px" id="libroSub"></span></h2>
+    <div class="filtros">
+      <select id="libroProy"><option value="">todos los proyectos</option></select>
+      <select id="libroPers"><option value="">todas las personas</option></select>
+      <select id="libroEst"><option value="">todos los estados</option>
+        <option value="tetoca">te toca redactar</option><option value="esperando">redactada, esperando</option>
+        <option value="ejecutada">ejecutada</option><option value="aplazada">aplazada</option></select>
+    </div>
+    <div id="libro"></div>
+  </section>
+
+  <!-- La bitacora: dia → proyecto → persona → accion. Reconstruida cada vez desde
+       los comentarios con fecha y el historial de estados de cada tarjeta. -->
+  <section class="zona bitac" id="zBitacora" data-mom="arranque firma cierre">
+    <h2>La bitácora <span class="sub" style="display:inline;margin-left:8px" id="bitacSub"></span></h2>
+    <div class="filtros">
+      <select id="bitacDias"><option value="7">últimos 7 días</option><option value="14" selected>últimos 14 días</option><option value="30">últimos 30 días</option><option value="90">últimos 90 días</option></select>
+      <select id="bitacProy"><option value="">todos los proyectos</option></select>
+      <select id="bitacPers"><option value="">todas las personas</option></select>
+    </div>
+    <div id="bitacora"></div>
+  </section>
+
+  <!-- Constancias: prueba de lo que Claudet ejecuto — la captura y lo que se leyo
+       de vuelta del Sheet despues de escribir. Viven en la pestaña CONSTANCIAS del
+       libro de mensajes. -->
+  <section class="zona const" id="zConst" data-mom="arranque firma cierre">
+    <h2>Constancias <span class="sub" style="display:inline;margin-left:8px">lo que Claudet ejecutó, con su captura y lo que se leyó de vuelta</span></h2>
+    <div id="constancias"><div class="vacio">cargando…</div></div>
+  </section>
 
   <div class="focos" data-mom="arranque firma">
     <h2>¿Cómo sé que jala?</h2>
@@ -1801,6 +1865,176 @@ async function despuesSaliente(id,btn){
   btn.disabled=true; btn.textContent='oculto por ahora';
 }
 
+/* ══════════════ EL LIBRO DE DECISIONES ══════════════
+   Cada comentario con «DECISIÓN» es una decision de Alejandro. Lo que vino
+   despues en esa misma tarjeta (Redactado, Ejecutado, Aplazada, Cambio, 💬)
+   son sus pasos, en orden. Nada se guarda aparte: se reconstruye del Sheet. */
+function sujetoDe(r){
+  var p=String(r.proyecto||'').trim();
+  if(sinac(p)==='decisiones'){ var t=temaDecision(r); return t||'Decisiones sin tema'; }
+  return p||'Sin proyecto';
+}
+function metaDe(r){ var k=DICC.metas[sujetoDe(r)]||DICC.metas[String(r.proyecto||'').trim()]||''; return k; }
+function tipoSello(t){
+  if(t.indexOf('DECISIÓN')>=0||t.indexOf('DECISION')>=0) return 'decisión';
+  if(t.indexOf('Ejecutado')>=0) return 'ejecutada';
+  if(t.indexOf('Retomada')>=0) return 'retomada';
+  if(t.indexOf('Redactado')>=0) return 'redactada';
+  if(t.indexOf('Aplazada')>=0) return 'aplazada';
+  if(t.indexOf('Cambio pedido')>=0) return 'cambio';
+  if(t.indexOf('Charola')>=0) return 'charola';
+  if(t.indexOf('💬')>=0) return 'respuesta';
+  return 'nota';
+}
+function limpiaSello(t){
+  return String(t).replace(/^[✅🤖⏳✏️📥🔄💰💬]+\s*/,'').replace(/^(DECISIÓN|Redactado|Ejecutado|Aplazada|Cambio pedido|Charola|Retomada)\s*(\([^)]*\))?:?\s*/,'').trim();
+}
+function libroDecisiones(){
+  var L=[];
+  TAREAS.forEach(function(r){
+    if(r.borrada===true||String(r.borrada)==='true') return;
+    var cs=comentarios(r).slice().sort(function(a,b){ return a.fecha<b.fecha?-1:(a.fecha>b.fecha?1:0); });
+    var actual=null;
+    cs.forEach(function(c){
+      var tipo=tipoSello(c.texto);
+      if(tipo==='decisión'){
+        actual={tarjeta:r.id, actividad:String(r.actividad||''), proyecto:sujetoDe(r), meta:metaDe(r),
+                responsable:String(r.responsable||'').trim(), fecha:c.fecha, autor:c.autor,
+                decision:limpiaSello(c.texto), pasos:[], estado:'tetoca'};
+        L.push(actual);
+      } else if(actual){
+        actual.pasos.push({fecha:c.fecha, autor:c.autor, tipo:tipo, texto:limpiaSello(c.texto)});
+        if(tipo==='ejecutada') actual.estado='ejecutada';
+        else if(tipo==='redactada' && actual.estado!=='ejecutada') actual.estado='esperando';
+        else if(tipo==='aplazada' && actual.estado!=='ejecutada') actual.estado='aplazada';
+      }
+    });
+  });
+  return L;
+}
+function pintarLibro(){
+  var c=$('#libro'); if(!c) return;
+  var L=libroDecisiones();
+  var fp=$('#libroProy').value, fpe=$('#libroPers').value, fe=$('#libroEst').value;
+  llenarSelect('#libroProy', L.map(function(d){return d.proyecto;}), fp);
+  llenarSelect('#libroPers', L.map(function(d){return d.responsable;}), fpe);
+  var V=L.filter(function(d){ return (!fp||d.proyecto===fp)&&(!fpe||d.responsable===fpe)&&(!fe||d.estado===fe); });
+  var n={tetoca:0,esperando:0,ejecutada:0,aplazada:0}; L.forEach(function(d){ n[d.estado]=(n[d.estado]||0)+1; });
+  $('#libroSub').textContent=L.length+' decisiones · '+n.ejecutada+' ejecutadas · '+n.esperando+' esperando · '+n.tetoca+' por redactar · '+n.aplazada+' aplazadas';
+  if(!V.length){ c.innerHTML='<div class="vacio">No hay decisiones con ese filtro.</div>'; return; }
+  var ORD=['MC','MA','MB','MD','ME',''];
+  var EST={tetoca:'te toca redactar',esperando:'esperando',ejecutada:'ejecutada',aplazada:'aplazada'};
+  var h='';
+  ORD.forEach(function(m){
+    var dm=V.filter(function(d){return (d.meta||'')===m;}); if(!dm.length) return;
+    h+='<div class="lb-meta">'+(m?esc(metaCorta(m)):'SIN META')+' · '+dm.length+'</div>';
+    var proys={}; dm.forEach(function(d){ (proys[d.proyecto]=proys[d.proyecto]||[]).push(d); });
+    Object.keys(proys).sort().forEach(function(pr){
+      h+='<div class="lb-proy">'+esc(pr)+'</div>';
+      proys[pr].sort(function(a,b){return a.fecha<b.fecha?1:-1;}).forEach(function(d){
+        h+='<div class="lb-dec"><div class="cab"><b>'+esc(d.decision.slice(0,160))+'</b>'
+          +'<span class="f">'+esc(d.fecha)+' · '+esc(d.tarjeta)+(d.responsable?(' · '+esc(d.responsable)):'')+'</span>'
+          +'<span class="e '+d.estado+'">'+EST[d.estado]+'</span></div>';
+        d.pasos.forEach(function(p){
+          h+='<div class="lb-paso"><span class="f">'+esc(p.fecha)+'</span><span class="q">'+esc(p.tipo)+' · '+esc(p.autor)+'</span><span>'+esc(p.texto.slice(0,180))+'</span></div>';
+        });
+        if(!d.pasos.length) h+='<div class="lb-paso"><span class="f"></span><span class="q">sin pasos</span><span>nadie ha redactado ni ejecutado nada después de decidir</span></div>';
+        h+='</div>';
+      });
+    });
+  });
+  c.innerHTML=h;
+}
+function llenarSelect(sel,valores,actual){
+  var el=$(sel); if(!el) return;
+  var u={}; valores.forEach(function(v){ if(v) u[v]=(u[v]||0)+1; });
+  var primero=el.options[0].outerHTML;
+  el.innerHTML=primero+Object.keys(u).sort().map(function(k){ return '<option value="'+esc(k)+'"'+(k===actual?' selected':'')+'>'+esc(k)+' ('+u[k]+')</option>'; }).join('');
+}
+
+/* ══════════════ LA BITÁCORA ══════════════
+   Dia → proyecto → persona → accion. Se reconstruye cada vez desde dos fuentes
+   con fecha que ya viven en el Sheet: los comentarios (quien escribio que) y el
+   historial de estados de cada tarjeta (quien la movio a Terminado). */
+function bitacora(dias){
+  var A=[]; var desde=menosDias(hoyLocal(),dias);
+  TAREAS.forEach(function(r){
+    if(r.borrada===true||String(r.borrada)==='true') return;
+    var proy=sujetoDe(r), resp=String(r.responsable||'').trim()||'sin dueño';
+    comentarios(r).forEach(function(c){
+      if(!c.fecha||c.fecha<desde) return;
+      A.push({fecha:c.fecha, proyecto:proy, persona:c.autor||resp, tipo:tipoSello(c.texto), texto:limpiaSello(c.texto), tarjeta:r.id, actividad:String(r.actividad||'')});
+    });
+    String(r.historial||'').split('|').forEach(function(hh){
+      var m=String(hh).trim().match(/^(\d{4}-\d{2}-\d{2})\s+(.+)$/); if(!m||m[1]<desde) return;
+      A.push({fecha:m[1], proyecto:proy, persona:resp, tipo:'estado', texto:'→ '+m[2], tarjeta:r.id, actividad:String(r.actividad||'')});
+    });
+  });
+  return A;
+}
+function menosDias(d,n){ var p=d.split('-'); var x=new Date(+p[0],+p[1]-1,+p[2]); x.setDate(x.getDate()-n);
+  var z=function(k){return (k<10?'0':'')+k;}; return x.getFullYear()+'-'+z(x.getMonth()+1)+'-'+z(x.getDate()); }
+function pintarBitacora(){
+  var c=$('#bitacora'); if(!c) return;
+  var dias=+($('#bitacDias').value||14), fp=$('#bitacProy').value, fpe=$('#bitacPers').value;
+  var A=bitacora(dias);
+  llenarSelect('#bitacProy', A.map(function(a){return a.proyecto;}), fp);
+  llenarSelect('#bitacPers', A.map(function(a){return a.persona;}), fpe);
+  var V=A.filter(function(a){ return (!fp||a.proyecto===fp)&&(!fpe||a.persona===fpe); });
+  $('#bitacSub').textContent=V.length+' acciones en '+dias+' días · reconstruida ahora mismo del Sheet';
+  if(!V.length){ c.innerHTML='<div class="vacio">Nada registrado en ese periodo con ese filtro.</div>'; return; }
+  var porDia={}; V.forEach(function(a){ (porDia[a.fecha]=porDia[a.fecha]||[]).push(a); });
+  var h='';
+  Object.keys(porDia).sort().reverse().forEach(function(f){
+    var del=porDia[f];
+    h+='<div class="bt-dia"><b>'+esc(fechaBonita(f))+'</b><span>'+del.length+(del.length===1?' acción':' acciones')+'</span>'
+      +'<button class="bOtro" data-copiadia="'+esc(f)+'" style="padding:5px 10px;font-size:11.5px">copiar el día</button></div>';
+    var pp={}; del.forEach(function(a){ (pp[a.proyecto]=pp[a.proyecto]||{}); (pp[a.proyecto][a.persona]=pp[a.proyecto][a.persona]||[]).push(a); });
+    Object.keys(pp).sort().forEach(function(pr){
+      h+='<div class="bt-proy">'+esc(pr)+'</div>';
+      Object.keys(pp[pr]).sort().forEach(function(pe){
+        h+='<div class="bt-pers">'+esc(pe)+'</div>';
+        pp[pr][pe].forEach(function(a){
+          h+='<div class="bt-acc"><span class="t">'+esc(a.tipo)+'</span><span class="id" title="'+esc(a.actividad)+'">'+esc(a.tarjeta)+'</span><span>'+esc(a.texto.slice(0,170))+'</span></div>';
+        });
+      });
+    });
+  });
+  c.innerHTML=h;
+  Array.prototype.forEach.call(c.querySelectorAll('[data-copiadia]'),function(b){
+    b.onclick=function(){
+      var f=b.dataset.copiadia, del=porDia[f]||[];
+      var txt='Bitácora '+fechaBonita(f)+'\n'+del.map(function(a){ return '· '+a.proyecto+' · '+a.persona+' · '+a.tipo+' · '+a.tarjeta+' · '+a.texto; }).join('\n');
+      try{ navigator.clipboard.writeText(txt); b.textContent='copiado ✓'; setTimeout(function(){b.textContent='copiar el día';},1500); }catch(e){}
+    };
+  });
+}
+
+/* ══════════════ CONSTANCIAS ══════════════ */
+async function pintarConstancias(){
+  var c=$('#constancias'); if(!c) return;
+  try{
+    if(typeof CFG_MSJ==='undefined' || !CFG_MSJ) await cargarConfigMensajes();
+    if(!CFG_MSJ || !CFG_MSJ.webhook_url) throw new Error('sin webhook en config.despacho.json');
+    var r=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'leer',k:credencial(),hoja:'CONSTANCIAS'})});
+    var d=JSON.parse(await r.text());
+    if(!d.ok) throw new Error(d.error||'no contestó');
+    var rows=(d.rows||[]).slice(-40).reverse();
+    if(!rows.length){ c.innerHTML='<div class="vacio">Todavía no hay constancias. Cada vez que Claudet ejecute algo, aquí queda la captura y lo que se leyó de vuelta.</div>'; return; }
+    c.innerHTML=rows.map(function(x){
+      var f=String(x.fecha||'').replace('T',' ').slice(0,16);
+      return '<div class="cs"><span class="f">'+esc(f)+'</span><div><b style="font-weight:500;color:var(--ink)">'+esc(x.que||'')+'</b>'
+        +(x.tarjeta?(' <span class="id" style="font-family:var(--mono);font-size:10.5px;color:var(--mute)">'+esc(x.tarjeta)+'</span>'):'')
+        +'<br><span class="'+(String(x.resultado||'').indexOf('✓')>=0?'ok':'')+'">'+esc(String(x.resultado_leido||x.resultado||'').slice(0,200))+'</span>'
+        +(x.captura_url?(' · <a href="'+esc(x.captura_url)+'" target="_blank" rel="noopener">ver captura</a>'):'')
+        +'</div></div>';
+    }).join('');
+  }catch(e){
+    c.innerHTML='<div class="vacio">No pude leer las constancias: '+esc(enCristiano(e.message))+'.</div>';
+  }
+}
+
 function pintar(){
   /* Si el tablero esta caido, lo que se ve es una foto vieja: los botones que
      escriben se apagan a proposito, para que nadie firme contra una copia. */
@@ -1809,6 +2043,8 @@ function pintar(){
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
   acuerdo(); pintarMarcador(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
+  try{ pintarLibro(); pintarBitacora(); }catch(e){ console.error('libro/bitacora',e); }
+  pintarConstancias();
   pintarAurum(); pintarMandar(); pintarSalientes(); pintarEnviadosHoy(); pintarPendiente(); pintarMomentos();
   var f=new Date();
   $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
@@ -2276,6 +2512,8 @@ async function cargar(){
 }
 document.addEventListener('DOMContentLoaded',function(){
   var b=$('#sBtn'); if(b) b.addEventListener('click',soltar);
+  ['#libroProy','#libroPers','#libroEst'].forEach(function(s){ var e=$(s); if(e) e.addEventListener('change',pintarLibro); });
+  ['#bitacDias','#bitacProy','#bitacPers'].forEach(function(s){ var e=$(s); if(e) e.addEventListener('change',pintarBitacora); });
   var on=$('#mkOn');
   if(on){ on.hidden=JUEGO;
     on.onclick=function(){ JUEGO=true; try{ localStorage.setItem('cierre_juego','si'); }catch(e){}
