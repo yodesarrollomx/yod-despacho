@@ -2186,7 +2186,17 @@ async function llamar(action,payload){
   }
   if(tope) clearTimeout(tope);
   var t=await r.text();
-  try{ return JSON.parse(t); }catch(e){ throw new Error('el tablero contestó algo que no entiendo'); }
+  var j; try{ j=JSON.parse(t); }catch(e){ throw new Error('el tablero contestó algo que no entiendo'); }
+  /* El board a veces contesta «liga» a una credencial buena (parpadeo). En una
+     lectura se repregunta hasta dos veces antes de creerle; en una escritura
+     NO, porque el 404/liga llega despues de ejecutar y repetir duplica. */
+  if(j && j.ok===false && j.error==='liga' && action==='getAll' && !(payload&&payload._reintento)){
+    for(var i=1;i<=2 && j && j.ok===false && j.error==='liga';i++){
+      await new Promise(function(ok){ setTimeout(ok, 1200*i); });
+      j=await llamar(action, Object.assign({}, payload||{}, {_reintento:i}));
+    }
+  }
+  return j;
 }
 
 /* Quien nombraste en «quién lo ejecuta». Gana el que aparece PRIMERO en tu
