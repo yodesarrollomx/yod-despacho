@@ -2879,7 +2879,7 @@ async function soltar(){
 }
 
 /* ── arranque ── */
-var _fallos=0, CAIDO=false;
+var _fallos=0, CAIDO=false, _esperandoClave=false;
 async function cargar(){
   var b=$('#banner');
   try{
@@ -2903,7 +2903,21 @@ async function cargar(){
     $('#estado').textContent='no pude leer el tablero';
     b.hidden=false; b.className='aviso mal';
     if(!credencial()){
-      b.textContent='Todavía no entras: el Portero pide tu acceso. En cuanto entres, este tablero se llena solo.';
+      /* Carrera real, cazada el 14-sep: esta pagina arranca cargar() antes de
+         que portero.js termine de canjear la liga, asi que ve el localStorage
+         vacio y se rinde con «todavia no entras» — con la sesion perfectamente
+         viva. Ahora se queda esperando la clave y arranca solo en cuanto
+         aparece; si a los 25 s no llego, entonces si es que hay que entrar. */
+      b.textContent='Esperando al Portero…';
+      if(!_esperandoClave){
+        _esperandoClave=true;
+        var t0=Date.now();
+        var iv=setInterval(function(){
+          if(credencial()){ clearInterval(iv); _esperandoClave=false; _fallos=0; cargar(); return; }
+          if(Date.now()-t0>25000){ clearInterval(iv); _esperandoClave=false;
+            b.textContent='Todavía no entras: el Portero pide tu acceso. En cuanto entres, este tablero se llena solo.'; }
+        },600);
+      }
       return;
     }
     /* El Apps Script de Google parpadea y contesta «liga» aunque la credencial
