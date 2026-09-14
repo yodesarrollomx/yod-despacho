@@ -2016,9 +2016,18 @@ async function pintarConstancias(){
   try{
     if(typeof CFG_MSJ==='undefined' || !CFG_MSJ) await cargarConfigMensajes();
     if(!CFG_MSJ || !CFG_MSJ.webhook_url) throw new Error('sin webhook en config.despacho.json');
-    var r=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action:'leer',k:credencial(),hoja:'CONSTANCIAS'})});
-    var d=JSON.parse(await r.text());
+    /* el echo de Google sirve una vez y a veces devuelve HTML: se repite el POST */
+    var d=null, ult='';
+    for(var i=0;i<3 && !d;i++){
+      if(i) await new Promise(function(ok){ setTimeout(ok,700*i); });
+      try{
+        var r=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body:JSON.stringify({action:'leer',k:credencial(),hoja:'CONSTANCIAS'})});
+        var t=await r.text(); if(/^\s*</.test(t)) { ult='Google devolvió su página en vez de los datos'; continue; }
+        d=JSON.parse(t);
+      }catch(e){ ult=e.message; }
+    }
+    if(!d) throw new Error(ult||'no contestó');
     if(!d.ok) throw new Error(d.error||'no contestó');
     var rows=(d.rows||[]).slice(-40).reverse();
     if(!rows.length){ c.innerHTML='<div class="vacio">Todavía no hay constancias. Cada vez que Claudet ejecute algo, aquí queda la captura y lo que se leyó de vuelta.</div>'; return; }
