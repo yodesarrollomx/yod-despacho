@@ -171,6 +171,10 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .cota.cero b{color:var(--mute)}
 
 /* ═══════════════ LOS PANELES ═══════════════ */
+/* OJO: display:flex le gana al atributo hidden del navegador. Sin esta linea
+   los dos paneles se quedaban encima de todo con su velo y su blur, y el
+   tablero se veia en blanco (14-sep, cazado en la primera revision). */
+.panel[hidden]{display:none}
 .panel{position:fixed;inset:0;z-index:2200;background:rgba(6,5,4,.72);
   backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:0}
 @media (min-width:760px){ .panel{align-items:center;padding:24px} }
@@ -2013,7 +2017,7 @@ function pintarPlanta(){
     var todas=VIVAS.filter(function(r){ return empresaDe(r)===emp; });
     var abiertas=todas.filter(function(r){ return !r._frio; }).length;
     var h='<div class="predio" data-emp="'+esc(emp)+'">'
-      +'<div class="predioCab"><img src="'+esc(E[3])+'" alt="'+esc(E[1])+'" loading="lazy">'
+      +'<div class="predioCab"><img src="'+esc(E[3])+'" alt="'+esc(E[1])+'">'
       +'<div class="t"><b>'+esc(E[1])+'</b><span>'+esc(E[2])+'</span></div>'
       +'<div class="tot">'+abiertas+'<u>abiertos</u></div></div>';
     ABC.forEach(function(A){
