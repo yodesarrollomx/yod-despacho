@@ -124,6 +124,10 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .dictado #sTexto{margin-top:12px}
 .dictado #entrada{margin-top:12px}
 
+.vistaSw{display:flex;align-items:center;gap:8px;margin:16px 0 -4px;flex-wrap:wrap}
+.vistaSw span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+.vistaSw .bOtro{padding:6px 13px;font-size:12px}
+.vistaSw .bOtro.on{border-color:var(--oro);color:var(--oro)}
 /* ═══════════════ LA PLANTA ═══════════════
    El tablero como planta arquitectonica: dos predios, tres crujias cada uno,
    y cada crujia leida como un eje estructural — linea de eje guion-punto,
@@ -612,6 +616,11 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
        con sus marcas numeradas (los proyectos) y la cota al final (la letra y
        el total abierto). Se pica una marca y sale el pendiente; se pica la
        cota y sale la crujia entera. -->
+  <div class="vistaSw">
+    <span>La planta, vista</span>
+    <button class="bOtro on" data-vista="proyecto" type="button">por proyecto</button>
+    <button class="bOtro" data-vista="persona" type="button">por persona</button>
+  </div>
   <section class="planta" id="planta"></section>
 
   <!-- los dos paneles que se abren encima: la crujia y el pendiente -->
@@ -1353,7 +1362,9 @@ function acuerdo(){
                         :('lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma'))
        +', leído de sus palabras: no es una cifra del contador</span>')
     : '';
-  $('#acuerdoDin').hidden = !suma;
+  /* Ninguna tarjeta viva trae monto hoy, asi que este marcador decia «$0» y
+     mentia por omision. Solo se enseña si hay una cifra de verdad. */
+  $('#acuerdoDin').hidden = !(suma>0);
   /* Los 7 dias que se guardan desde la ronda 6 por fin se ven. Numeros, no
      grafica ni racha: solo cuantas vencidas habia cada dia que abriste. */
   var elH=$('#acuerdoHist');
@@ -1995,12 +2006,15 @@ function carrilABC(r){
   if(n.indexOf('nuevos clientes')>=0 || n.indexOf('cliente')>=0) return 'C';
   return 'A';   /* admin, contratos, nomina, gastos, ayuda social, decisiones sin tema */
 }
-/* Los proyectos de una crujia, con sus pendientes, ordenados por urgencia. */
+/* Los proyectos —o las personas— de una crujia, con sus pendientes, por urgencia.
+   La misma planta se puede leer de dos maneras: por PROYECTO (donde vive el
+   trabajo) o por PERSONA (quien te debe que). Las crujias no cambian. */
+var VISTA='proyecto';
 function crujiaDe(emp, car){
   var L=VIVAS.filter(function(r){ return empresaDe(r)===emp && carrilABC(r)===car; });
   var por={};
   L.forEach(function(r){
-    var k=sujetoDe(r);
+    var k = VISTA==='persona' ? (String(r.responsable||'').trim()||'sin dueño') : sujetoDe(r);
     (por[k]=por[k]||{nombre:k, tarjetas:[], frios:0, vencidas:0, dinero:0}).tarjetas.push(r);
     if(r._frio) por[k].frios++;
     var d=dias(r._f); if(d!==null && d>0 && !r._frio) por[k].vencidas++;
@@ -2061,15 +2075,14 @@ function abrirCrujia(emp, car, resaltar){
   if(!P.length) h+='<div class="vacio">Nada abierto en esta crujía.</div>';
   P.forEach(function(x){
     h+='<div style="margin:16px 0 4px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--oro)">'
-      +esc(x.nombre.toUpperCase())+' · '+x.abiertas+(x.frios?(' · '+x.frios+' en pausa'):'')
-      +(x.dinero?(' · '+esc(pesos(x.dinero))):'')+'</div>';
+      +esc(x.nombre.toUpperCase())+' · '+x.abiertas+(x.frios?(' · '+x.frios+' en pausa'):'')+'</div>';
     x.tarjetas.forEach(function(r,k){
       var d=dias(r._f);
       var dtx = d===null?'sin fecha' : (d>0?(d+' d tarde'):(d===0?'HOY':('en '+(-d)+' d')));
       h+='<div class="pFila'+((d!==null&&d>0&&!r._frio)?' venc':'')+'" data-abrir="'+esc(r.id)+'">'
         +'<span class="n">'+(k+1)+'</span>'
         +'<div class="c"><b>'+esc(String(r.actividad||'').slice(0,110))+'</b>'
-        +'<span>'+esc(r.responsable||'sin dueño')+(r.estado?(' · '+esc(r.estado)):'')
+        +'<span>'+esc(VISTA==='persona'?sujetoDe(r):(r.responsable||'sin dueño'))+(r.estado?(' · '+esc(r.estado)):'')
         +(r._frio?' · en pausa':'')+(r._dinTxt?(' · '+esc(r._dinTxt)):'')+'</span></div>'
         +'<span class="d'+((d!==null&&d>0&&!r._frio)?' venc':'')+'">'+esc(dtx)+'</span></div>';
     });
@@ -2970,7 +2983,13 @@ async function cargar(){
 document.addEventListener('DOMContentLoaded',function(){
   var b=$('#sBtn'); if(b) b.addEventListener('click',soltar);
   ['#libroProy','#libroPers','#libroEst'].forEach(function(s){ var e=$(s); if(e) e.addEventListener('change',pintarLibro); });
-  var tp=$('#trabajoProy'); if(tp) tp.addEventListener('change',pintarTrabajo);
+  Array.prototype.forEach.call(document.querySelectorAll('.vistaSw [data-vista]'),function(b){
+    b.addEventListener('click',function(){
+      VISTA=b.dataset.vista;
+      Array.prototype.forEach.call(document.querySelectorAll('.vistaSw [data-vista]'),function(x){ x.classList.toggle('on', x.dataset.vista===VISTA); });
+      pintarPlanta();
+    });
+  });
   Array.prototype.forEach.call(document.querySelectorAll('#trabajoFiltros [data-tf]'),function(b){ b.addEventListener('click',function(){ TF=b.dataset.tf; TRAB_MAX=12; pintarTrabajo(); }); });
   /* la historia se pliega: no empuja el trabajo hacia abajo */
   ['#zHilo','#zMarcador','#zLibro','#zBitacora','#zConst'].forEach(function(sel){
