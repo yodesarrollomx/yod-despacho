@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>El Despacho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f12; --panel:#16171b; --panel2:#1c1e23; --line:#2a2c33;
+  --ink:#eceef2; --ink2:#a7abb6; --ink3:#6d717d;
+  --accent:#e7b65c; --accent-ink:#241a05;
+  --good:#4fae7a; --bad:#d9695c; --warn:#e7b65c;
+  --btn:#25272e; --btn-hover:#2d3038;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--bg);color:var(--ink);}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.45;
+  min-height:100vh;display:flex;flex-direction:column;}
+.serif{font-family:'Fraunces',Georgia,serif;}
+::selection{background:var(--accent);color:var(--accent-ink);}
+
+/* ── portero (bloqueo hasta credencial) ── */
+#lockWrap{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;}
+#lockWrap[hidden]{display:none;}
+.lockcard{max-width:360px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;text-align:center;}
+.lockcard h1{font-size:20px;margin:0 0 8px;}
+.lockcard p{color:var(--ink2);font-size:13px;margin:0 0 16px;}
+.lockcard input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  border-radius:8px;padding:10px 12px;font-size:15px;text-align:center;letter-spacing:2px;}
+.lockcard button{margin-top:10px;width:100%;background:var(--accent);color:var(--accent-ink);border:0;
+  border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
+.lockcard .err{color:var(--bad);font-size:12px;margin-top:8px;min-height:14px;}
+
+/* ── encabezado ── */
+header{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 80%,transparent);
+  padding:14px 16px 6px;display:flex;align-items:center;gap:10px;}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-family:'Fraunces',serif;flex-shrink:0;}
+header .tit{flex:1;min-width:0;}
+header .tit b{display:block;font-size:15px;}
+header .tit span{display:block;font-size:12px;color:var(--ink2);}
+header .tit span.roja{color:var(--bad);font-weight:600;}
+#demoTag{font-size:10px;background:var(--btn);color:var(--ink2);padding:3px 7px;border-radius:6px;flex-shrink:0;}
+
+/* ── hilo ── */
+main{flex:1;max-width:640px;width:100%;margin:0 auto;padding:4px 12px 140px;}
+.sep{text-align:center;color:var(--ink3);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
+  margin:22px 0 10px;position:relative;}
+.sep span{background:var(--bg);padding:0 10px;position:relative;z-index:1;}
+.sep::before{content:'';position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--line);}
+
+.msg{margin:10px 0;display:flex;gap:8px;align-items:flex-start;}
+.msg .av{width:26px;height:26px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'Fraunces',serif;flex-shrink:0;margin-top:2px;}
+.bubble{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;max-width:100%;}
+.msg.voz .bubble{font-family:'Fraunces',serif;font-size:16px;font-style:italic;color:var(--ink);}
+.msg.sistema .bubble{color:var(--ink2);font-size:13px;font-style:italic;}
+.msg.respuesta{justify-content:flex-end;}
+.msg.respuesta .bubble{background:var(--panel2);}
+.msg.respuesta .av{order:2;}
+
+/* ── tarjeta caso ── */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0 0 34px;}
+.card h3{margin:0 0 10px;font-size:16px;font-family:'Fraunces',serif;font-weight:600;}
+.card .campo{margin-bottom:10px;}
+.card .campo b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:2px;}
+.card .campo p{margin:0;font-size:14px;color:var(--ink);white-space:pre-wrap;}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.opt{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2);}
+.opt.rec{border-color:var(--accent);background:rgba(231,182,92,.08);}
+.opt .k{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
+  background:var(--btn);font-size:11px;font-weight:600;margin-right:8px;}
+.opt.rec .k{background:var(--accent);color:var(--accent-ink);}
+.opt .txt{font-size:14px;}
+.opt .cons{font-size:12px;color:var(--ink2);margin-top:3px;}
+.opt .estrella{font-size:10px;color:var(--accent);margin-left:6px;}
+.botones{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.btn{flex:1 1 auto;min-width:64px;background:var(--btn);color:var(--ink);border:1px solid var(--line);
+  border-radius:9px;padding:11px 10px;font-size:14px;font-weight:500;cursor:pointer;text-align:center;}
+.btn:hover{background:var(--btn-hover);}
+.btn:disabled{opacity:.45;cursor:default;}
+.btn.principal{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;}
+.btn.chico{flex:0 1 auto;padding:8px 12px;font-size:13px;}
+.estado{margin-top:10px;font-size:13px;padding:8px 10px;border-radius:8px;}
+.estado.ok{background:rgba(79,174,122,.15);color:var(--good);}
+.estado.mal{background:rgba(217,105,92,.15);color:var(--bad);}
+.estado.espera{background:var(--panel2);color:var(--ink2);}
+
+/* ── movimiento ── */
+.mov{margin:10px 0 0 34px;background:var(--panel2);border:1px dashed var(--line);border-radius:10px;
+  padding:10px 12px;font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.mov b{color:var(--ink);font-weight:500;}
+.mov .btn{flex:0 0 auto;padding:6px 10px;font-size:12px;}
+
+/* ── cambia dialog ── */
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:flex;align-items:flex-end;justify-content:center;}
+.dlg[hidden]{display:none;}
+.dlgcard{background:var(--panel);border:1px solid var(--line);border-radius:16px 16px 0 0;padding:18px;
+  width:100%;max-width:640px;}
+.dlgcard textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  border-radius:8px;padding:10px;font-size:14px;font-family:inherit;min-height:70px;resize:vertical;}
+.dlgrow{display:flex;gap:8px;margin-top:10px;}
+
+/* ── compose ── */
+#compose{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:10;}
+.cwrap{max-width:640px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;}
+#composeTxt{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  border-radius:14px;padding:11px 14px;font-size:15px;font-family:inherit;resize:none;max-height:110px;}
+.round{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);
+  color:var(--ink);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.round.on{background:var(--bad);border-color:var(--bad);color:#fff;animation:pulse 1.2s infinite;}
+.round.send{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+.urgToggle{max-width:640px;margin:6px auto 0;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);}
+.urgToggle input{accent-color:var(--bad);}
+#micEst{max-width:640px;margin:4px auto 0;font-size:11px;color:var(--ink3);min-height:14px;}
+
+.vacio{text-align:center;color:var(--ink3);font-size:13px;padding:60px 20px;}
+.avisoCfg{margin:16px;padding:12px 14px;border-radius:10px;background:rgba(217,105,92,.12);color:var(--bad);font-size:13px;}
+body.embed{background:transparent}
+</style>
+</head>
+<body>
+
+<div id="lockWrap">
+  <div class="lockcard">
+    <h1 class="serif">El Despacho</h1>
+    <p>Escribe tu clave para entrar.</p>
+    <input id="lockKey" type="password" inputmode="text" placeholder="clave" autocomplete="off">
+    <button id="lockBtn">Entrar</button>
+    <div class="err" id="lockErr"></div>
+  </div>
+</div>
+
+<header id="hiloHeader">
+  <div class="avatar serif">C</div>
+  <div class="tit">
+    <b>El Despacho</b>
+    <span id="ultimaPasada">cargando…</span>
+  </div>
+  <span id="demoTag" hidden>modo demo</span>
+</header>
+
+<main id="hilo"><div class="vacio">Cargando el hilo…</div></main>
+
+<div class="dlg" id="dlgCambia" hidden>
+  <div class="dlgcard">
+    <b class="serif" style="font-size:15px;">Cámbiale — dime qué prefieres</b>
+    <textarea id="dlgTxt" placeholder="Escribe o dicta el cambio…"></textarea>
+    <div class="dlgrow">
+      <button class="round" id="dlgMic">🎙</button>
+      <button class="btn" id="dlgCancel">Cancelar</button>
+      <button class="btn principal" id="dlgOk">Mandar</button>
+    </div>
+  </div>
+</div>
+
+<div id="compose">
+  <div class="cwrap">
+    <textarea id="composeTxt" rows="1" placeholder="Dile algo a Claudet, o dicta…"></textarea>
+    <button class="round" id="micBtn" title="Dictar">🎙</button>
+    <button class="round send" id="sendBtn" title="Enviar">➤</button>
+  </div>
+  <label class="urgToggle"><input type="checkbox" id="urgChk"> Es urgente</label>
+  <div id="micEst"></div>
+</div>
+
+<script>
+'use strict';
+var $ = function(s,c){ return (c||document).querySelector(s); };
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+var PORTERO_LSK = 'pyod_clave_v1';
+var DEMO = /[?&]demo=1/.test(location.search);
+var CFG = null;
+var FILAS = [];
+var POLL_MS = 60000;
+var pollTimer = null;
+
+/* ── portero: misma mecánica de yod-despacho (localStorage pyod_clave_v1) ── */
+function credencial(){ try{ return localStorage.getItem(PORTERO_LSK) || ''; }catch(e){ return ''; } }
+function guardarCredencial(k){ try{ localStorage.setItem(PORTERO_LSK, k); }catch(e){} }
+function mostrarLock(mostrar){ $('#lockWrap').hidden = !mostrar; }
+
+function iniciarPortero(){
+  if(DEMO){ mostrarLock(false); arrancar(); return; }
+  var k = credencial();
+  if(k){ mostrarLock(false); arrancar(); return; }
+  mostrarLock(true);
+  $('#lockBtn').onclick = intentarEntrar;
+  $('#lockKey').addEventListener('keydown', function(e){ if(e.key==='Enter') intentarEntrar(); });
+}
+function intentarEntrar(){
+  var v = $('#lockKey').value.trim();
+  if(!v){ $('#lockErr').textContent='Escribe algo.'; return; }
+  guardarCredencial(v);
+  mostrarLock(false);
+  arrancar();
+}
+
+/* ── config: nada hardcodeado, todo sale de config.despacho.json ── */
+async function cargarConfig(){
+  try{
+    var r = await fetch('config.despacho.json', {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    CFG = await r.json();
+    if(!CFG.webhook_url) throw new Error('sin webhook_url');
+  }catch(e){
+    CFG = null;
+    $('#hilo').innerHTML = '<div class="avisoCfg">No encontré config.despacho.json con webhook_url válido. El Despacho no puede hablar con el backend hasta que exista.</div>';
+  }
+}
+
+async function llamarWebhook(action, campos){
+  var body = Object.assign({action: action, k: credencial()}, campos||{});
+  var r = await fetch(CFG.webhook_url, {
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return await r.json();
+}
+
+/* ── datos demo (sin backend) ── */
+function datosDemo(){
+  return [
+    {id:'d1', fecha:'2026-09-12 07:02', momento:'arranque', tipo:'voz', titulo:'', texto:'Buenos días, Alejandro. Esto es lo que traigo para arrancar el día.', opciones:'[]', estado:'cerrada'},
+    {id:'d2', fecha:'2026-09-12 07:03', momento:'arranque', tipo:'caso', titulo:'Franco pidió respuesta sobre Sonora',
+      texto:'Qué pasó: Franco preguntó ayer por WhatsApp si el terreno de Sonora sigue en pie.\nQué hice: revisé el hilo y no hay nada nuevo desde el 8-sep.\nQué necesito: que decidas cómo le contesto.',
+      opciones: JSON.stringify([
+        {k:'A', texto:'Decirle que sí sigue en pie, sin fecha aún', consecuencia:'lo deja tranquilo, sin comprometer fecha', recomendada:true, accion:{tipo:'whatsapp', para:'Franco', texto:'Franco, sigue en pie, en cuanto tenga fecha te aviso.'}},
+        {k:'B', texto:'Decirle que se enfría por ahora', consecuencia:'puede buscar otro terreno', recomendada:false, accion:{tipo:'whatsapp', para:'Franco', texto:'Franco, por ahora se enfría, te aviso si se reactiva.'}},
+        {k:'C', texto:'No contestar todavía', consecuencia:'Franco puede insistir de nuevo', recomendada:false, accion:{tipo:'nada'}}
+      ]), estado:'abierta'},
+    {id:'d3', fecha:'2026-09-12 07:05', momento:'arranque', tipo:'movimiento', titulo:'Recordatorio de pago programado',
+      texto:'Mandé el recordatorio de pago a Sayri porque llevaba 3 días sin moverse (regla: Así siempre).', estado:'ejecutada', resultado:'{}'},
+    {id:'d4', fecha:'2026-09-12 12:00', momento:'mediodia', tipo:'sistema', texto:'Pasada de mediodía: sin casos nuevos.', estado:'cerrada'}
+  ];
+}
+
+/* ── carga y pintura del hilo ── */
+async function refrescar(){
+  if(DEMO){ FILAS = datosDemo(); $('#demoTag').hidden = false; pintarTodo(); return; }
+  if(!CFG) return;
+  try{
+    var r = await llamarWebhook('hilo_listar', {});
+    if(!r || !r.ok) throw new Error((r&&r.error)||'respuesta sin ok');
+    FILAS = r.filas || r.rows || [];
+    pintarTodo();
+  }catch(e){
+    var h = $('#hilo');
+    if(!h.dataset.pintado){
+      h.innerHTML = '<div class="avisoCfg">No pude leer el hilo: '+esc(e.message)+'</div>';
+    }
+  }
+}
+
+function opcionesDe(fila){
+  try{ return JSON.parse(fila.opciones||'[]'); }catch(e){ return []; }
+}
+
+function pintarUltimaPasada(){
+  var relevantes = FILAS.filter(function(f){ return f.tipo==='voz' || f.tipo==='sistema'; });
+  var el = $('#ultimaPasada');
+  if(!relevantes.length){ el.textContent='sin pasadas aún'; el.className=''; return; }
+  var ultima = relevantes[relevantes.length-1];
+  var fecha = new Date((ultima.fecha||'').replace(' ','T'));
+  var mins = isNaN(fecha) ? null : Math.round((Date.now()-fecha.getTime())/60000);
+  var horaTxt = isNaN(fecha) ? ultima.fecha : fecha.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
+  el.textContent = 'última pasada: ' + (horaTxt||'—') + (mins!=null ? ' · hace '+mins+' min' : '');
+  el.className = (mins!=null && mins>90) ? 'roja' : '';
+}
+
+function pintarTodo(){
+  pintarUltimaPasada();
+  var h = $('#hilo');
+  if(!FILAS.length){ h.innerHTML='<div class="vacio">No hay nada en el hilo todavía.</div>'; return; }
+  var out = [];
+  var momentoAnterior = null;
+  var NOMBRE_MOMENTO = {arranque:'Arranque', mediodia:'Mediodía', cierre:'Cierre', pasada:'Pasada', instante:'Ahora'};
+  FILAS.forEach(function(f){
+    if(f.momento && f.momento!==momentoAnterior){
+      out.push('<div class="sep"><span>'+esc(NOMBRE_MOMENTO[f.momento]||f.momento)+'</span></div>');
+      momentoAnterior = f.momento;
+    }
+    out.push(pintarFila(f));
+  });
+  h.innerHTML = out.join('');
+  h.dataset.pintado = '1';
+  // enganchar eventos por fila
+  FILAS.forEach(function(f){
+    if(f.tipo==='caso' && (f.estado==='abierta')){
+      enganchaCaso(f);
+    } else if(f.tipo==='movimiento' && f.estado==='ejecutada'){
+      enganchaMovimiento(f);
+    }
+  });
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function pintarFila(f){
+  if(f.tipo==='voz'){
+    return '<div class="msg voz"><div class="av serif">C</div><div class="bubble serif">'+esc(f.texto)+'</div></div>';
+  }
+  if(f.tipo==='sistema'){
+    return '<div class="msg sistema"><div class="av">·</div><div class="bubble">'+esc(f.texto)+'</div></div>';
+  }
+  if(f.tipo==='respuesta'){
+    return '<div class="msg respuesta"><div class="av">A</div><div class="bubble">'+esc(f.texto)+'</div></div>';
+  }
+  if(f.tipo==='movimiento'){
+    return pintarMovimiento(f);
+  }
+  if(f.tipo==='caso'){
+    return pintarCaso(f);
+  }
+  return '';
+}
+
+function pintarMovimiento(f){
+  var deshacer = f.estado==='ejecutada'
+    ? '<button class="btn chico" data-deshacer="'+esc(f.id)+'">Deshacer</button>'
+    : (f.estado==='descartada' ? '<span style="color:var(--ink3)">deshecho</span>' : '');
+  return '<div class="mov" id="mov_'+esc(f.id)+'"><span>↳ <b>'+esc(f.titulo||'Lo que moví yo')+'</b> — '+esc(f.texto)+'</span>'+deshacer+'</div>';
+}
+
+function pintarCaso(f){
+  var partes = String(f.texto||'').split(/\n/).map(function(l){
+    var m = l.match(/^(Qué pasó|Qué hice|Qué necesito):\s*(.*)$/i);
+    if(m) return {b:m[1], t:m[2]};
+    return null;
+  }).filter(Boolean);
+  var camposHtml = partes.length
+    ? partes.map(function(p){ return '<div class="campo"><b>'+esc(p.b)+'</b><p>'+esc(p.t)+'</p></div>'; }).join('')
+    : '<div class="campo"><p>'+esc(f.texto).replace(/\n/g,'<br>')+'</p></div>';
+  var opts = opcionesDe(f);
+  var optsHtml = opts.map(function(o){
+    return '<div class="opt'+(o.recomendada?' rec':'')+'"><span class="k">'+esc(o.k)+'</span><span class="txt">'+esc(o.texto)+'</span>'
+      + (o.recomendada?'<span class="estrella">★ recomendada</span>':'')
+      + (o.consecuencia?'<div class="cons">'+esc(o.consecuencia)+'</div>':'') + '</div>';
+  }).join('');
+  var botonesHtml = opts.map(function(o){
+    return '<button class="btn'+(o.recomendada?' principal':'')+'" data-opt="'+esc(o.k)+'" data-caso="'+esc(f.id)+'">'+esc(o.k)+'</button>';
+  }).join('') +
+    '<button class="btn chico" data-cambia="'+esc(f.id)+'">Cámbiale</button>' +
+    '<button class="btn chico" data-despues="'+esc(f.id)+'">Después</button>';
+  return '<div class="msg sistema"><div class="av">·</div><div class="bubble" style="font-size:12px;color:var(--ink3)">caso</div></div>'
+    + '<div class="card" id="caso_'+esc(f.id)+'">'
+    + '<h3 class="serif">'+esc(f.titulo||'Un caso')+'</h3>'
+    + camposHtml
+    + '<div class="opts">'+optsHtml+'</div>'
+    + '<div class="botones">'+botonesHtml+'</div>'
+    + '<div class="estado" id="estado_'+esc(f.id)+'" hidden></div>'
+    + '</div>';
+}
+
+function estadoCaso(id, clase, texto){
+  var el = $('#estado_'+id);
+  if(!el) return;
+  el.hidden = false;
+  el.className = 'estado '+clase;
+  el.textContent = texto;
+}
+
+function deshabilitarCaso(id){
+  var card = $('#caso_'+id);
+  if(!card) return;
+  card.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+}
+
+async function responderCaso(id, respuesta, textoCambio){
+  deshabilitarCaso(id);
+  estadoCaso(id, 'espera', 'Mandando…');
+  if(DEMO){
+    setTimeout(function(){ estadoCaso(id, 'ok', '✓ (demo) respuesta registrada, no se envió nada real'); }, 400);
+    return;
+  }
+  try{
+    var campos = {id: id, respuesta: respuesta};
+    if(textoCambio) campos.texto_cambio = textoCambio;
+    var r = await llamarWebhook('hilo_responder', campos);
+    if(!r || !r.ok) throw new Error((r&&r.error)||'sin ok');
+    if(r.estado==='ejecutada' || (r.resultado && r.resultado.wamid)){
+      var hora = (r.resultado && r.resultado.hora) || new Date().toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
+      estadoCaso(id, 'ok', '✓ enviado '+hora);
+    } else {
+      estadoCaso(id, 'ok', 'recibido, lo ejecuto en la siguiente pasada');
+    }
+  }catch(e){
+    estadoCaso(id, 'mal', 'Error: '+e.message);
+    var card = $('#caso_'+id);
+    if(card) card.querySelectorAll('button').forEach(function(b){ b.disabled = false; });
+  }
+}
+
+function enganchaCaso(f){
+  var card = $('#caso_'+f.id);
+  if(!card) return;
+  card.querySelectorAll('[data-opt]').forEach(function(b){
+    b.onclick = function(){ responderCaso(f.id, b.dataset.opt); };
+  });
+  var cambia = card.querySelector('[data-cambia]');
+  if(cambia) cambia.onclick = function(){ abrirCambia(f.id); };
+  var despues = card.querySelector('[data-despues]');
+  if(despues) despues.onclick = function(){ responderCaso(f.id, 'despues'); };
+}
+
+/* ── Cámbiale: cuadro con dictado ── */
+var CAMBIA_ID = null;
+function abrirCambia(id){
+  CAMBIA_ID = id;
+  $('#dlgTxt').value = '';
+  $('#dlgCambia').hidden = false;
+  $('#dlgTxt').focus();
+}
+function cerrarCambia(){ $('#dlgCambia').hidden = true; CAMBIA_ID = null; }
+
+/* ── movimientos: Deshacer ── */
+async function deshacerMovimiento(id, btn){
+  btn.disabled = true; btn.textContent = '…';
+  if(DEMO){ setTimeout(function(){ btn.parentNode.innerHTML = btn.parentNode.innerHTML.replace(/<span[^>]*>·<\/span>$/,''); btn.outerHTML='<span style="color:var(--ink3)">deshecho (demo)</span>'; }, 300); return; }
+  try{
+    var r = await llamarWebhook('hilo_deshacer', {id:id});
+    if(!r || !r.ok) throw new Error((r&&r.error)||'ya salió');
+    btn.outerHTML = '<span style="color:var(--good)">deshecho</span>';
+  }catch(e){
+    btn.disabled = false; btn.textContent = 'Deshacer';
+    alert('No se pudo deshacer: '+e.message);
+  }
+}
+function enganchaMovimiento(f){
+  var el = $('#mov_'+f.id+' [data-deshacer]');
+  if(el) el.onclick = function(){ deshacerMovimiento(f.id, el); };
+}
+
+/* ── dictado (mismo patrón que yod-despacho: dictarEn) ── */
+var REC=null, RECdest=null, RECbtn=null, RECbase='';
+function hayDictado(){ return !!(window.SpeechRecognition||window.webkitSpeechRecognition); }
+function dictarEn(dest, btn){
+  if(!hayDictado()){ if(btn) btn.title='tu navegador no oye'; return; }
+  if(REC){ REC.stop(); return; }
+  var SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  REC = new SR(); RECdest = dest; RECbtn = btn; RECbase = dest.value ? dest.value+' ' : '';
+  REC.lang = 'es-MX'; REC.continuous = true; REC.interimResults = true;
+  REC.onstart = function(){ if(btn) btn.classList.add('on'); };
+  REC.onresult = function(e){
+    var t=''; for(var i=0;i<e.results.length;i++) t += e.results[i][0].transcript;
+    dest.value = RECbase + t;
+  };
+  var POR = {'not-allowed':'Chrome no me dejó oír: dale permiso de micrófono al sitio.',
+    'no-speech':'No te oí nada.', 'audio-capture':'No encuentro micrófono.',
+    'network':'Se cortó la conexión.', 'aborted':'Se cortó la grabación.',
+    'service-not-allowed':'El navegador no deja usar el dictado aquí.'};
+  REC.onerror = function(e){ if(btn) btn.classList.remove('on'); $('#micEst').textContent = POR[e.error] || 'No pude oír.'; };
+  REC.onend = function(){ if(btn) btn.classList.remove('on'); REC=null; };
+  try{ REC.start(); }catch(e){ REC=null; if(btn) btn.classList.remove('on'); }
+}
+
+/* ── compose: enviar a charola ── */
+async function enviarCompose(){
+  var txt = $('#composeTxt').value.trim();
+  if(!txt) return;
+  var urgente = $('#urgChk').checked;
+  var btn = $('#sendBtn');
+  btn.disabled = true;
+  try{
+    if(DEMO){
+      FILAS.push({id:'demo-'+Date.now(), fecha:new Date().toISOString(), momento:'instante', tipo:'respuesta', texto:txt, estado:'cerrada'});
+      pintarTodo();
+    } else {
+      var r = await llamarWebhook('charola_agregar', {texto:txt, origen:'texto', urgente: urgente?1:0, para:''});
+      if(!r || !r.ok) throw new Error((r&&r.error)||'sin ok');
+      await refrescar();
+    }
+    $('#composeTxt').value = '';
+    $('#urgChk').checked = false;
+  }catch(e){
+    $('#micEst').textContent = 'No se pudo mandar: '+e.message;
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+/* ── arranque ── */
+function programarPoll(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refrescar, POLL_MS);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') refrescar();
+  });
+}
+
+async function arrancar(){
+  if(location.search.indexOf('embed=1')>=0){ var hh=document.getElementById('hiloHeader'); if(hh) hh.hidden=true; document.body.classList.add('embed'); }
+  await cargarConfig();
+  if(CFG || DEMO) await refrescar();
+  programarPoll();
+
+  $('#micBtn').onclick = function(){ dictarEn($('#composeTxt'), $('#micBtn')); };
+  $('#sendBtn').onclick = enviarCompose;
+  $('#composeTxt').addEventListener('keydown', function(e){
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); enviarCompose(); }
+  });
+  $('#dlgMic').onclick = function(){ dictarEn($('#dlgTxt'), $('#dlgMic')); };
+  $('#dlgCancel').onclick = cerrarCambia;
+  $('#dlgOk').onclick = function(){
+    var t = $('#dlgTxt').value.trim();
+    if(!t) return;
+    var id = CAMBIA_ID;
+    cerrarCambia();
+    responderCaso(id, 'cambio', t);
+  };
+}
+
+iniciarPortero();
+</script>
+</body>
+</html>
