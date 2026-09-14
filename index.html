@@ -2919,7 +2919,23 @@ async function cargar(){
   try{
     var r=await llamar('getAll',{});
     if(!r || !r.ok) throw new Error(r&&r.error?r.error:'sin respuesta');
-    TAREAS=r.tasks||[];
+    var llegaron=r.tasks||[];
+    /* Google a veces contesta ok:true con CERO tarjetas (visto el 14-sep en su
+       Chrome: la pantalla dijo «Nada vencido. La mesa está limpia» con 149
+       tarjetas en el Sheet). Un cero contra una copia que si tenia es mentira:
+       se reintenta, y si insiste se usa la copia y se dice de cuando es. */
+    if(!llegaron.length){
+      var prevJ=null; try{ prevJ=JSON.parse(localStorage.getItem('cierre_ultima')||'null'); }catch(e){}
+      if(prevJ && prevJ.t && prevJ.t.length){
+        for(var iv=1; iv<=2 && !llegaron.length; iv++){
+          await new Promise(function(ok){ setTimeout(ok,1500*iv); });
+          var r2=await llamar('getAll',{});
+          if(r2 && r2.ok) llegaron=r2.tasks||[];
+        }
+        if(!llegaron.length) throw new Error('el tablero contestó cero tarjetas tres veces seguidas');
+      }
+    }
+    TAREAS=llegaron;
     /* Se guarda la ultima lectura buena. NO es una segunda bandeja: el Sheet
        sigue mandando y esto jamas se escribe. Es para que un parpadeo de Google
        no deje la pantalla en blanco, y siempre se dice de cuando es. */
