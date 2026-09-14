@@ -2151,6 +2151,9 @@ function pintarSalidas(id){
     h+='<button class="bFirmar" data-sal="copiar">Copiar el texto</button>';
     if(o.wa) h+='<button class="bOtro" data-sal="wa">Abrir WhatsApp con él ya escrito</button>';
     h+='<button class="bOtro" data-sal="claudet">Que lo mande Claudet (con tu firma)</button>';
+    /* El correo no sale de aqui: la pagina no manda correos. Se le encarga a
+       Claudet, que deja el BORRADOR en Gmail y tu lo revisas y lo envias. */
+    h+='<button class="bOtro" data-sal="correo">Que Claudet deje el borrador de correo</button>';
   }
   if(o.accion) h+='<button class="bFirmar" data-sal="hazlo">'+(o.accion==='aClaudet'?'Déjaselo a Claudet':'Hazlo')+'</button>';
   h+='<button class="bOtro" data-sal="nota">Anotar algo</button>';
@@ -2172,6 +2175,14 @@ async function salida(id, cual, btn){
   if(cual==='wa'){
     window.open('https://wa.me/'+o.wa+'?text='+encodeURIComponent(o.texto),'_blank');
     m.className='pMsg'; m.textContent='Se abrió WhatsApp. Cuando lo mandes, anótalo aquí con «Anotar algo».';
+    return;
+  }
+  if(cual==='correo'){
+    var quien=String(r.responsable||'').trim();
+    var mail=(CONTACTOS[quien]||{}).mail||'';
+    await escribirEnTarjeta(id, {},
+      '✉️ Para Claudet (Despacho, '+hoyLocal()+'): dejar borrador de correo'+(mail?(' a '+mail):'')+' — '+o.texto.slice(0,160),
+      'Anotado. Claudet deja el borrador en Gmail en su próxima pasada'+(mail?(' a '+mail):'')+'; tú lo revisas y lo mandas.', btn);
     return;
   }
   if(cual==='nota'){
