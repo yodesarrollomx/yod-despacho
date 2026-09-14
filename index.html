@@ -2032,7 +2032,9 @@ async function pintarConstancias(){
     var rows=(d.rows||[]).slice(-40).reverse();
     if(!rows.length){ c.innerHTML='<div class="vacio">Todavía no hay constancias. Cada vez que Claudet ejecute algo, aquí queda la captura y lo que se leyó de vuelta.</div>'; return; }
     c.innerHTML=rows.map(function(x){
-      var f=String(x.fecha||'').replace('T',' ').slice(0,16);
+      /* el webhook devuelve la fecha en ISO UTC: se pinta en la hora de aqui */
+      var fd=new Date(x.fecha), f=isNaN(fd)?String(x.fecha||'').slice(0,16)
+        :fd.toLocaleDateString('es-MX',{day:'numeric',month:'short'})+' '+fd.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
       return '<div class="cs"><span class="f">'+esc(f)+'</span><div><b style="font-weight:500;color:var(--ink)">'+esc(x.que||'')+'</b>'
         +(x.tarjeta?(' <span class="id" style="font-family:var(--mono);font-size:10.5px;color:var(--mute)">'+esc(x.tarjeta)+'</span>'):'')
         +'<br><span class="'+(String(x.resultado||'').indexOf('✓')>=0?'ok':'')+'">'+esc(String(x.resultado_leido||x.resultado||'').slice(0,200))+'</span>'
