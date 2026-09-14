@@ -106,120 +106,6 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
    El boceto que Alejandro aprobo el 7-sep: un escritorio con tres charolas —
    lo que entra, lo que ya acomode, y lo que salio firmado. El centro no es una
    lista: es un acto. Firmar. */
-/* ═══════════════ EL DICTADO ═══════════════ */
-.dictado{margin-top:14px;background:var(--panel);border:1px solid var(--hair);border-radius:24px;padding:16px 16px 14px}
-.micGrande{width:100%;display:flex;align-items:center;justify-content:center;gap:13px;
-  background:linear-gradient(160deg,#241E16 0%,#1A160F 70%);border:1px solid var(--hair2);
-  color:var(--oro2);border-radius:20px;padding:22px 20px;font-family:var(--serif);font-size:24px;
-  letter-spacing:.01em;cursor:pointer;transition:.18s;min-height:74px}
-.micGrande:hover{border-color:var(--oro);color:var(--oro)}
-.micGrande:active{transform:scale(.99)}
-.micGrande i{width:13px;height:13px;border-radius:50%;background:var(--verde);flex:0 0 auto}
-.micGrande.on{background:var(--rojoS);border-color:var(--rojo);color:var(--rojo)}
-.micGrande.on i{background:var(--rojo);animation:lat 1s infinite}
-.dicCuerpo{max-height:0;overflow:hidden;transition:max-height .28s ease}
-.dictado.abierto .dicCuerpo{max-height:900px}
-.dictado #sTexto{margin-top:12px}
-.dictado #entrada{margin-top:12px}
-
-/* ═══════════════ LA PLANTA ═══════════════
-   El tablero como planta arquitectonica: dos predios, tres crujias cada uno,
-   y cada crujia leida como un eje estructural — linea de eje guion-punto,
-   marcas de eje numeradas (los proyectos) y la cota al final. */
-.planta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
-@media (max-width:860px){ .planta{grid-template-columns:1fr} }
-.predio{background:var(--panel);border:1px solid var(--hair);border-radius:24px;padding:16px 16px 10px}
-.predioCab{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--hair)}
-.predioCab img{width:38px;height:38px;object-fit:contain;border-radius:9px;background:#fff;padding:3px;flex:0 0 auto}
-.predioCab .t{flex:1;min-width:0}
-.predioCab b{display:block;font-family:var(--serif);font-size:18px;color:var(--ink);font-weight:400;line-height:1.15}
-.predioCab span{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--faint)}
-.predioCab .tot{font-family:var(--serif);font-size:26px;color:var(--oro);line-height:1}
-.predioCab .tot u{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
-  color:var(--faint);text-decoration:none;text-align:right}
-
-/* una crujia = una fila de eje */
-.crujia{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
-  padding:13px 0;border-bottom:1px solid var(--hair)}
-.predio .crujia:last-child{border-bottom:0}
-.ejeZona{min-width:0}
-.ejeNom{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;color:var(--faint);
-  text-transform:uppercase;margin-bottom:7px}
-/* la linea de eje: guion-punto, como en plano */
-.eje{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:9px;min-height:30px}
-.eje::before{content:'';position:absolute;left:0;right:0;top:15px;height:1px;
-  background:repeating-linear-gradient(90deg,var(--hair2) 0 7px,transparent 7px 10px,var(--mute) 10px 11px,transparent 11px 14px)}
-/* marca de eje: el circulo numerado del plano */
-.marca{position:relative;display:inline-flex;align-items:center;justify-content:center;
-  width:30px;height:30px;border-radius:50%;background:var(--panel2);border:1px solid var(--hair2);
-  color:var(--ink2);font-family:var(--mono);font-size:12.5px;cursor:pointer;transition:.15s;flex:0 0 auto}
-.marca:hover{border-color:var(--oro);color:var(--oro);transform:translateY(-1px)}
-.marca.venc{border-color:var(--rojo);color:var(--rojo);background:var(--rojoS)}
-.marca.hoy{border-color:var(--ambar);color:var(--ambar)}
-.marca.fria{opacity:.4;border-style:dashed}
-.marca .nom{position:absolute;top:33px;left:50%;transform:translateX(-50%);white-space:nowrap;
-  font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--mute);pointer-events:none}
-.eje{padding-bottom:15px}
-.ejeVacio{font-size:12px;color:var(--mute);padding:6px 0}
-/* la cota: la letra y el total, al final del eje */
-.cota{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
-  min-width:56px;padding:8px 10px;background:var(--panel2);border:1px solid var(--hair2);
-  border-radius:12px;cursor:pointer;transition:.15s}
-.cota:hover{border-color:var(--oro);background:var(--oroS)}
-.cota b{font-family:var(--serif);font-size:22px;color:var(--oro);line-height:1;font-weight:400}
-.cota u{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--faint);text-decoration:none}
-.cota.cero b{color:var(--mute)}
-
-/* ═══════════════ LOS PANELES ═══════════════ */
-.panel{position:fixed;inset:0;z-index:2200;background:rgba(6,5,4,.72);
-  backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:0}
-@media (min-width:760px){ .panel{align-items:center;padding:24px} }
-.panelCaja{width:100%;max-width:720px;max-height:92vh;overflow:auto;background:var(--panel);
-  border:1px solid var(--hair2);border-radius:24px 24px 0 0;padding:20px 20px 28px;
-  animation:sube .26s cubic-bezier(.2,.8,.3,1)}
-@media (min-width:760px){ .panelCaja{border-radius:24px} }
-@keyframes sube{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){ .panelCaja{animation:none} }
-.pCab{display:flex;align-items:flex-start;gap:12px;padding-bottom:13px;border-bottom:1px solid var(--hair);margin-bottom:14px}
-.pCab .t{flex:1;min-width:0}
-.pCab .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--oro);text-transform:uppercase}
-.pCab h3{font-family:var(--serif);font-size:23px;line-height:1.16;color:var(--ink);margin:4px 0 0;font-weight:400}
-.pCerrar{background:transparent;border:1px solid var(--hair2);color:var(--faint);border-radius:11px;
-  padding:7px 12px;font-size:12.5px;cursor:pointer;flex:0 0 auto}
-.pCerrar:hover{color:var(--ink2);border-color:var(--hair2)}
-/* renglon de proyecto dentro de una crujia */
-.pFila{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
-  padding:11px 2px;border-bottom:1px solid var(--hair);cursor:pointer}
-.pFila:hover{background:var(--panel2)}
-.pFila .n{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;
-  border-radius:50%;background:var(--panel2);border:1px solid var(--hair2);font-family:var(--mono);font-size:11.5px;color:var(--ink2)}
-.pFila.venc .n{border-color:var(--rojo);color:var(--rojo)}
-.pFila .c b{display:block;font-size:14px;color:var(--ink);font-weight:500;line-height:1.3}
-.pFila .c span{font-size:12px;color:var(--faint)}
-.pFila .d{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap}
-.pFila .d.venc{color:var(--rojo)}
-/* el pendiente: lo que pasa, lo que propongo, y las salidas */
-.pQue{font-size:13.5px;color:var(--ink2);line-height:1.55;background:var(--panel2);
-  border-radius:14px;padding:13px 15px;margin-bottom:12px}
-.pQue b{color:var(--ink)}
-.pHist{font-size:12.5px;color:var(--faint);line-height:1.5;margin-bottom:14px}
-.pHist div{padding:5px 0;border-bottom:1px solid var(--hair)}
-.pHist .f{font-family:var(--mono);font-size:10.5px;color:var(--mute);margin-right:7px}
-.pProp{margin-bottom:6px}
-.pProp .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--oro);text-transform:uppercase;display:block;margin-bottom:9px}
-.opcion{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;padding:12px 13px;
-  background:var(--panel2);border:1px solid var(--hair2);border-radius:14px;margin-bottom:8px;cursor:pointer;transition:.15s}
-.opcion:hover{border-color:var(--oro)}
-.opcion.sel{border-color:var(--oro);background:var(--oroS)}
-.opcion .l{font-family:var(--mono);font-size:13px;color:var(--oro);width:17px}
-.opcion b{display:block;font-size:13.5px;color:var(--ink);font-weight:500;line-height:1.35}
-.opcion span{display:block;font-size:12px;color:var(--faint);line-height:1.45;margin-top:2px}
-.pSalidas{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;padding-top:13px;border-top:1px solid var(--hair)}
-.pSalidas button{padding:9px 13px;font-size:12.5px;border-radius:12px}
-.pPrev{font-family:var(--mono);font-size:11.5px;color:var(--faint);background:var(--panel2);
-  border-radius:10px;padding:10px 12px;margin-top:11px;white-space:pre-wrap;line-height:1.5}
-.pMsg{font-size:12.5px;margin-top:10px;min-height:17px}
-.pMsg.ok{color:var(--verde)} .pMsg.mal{color:var(--rojo)}
 .acuerdo{margin-top:16px;background:linear-gradient(160deg,#221C13 0%,#17140F 62%);border-radius:24px;padding:22px 24px}
 .acuerdo .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--oro)}
 .acuerdo .n{font-family:var(--serif);font-size:clamp(30px,4.4vw,44px);line-height:1.05;color:var(--ink);margin-top:4px}
@@ -570,15 +456,48 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <div class="hist" id="acuerdoHist" hidden></div>
   </section>
 
-  <!-- ═══════════════ EL DICTADO ═══════════════
-       Lo primero y lo mas grande: en el iPhone se aprieta con el pulgar sin
-       buscar nada. Todo lo demas de la pantalla empieza aqui. -->
+  <!-- LA MESA DE HOY: TODO lo vivo, por urgencia, con acciones reales. Antes la
+       mesa solo enseñaba decisiones y, con las 14 ejecutadas, decia «la mesa esta
+       limpia» mientras habia 34 tarjetas vivas y 7 vencidas: el trabajo no estaba
+       al frente. Ahora esta aqui, arriba de todo. -->
+  <section class="zona trabajo" id="zTrabajo" data-mom="arranque firma cierre">
+    <h2>La mesa de hoy <span class="sub" style="display:inline;margin-left:8px" id="trabajoSub"></span></h2>
+    <div class="filtros" id="trabajoFiltros">
+      <button class="bOtro on" data-tf="todo" type="button">todo</button>
+      <button class="bOtro" data-tf="vencidas" type="button">vencidas</button>
+      <button class="bOtro" data-tf="mias" type="button">mías</button>
+      <button class="bOtro" data-tf="otros" type="button">de otros</button>
+      <button class="bOtro" data-tf="dinero" type="button">con dinero</button>
+      <select id="trabajoProy"><option value="">todos los proyectos</option></select>
+    </div>
+    <div id="trabajo"></div>
+  </section>
+
+  <!-- El Hilo: la conversacion con Claudet (casos A/B/C, movimientos, respuestas).
+       Vive en hilo.html con su propio JS para no chocar nombres con esta pagina;
+       misma origen, misma credencial del Portero en localStorage. -->
+  <section class="zona hiloZ" id="zHilo" data-mom="arranque firma cierre">
+    <h2>El Hilo <span class="sub" style="display:inline;margin-left:8px">lo que Claudet te pregunta y lo que hizo solo</span></h2>
+    <iframe id="hiloFrame" src="hilo.html?embed=1" title="El Hilo" loading="lazy"></iframe>
+  </section>
+
+  <div id="marcador" hidden></div>
+  <button class="mkOn" id="mkOn" type="button" hidden>volver a prender el marcador</button>
+
+  <div class="moms" id="moms"></div>
+  <p class="momAviso" id="momAviso"></p>
+
   <div class="aviso" id="banner" hidden></div>
 
-  <section class="dictado" id="zDictado">
-    <button class="micGrande" id="micBtn" type="button"><i></i><span id="micTxt">Dictar</span></button>
-    <p class="micEst" id="micEst">Apriétalo y habla. Yo lo escribo.</p>
-    <div class="dicCuerpo" id="dicCuerpo">
+  <!-- 2 · las tres charolas -->
+  <div class="pendiente" id="pendiente" data-mom="cierre" hidden></div>
+
+  <div class="tres" data-mom="arranque firma cierre">
+    <section class="zona entrada" data-mom="arranque firma cierre">
+      <h2>Charola de entrada</h2>
+      <span class="sub">lo crudo que soltaste y todavía no acomodo</span>
+      <button class="mic" id="micBtn" type="button"><i></i><span id="micTxt">Grabar</span></button>
+      <p class="micEst" id="micEst">Apriétalo y habla. Yo lo escribo.</p>
       <textarea id="sTexto" placeholder="…o escríbelo aquí"></textarea>
       <div class="dicPie">
         <select id="sProy"></select>
@@ -591,40 +510,74 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
         <button class="bp" id="sBtn" type="button" disabled>cargando el tablero…</button>
         <span class="smsg" id="sMsg"></span>
       </div>
-      <div id="entrada"></div>
-    </div>
+      <div id="entrada" style="margin-top:14px"></div>
+    </section>
+
+    <section class="zona mesa" data-mom="arranque firma">
+      <h2>La mesa de firmas</h2>
+      <span class="sub">se firma, se corrige o se aplaza — nada más</span>
+      <div id="mesa"></div>
+    </section>
+
+    <section class="zona arbol" data-mom="arranque firma">
+      <h2>El árbol de la casa</h2>
+      <span class="sub">se prende la rama de la tarjeta abierta</span>
+      <div id="arbol"></div>
+    </section>
+  </div>
+
+  <!-- MÓDULO despacho (botón Enviar) — agregado por Claudet, operador/despacho.
+       Misma bandeja de siempre: lee las tarjetas cuyo último comentario relevante
+       es 📤 SALIENTE (redactadas y sin 📨 ENVIADO después). Enviar es un POST al
+       web app del webhook; nunca lo dispara nadie más que el clic de Alejandro. -->
+  <section class="zona salientes" data-mom="arranque firma cierre">
+    <h2>Mensajes por enviar</h2>
+    <span class="sub">redactados y con destinatario de WhatsApp · Enviar los saca de aquí de verdad, no es para copiar</span>
+    <div id="salientesAviso" class="smsg" hidden></div>
+    <div id="salientes"></div>
   </section>
 
-  <!-- ═══════════════ LA PLANTA ═══════════════
-       Dos predios (las dos empresas) sobre el mismo eje. Cada predio con tres
-       crujias: A operacion interna, B operacion con clientes, C nuevos
-       clientes. Cada crujia se lee como un eje estructural: la linea de eje
-       con sus marcas numeradas (los proyectos) y la cota al final (la letra y
-       el total abierto). Se pica una marca y sale el pendiente; se pica la
-       cota y sale la crujia entera. -->
-  <section class="planta" id="planta"></section>
-
-  <!-- los dos paneles que se abren encima: la crujia y el pendiente -->
-  <div class="panel" id="panelCrujia" hidden><div class="panelCaja"></div></div>
-  <div class="panel" id="panelPend" hidden><div class="panelCaja"></div></div>
-
-  <!-- Abajo, y plegado: la conversacion con Claudet y la historia. Se abre con
-       un clic en su titulo; nunca empuja el trabajo hacia abajo. -->
-  <section class="zona hiloZ" id="zHilo">
-    <h2>El Hilo <span class="sub" style="display:inline;margin-left:8px">lo que Claudet te pregunta y lo que hizo solo</span></h2>
-    <iframe id="hiloFrame" src="hilo.html?embed=1" title="El Hilo" loading="lazy"></iframe>
+  <section class="zona enviados" data-mom="arranque firma cierre">
+    <h2>Enviados hoy</h2>
+    <span class="sub">estado que reporta WhatsApp: accepted → delivered → read</span>
+    <div id="enviadosHoy"></div>
   </section>
 
-  <section class="zona mkZ" id="zMarcador">
-    <h2>El marcador de la casa <span class="sub" style="display:inline;margin-left:8px">récord, racha y las cinco metas</span></h2>
-    <div id="marcador" hidden></div>
-    <button class="mkOn" id="mkOn" type="button" hidden>volver a prender el marcador</button>
+  <div id="riesgos" data-mom="arranque"></div>
+
+  <!-- Aurum al frente: 5 de 46 tarjetas, pero carga una de las cinco metas -->
+  <section class="aurum" id="aurum" data-mom="arranque firma" hidden>
+    <h2 style="font-family:var(--serif);font-size:21px;color:var(--ink)">Aurum al frente</h2>
+    <span class="sub" style="display:block;font-size:12px;color:var(--faint);margin:2px 0 12px">3 contratos nuevos antes del 28 de febrero · no se pierden entre las de YoDesarrollo</span>
+    <div id="aurumL"></div>
   </section>
+
+  <!-- el cierre de las 9: lo que se movió y lo que hay que mandar -->
+  <section class="zona salida" id="zCierre" data-mom="cierre" style="margin-top:14px">
+    <h2>Lo que hay que mandar</h2>
+    <span class="sub">un bloque por persona, listo para copiar · la app nunca manda nada</span>
+    <div id="mandar"></div>
+  </section>
+
+  <!-- 3 · lo que salió y lo que se atora -->
+  <div class="dos" data-mom="firma cierre">
+    <section class="zona salida">
+      <h2>Charola de salida</h2>
+      <span class="sub">lo que firmaste hoy y adónde se fue</span>
+      <div id="salidaDin" class="salDin" hidden></div>
+      <div id="salida"></div>
+    </section>
+    <section class="zona atora">
+      <h2>Lo que se está atorando</h2>
+      <span class="sub">aplazado tres veces o más</span>
+      <div id="atora"></div>
+    </section>
+  </div>
 
   <!-- El libro de decisiones: cada DECISIÓN que tomaste, con lo que paso despues,
        como arbol Meta → Proyecto → Decision → pasos. Sale del Sheet, de los
        comentarios con sello; no hay una segunda base de datos. -->
-  <section class="zona libro" id="zLibro">
+  <section class="zona libro" id="zLibro" data-mom="arranque firma cierre">
     <h2>El libro de decisiones <span class="sub" style="display:inline;margin-left:8px" id="libroSub"></span></h2>
     <div class="filtros">
       <select id="libroProy"><option value="">todos los proyectos</option></select>
@@ -638,7 +591,7 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 
   <!-- La bitacora: dia → proyecto → persona → accion. Reconstruida cada vez desde
        los comentarios con fecha y el historial de estados de cada tarjeta. -->
-  <section class="zona bitac" id="zBitacora">
+  <section class="zona bitac" id="zBitacora" data-mom="arranque firma cierre">
     <h2>La bitácora <span class="sub" style="display:inline;margin-left:8px" id="bitacSub"></span></h2>
     <div class="filtros">
       <select id="bitacDias"><option value="7">últimos 7 días</option><option value="14" selected>últimos 14 días</option><option value="30">últimos 30 días</option><option value="90">últimos 90 días</option></select>
@@ -651,12 +604,12 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   <!-- Constancias: prueba de lo que Claudet ejecuto — la captura y lo que se leyo
        de vuelta del Sheet despues de escribir. Viven en la pestaña CONSTANCIAS del
        libro de mensajes. -->
-  <section class="zona const" id="zConst">
+  <section class="zona const" id="zConst" data-mom="arranque firma cierre">
     <h2>Constancias <span class="sub" style="display:inline;margin-left:8px">lo que Claudet ejecutó, con su captura y lo que se leyó de vuelta</span></h2>
     <div id="constancias"><div class="vacio">cargando…</div></div>
   </section>
 
-  <div class="focos">
+  <div class="focos" data-mom="arranque firma">
     <h2>¿Cómo sé que jala?</h2>
     <div class="fgrid" id="focos"></div>
   </div>
@@ -1955,317 +1908,151 @@ async function despuesSaliente(id,btn){
   btn.disabled=true; btn.textContent='oculto por ahora';
 }
 
-/* ══════════════════════ LA PLANTA ══════════════════════
-   El Despacho leido como un plano: dos predios (las dos empresas) y, en cada
-   uno, tres crujias. La crujia es un eje estructural: la linea de eje con sus
-   marcas numeradas (los proyectos) y la cota al final (la letra y el total).
-   Se pica una marca y sale ese pendiente; se pica la cota y sale la crujia. */
-var CONTACTOS = {"Alejandro": {"wa": "525518331100", "mail": "direccion@aurumarquitectos.com"}, "Mariana": {"wa": "527225722961", "mail": "hmo.arq@aurumarquitectos.com"}, "Alma": {"wa": "526622020253", "mail": "admin@aurumarquitectos.com"}, "Sayri": {"wa": "526622000340", "mail": "proyectos@aurumarquitectos.com"}};
-var ABC = [
-  ['A','Operación interna','lo de la casa: admin, contratos, dinero, decisiones'],
-  ['B','Operación con clientes','lo que ya está andando y tiene cliente'],
-  ['C','Nuevos clientes','lo que todavía no es tuyo']
-];
-var EMPRESAS = [
-  ['Aurum Arquitectos','Aurum Arquitectos','ARQUITECTURA DE AUTOR','img/aurum.jpg'],
-  ['YoDesarrollo','YoDesarrollo','CO-DESARROLLO DE TERRENOS','img/yod.jpg']
-];
-function empresaDe(r){
-  var e=sinac(String(r.empresa||''));
-  return e.indexOf('aurum')>=0 ? 'Aurum Arquitectos' : 'YoDesarrollo';
+/* ══════════════ LA MESA DE HOY ══════════════
+   Todo lo vivo, por urgencia: vencidas (las mas viejas primero), luego lo que
+   vence esta semana, luego lo demas por fecha, al final lo que no tiene fecha.
+   Cada tarjeta trae las cuatro acciones que de verdad mueven una tarea:
+   terminarla, pasarla a alguien, darle fecha nueva, o anotarle algo. Todas
+   ven antes de escribir, escriben por el mismo Apps Script, y releen. */
+var TF='todo', TRAB_MAX=12, TRAB_ABIERTAS={};
+function ordenTrabajo(r){ var d=dias(r._f); if(d===null) return [3,0]; if(d>0) return [0,-d]; if(d>=-7) return [1,-d]; return [2,-d]; }
+function trabajoLista(){
+  var fp=$('#trabajoProy').value;
+  var L=VIVAS.filter(function(r){ return !r._frio; });
+  if(TF==='vencidas') L=L.filter(function(r){ var d=dias(r._f); return d!==null && d>0; });
+  else if(TF==='mias') L=L.filter(function(r){ return r._mio; });
+  else if(TF==='otros') L=L.filter(function(r){ return !r._mio; });
+  else if(TF==='dinero') L=L.filter(function(r){ return r._din>0; });
+  if(fp) L=L.filter(function(r){ return sujetoDe(r)===fp; });
+  L.sort(function(a,b){ var A=ordenTrabajo(a),B=ordenTrabajo(b); return A[0]-B[0] || A[1]-B[1] || (b._din||0)-(a._din||0); });
+  return L;
 }
-/* A que crujia pertenece. Una tarjeta de «Decisiones» se clasifica por su tema
-   real, igual que en el arbol: la decision no es un proyecto, es de alguno. */
-function carrilABC(r){
-  var p=String(r.proyecto||'').trim();
-  if(sinac(p)==='decisiones'){ var t=temaDecision(r); if(t) p=t; }
-  var n=sinac(p);
-  if((MAPA.proyectos||[]).some(function(x){return sinac(x)===n;})) return 'B';
-  if((MAPA.nuevos||[]).some(function(x){return sinac(x)===n;})) return 'C';
-  if(n.indexOf('nuevos clientes')>=0 || n.indexOf('cliente')>=0) return 'C';
-  return 'A';   /* admin, contratos, nomina, gastos, ayuda social, decisiones sin tema */
+function pintarTrabajo(){
+  var c=$('#trabajo'); if(!c) return;
+  llenarSelect('#trabajoProy', VIVAS.filter(function(r){return !r._frio;}).map(sujetoDe), $('#trabajoProy').value);
+  var L=trabajoLista(), todas=VIVAS.filter(function(r){return !r._frio;});
+  var venc=todas.filter(function(r){ var d=dias(r._f); return d!==null&&d>0; }).length;
+  var sem=todas.filter(function(r){ var d=dias(r._f); return d!==null&&d<=0&&d>=-7; }).length;
+  $('#trabajoSub').textContent=todas.length+' vivas · '+venc+(venc===1?' vencida':' vencidas')+' · '+sem+' vencen esta semana · '+todas.filter(function(r){return r._mio;}).length+' tuyas';
+  Array.prototype.forEach.call(document.querySelectorAll('#trabajoFiltros [data-tf]'),function(b){ b.classList.toggle('on', b.dataset.tf===TF); });
+  if(!L.length){ c.innerHTML='<div class="vacio">Nada con ese filtro. Cambia el filtro o suelta algo en la charola.</div>'; return; }
+  var vis=L.slice(0, TRAB_MAX);
+  c.innerHTML=vis.map(function(r){
+    var d=dias(r._f), ra=ramaDe(r);
+    var cd = d===null?'' : (d>0?'venc':(d===0?'hoy':''));
+    var dtx = d===null?'sin fecha' : (d>0?(d+' d tarde'):(d===0?'HOY':('en '+(-d)+' d')));
+    var tieneDec = r._dec || r._miaCerrar || r._espAotro;
+    return '<div class="tj'+(r._mio?' mia':'')+'" data-id="'+esc(r.id)+'">'
+      +'<div class="d '+cd+'">'+esc(dtx)+'</div>'
+      +'<div class="cuerpo"><div class="r">'+esc(sujetoDe(r))+(ra.meta?(' · '+esc(metaCorta(ra.meta))):'')+'</div>'
+      +'<h4>'+esc(String(r.actividad||'').slice(0,140))+'</h4>'
+      +'<div class="m"><b>'+esc(r.responsable||'sin dueño')+'</b>'+(r.estado?(' · '+esc(r.estado)):'')
+      +(r._dinTxt?(' · <span class="din">'+esc(r._dinTxt)+'</span>'):'')
+      +(String(r.observaciones||'').trim()?(' · '+esc(String(r.observaciones).slice(0,90))):'')
+      +(tieneDec?' · <span style="color:var(--oro)">tiene una decisión abajo en la mesa de firmas</span>':'')+'</div></div>'
+      +'<div class="acc">'
+      +'<button class="bFirmar" data-tj="terminar" data-id="'+esc(r.id)+'">Terminada</button>'
+      +'<button class="bOtro" data-tj="pasar" data-id="'+esc(r.id)+'">Pasar a…</button>'
+      +'<button class="bOtro" data-tj="fecha" data-id="'+esc(r.id)+'">Nueva fecha</button>'
+      +'<button class="bOtro" data-tj="nota" data-id="'+esc(r.id)+'">Nota</button>'
+      +'</div>'
+      +'<div class="caja2" id="tjc_'+esc(r.id)+'"></div>'
+      +'</div>';
+  }).join('')
+  +(L.length>vis.length?('<button class="bOtro verMas" id="trabMas">ver '+(L.length-vis.length)+' más</button>'):'');
+  Array.prototype.forEach.call(c.querySelectorAll('[data-tj]'),function(b){ b.onclick=function(){ abrirAccion(b.dataset.id, b.dataset.tj); }; });
+  var vm=$('#trabMas'); if(vm) vm.onclick=function(){ TRAB_MAX+=12; pintarTrabajo(); };
+  Object.keys(TRAB_ABIERTAS).forEach(function(id){ if(document.getElementById('tjc_'+id)) abrirAccion(id, TRAB_ABIERTAS[id]); });
 }
-/* Los proyectos de una crujia, con sus pendientes, ordenados por urgencia. */
-function crujiaDe(emp, car){
-  var L=VIVAS.filter(function(r){ return empresaDe(r)===emp && carrilABC(r)===car; });
-  var por={};
-  L.forEach(function(r){
-    var k=sujetoDe(r);
-    (por[k]=por[k]||{nombre:k, tarjetas:[], frios:0, vencidas:0, dinero:0}).tarjetas.push(r);
-    if(r._frio) por[k].frios++;
-    var d=dias(r._f); if(d!==null && d>0 && !r._frio) por[k].vencidas++;
-    por[k].dinero+=(r._din||0);
-  });
-  var P=Object.keys(por).map(function(k){ return por[k]; });
-  P.forEach(function(x){
-    x.abiertas=x.tarjetas.filter(function(r){ return !r._frio; }).length;
-    x.tarjetas.sort(function(a,b){ var A=dias(a._f), B=dias(b._f);
-      if(A===null) return 1; if(B===null) return -1; return B-A; });
-    x.dmax=Math.max.apply(null, x.tarjetas.map(function(r){ var d=dias(r._f); return d===null?-999:d; }));
-  });
-  P.sort(function(a,b){ return b.vencidas-a.vencidas || b.dmax-a.dmax || b.abiertas-a.abiertas; });
-  return P;
-}
-function pintarPlanta(){
-  var c=$('#planta'); if(!c) return;
-  c.innerHTML = EMPRESAS.map(function(E){
-    var emp=E[0];
-    var todas=VIVAS.filter(function(r){ return empresaDe(r)===emp; });
-    var abiertas=todas.filter(function(r){ return !r._frio; }).length;
-    var h='<div class="predio" data-emp="'+esc(emp)+'">'
-      +'<div class="predioCab"><img src="'+esc(E[3])+'" alt="'+esc(E[1])+'" loading="lazy">'
-      +'<div class="t"><b>'+esc(E[1])+'</b><span>'+esc(E[2])+'</span></div>'
-      +'<div class="tot">'+abiertas+'<u>abiertos</u></div></div>';
-    ABC.forEach(function(A){
-      var car=A[0], P=crujiaDe(emp,car);
-      var ab=P.reduce(function(n,x){ return n+x.abiertas; },0);
-      var vn=P.reduce(function(n,x){ return n+x.vencidas; },0);
-      h+='<div class="crujia"><div class="ejeZona"><div class="ejeNom">'+esc(A[1])+'</div><div class="eje">';
-      if(!P.length) h+='<span class="ejeVacio">nada abierto</span>';
-      else P.forEach(function(x){
-        var cl = x.vencidas?'venc' : (x.dmax===0?'hoy' : (x.abiertas?'':'fria'));
-        if(!x.abiertas) cl='fria';
-        h+='<button class="marca '+cl+'" data-emp="'+esc(emp)+'" data-car="'+car+'" data-proy="'+esc(x.nombre)+'" '
-          +'title="'+esc(x.nombre)+' · '+x.abiertas+' abierto'+(x.abiertas===1?'':'s')+(x.frios?(' · '+x.frios+' en pausa'):'')+'">'
-          +(x.abiertas||x.frios)+'<span class="nom">'+esc(x.nombre.length>13?x.nombre.slice(0,12)+'…':x.nombre)+'</span></button>';
-      });
-      h+='</div></div>'
-        +'<button class="cota'+(ab?'':' cero')+'" data-emp="'+esc(emp)+'" data-car="'+car+'" '
-        +'title="'+esc(A[2])+'"><b>'+car+'</b><u>'+ab+(vn?(' · '+vn+'✕'):'')+'</u></button></div>';
-    });
-    return h+'</div>';
-  }).join('');
-  Array.prototype.forEach.call(c.querySelectorAll('.cota'),function(b){
-    b.onclick=function(){ abrirCrujia(b.dataset.emp, b.dataset.car); }; });
-  Array.prototype.forEach.call(c.querySelectorAll('.marca'),function(b){
-    b.onclick=function(){ abrirCrujia(b.dataset.emp, b.dataset.car, b.dataset.proy); }; });
-}
-
-/* ────────── panel 1: la crujia ────────── */
-function abrirCrujia(emp, car, resaltar){
-  var A=ABC.filter(function(x){return x[0]===car;})[0]||['','',''];
-  var P=crujiaDe(emp,car);
-  var h='<div class="pCab"><div class="t"><div class="k">'+esc(emp)+' · CRUJÍA '+car+'</div>'
-    +'<h3>'+esc(A[1])+'</h3></div><button class="pCerrar" data-cerrar="panelCrujia">cerrar</button></div>'
-    +'<p style="font-size:12.5px;color:var(--faint);margin:-6px 0 14px">'+esc(A[2])+'</p>';
-  if(!P.length) h+='<div class="vacio">Nada abierto en esta crujía.</div>';
-  P.forEach(function(x){
-    h+='<div style="margin:16px 0 4px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--oro)">'
-      +esc(x.nombre.toUpperCase())+' · '+x.abiertas+(x.frios?(' · '+x.frios+' en pausa'):'')
-      +(x.dinero?(' · '+esc(pesos(x.dinero))):'')+'</div>';
-    x.tarjetas.forEach(function(r,k){
-      var d=dias(r._f);
-      var dtx = d===null?'sin fecha' : (d>0?(d+' d tarde'):(d===0?'HOY':('en '+(-d)+' d')));
-      h+='<div class="pFila'+((d!==null&&d>0&&!r._frio)?' venc':'')+'" data-abrir="'+esc(r.id)+'">'
-        +'<span class="n">'+(k+1)+'</span>'
-        +'<div class="c"><b>'+esc(String(r.actividad||'').slice(0,110))+'</b>'
-        +'<span>'+esc(r.responsable||'sin dueño')+(r.estado?(' · '+esc(r.estado)):'')
-        +(r._frio?' · en pausa':'')+(r._dinTxt?(' · '+esc(r._dinTxt)):'')+'</span></div>'
-        +'<span class="d'+((d!==null&&d>0&&!r._frio)?' venc':'')+'">'+esc(dtx)+'</span></div>';
-    });
-  });
-  mostrarPanel('panelCrujia', h);
-  if(resaltar){
-    var el=document.querySelector('#panelCrujia [data-abrir]');
-    var t=Array.prototype.filter.call(document.querySelectorAll('#panelCrujia div[style*="letter-spacing"]'),
-      function(x){ return x.textContent.indexOf(String(resaltar).toUpperCase())===0; })[0];
-    if(t) t.scrollIntoView({block:'start'});
-  }
-}
-
-/* ────────── panel 2: el pendiente ────────── */
-function propuestasDe(r){
-  var d=dias(r._f), quien=String(r.responsable||'').trim(), mio=(quien==='Alejandro'||!quien);
-  var P=[], act=String(r.actividad||'').slice(0,90);
-  if(!mio){
-    var wa=(CONTACTOS[quien]||{}).wa||'';
-    P.push({k:'A', t:'Recordárselo a '+quien, q:'Un mensaje corto pidiendo en qué va. '+(wa?'Tengo su WhatsApp.':'No tengo su WhatsApp: se copia y lo mandas tú.'),
-      texto:quien+', ¿cómo vamos con «'+act+'»?'+(d!==null&&d>0?(' Lleva '+d+' días.'):'')+' ¿Me dices en qué punto está?', wa:wa, rec:true});
-    P.push({k:'B', t:'Traérmela de vuelta', q:'Deja de esperar a '+quien+': la tarjeta pasa a tu nombre y sigue viva.', accion:'tomar'});
-  } else {
-    P.push({k:'A', t:'Pasársela a alguien', q:'Cambia el dueño y le queda anotado qué le pides.', accion:'pasar', rec:(d!==null&&d>7)});
-    P.push({k:'B', t:'Darle fecha nueva', q:'La mueve en el tablero y queda escrito que la moviste.', accion:'fecha'});
-  }
-  if(r._dec) P.unshift({k:'!', t:'Ya la decidiste: falta redactar lo que sale', q:'Claudet lo redacta en su próxima pasada y te lo deja para revisar.', accion:'aClaudet', rec:true});
-  P.push({k:'C', t:'Darla por terminada', q:'Escribe estado Terminado, la fecha de cierre y el historial. Deja de contar entre las vencidas.', accion:'terminar'});
-  P.push({k:'D', t:'Recordármelo mañana', q:'La deja con fecha de mañana y una nota de que la pospusiste tú.', accion:'manana'});
-  return P.map(function(x,i){ x.k=['A','B','C','D','E','F'][i]; return x; });
-}
-var PEND_SEL=null;
-function abrirPendiente(id){
+function abrirAccion(id, que){
+  var caja=document.getElementById('tjc_'+id); if(!caja) return;
   var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
-  PEND_SEL=null;
-  var ra=ramaDe(r), d=dias(r._f);
-  var dtx = d===null?'sin fecha' : (d>0?('vencida hace '+d+' días'):(d===0?'vence hoy':('vence en '+(-d)+' días')));
-  var cs=comentarios(r).slice(-4).reverse();
-  var h='<div class="pCab"><div class="t"><div class="k">'+esc(sujetoDe(r))+' · '+esc(r.id)+'</div>'
-    +'<h3>'+esc(String(r.actividad||'').slice(0,150))+'</h3></div>'
-    +'<button class="pCerrar" data-cerrar="panelPend">cerrar</button></div>'
-    +'<div class="pQue"><b>'+esc(r.responsable||'sin dueño')+'</b> · '+esc(dtx)
-    +(r.estado?(' · '+esc(r.estado)):'')+(r._dinTxt?(' · <b>'+esc(r._dinTxt)+'</b>'):'')
-    +(ra.meta?('<br><span style="font-size:12px;color:var(--faint)">'+esc(metaCorta(ra.meta))+'</span>'):'')
-    +(String(r.observaciones||'').trim()?('<br>'+esc(String(r.observaciones).slice(0,220))):'')+'</div>';
-  if(cs.length){
-    h+='<div class="pHist">'+cs.map(function(c){
-      return '<div><span class="f">'+esc(c.fecha)+' · '+esc(c.autor)+'</span>'+esc(limpiaSello(c.texto).slice(0,180))+'</div>';
-    }).join('')+'</div>';
-  }
-  h+='<div class="pProp"><span class="k">LO QUE TE PROPONGO</span>';
-  propuestasDe(r).forEach(function(x){
-    h+='<div class="opcion'+(x.rec?' sel':'')+'" data-op="'+x.k+'"><span class="l">'+x.k+'</span>'
-      +'<div><b>'+esc(x.t)+(x.rec?' <span style="color:var(--oro);font-size:11px">★ te lo recomiendo</span>':'')+'</b>'
-      +'<span>'+esc(x.q)+'</span></div></div>';
-  });
-  h+='</div><div class="pSalidas" id="pSalidas"></div><div class="pPrev" id="pPrev" hidden></div><div class="pMsg" id="pMsg"></div>';
-  mostrarPanel('panelPend', h);
-  var caja=document.querySelector('#panelPend .panelCaja');
-  caja.dataset.id=id;
-  Array.prototype.forEach.call(caja.querySelectorAll('.opcion'),function(el){
-    el.onclick=function(){
-      Array.prototype.forEach.call(caja.querySelectorAll('.opcion'),function(x){ x.classList.remove('sel'); });
-      el.classList.add('sel'); PEND_SEL=el.dataset.op; pintarSalidas(id);
-    };
-  });
-  var rec=caja.querySelector('.opcion.sel'); if(rec){ PEND_SEL=rec.dataset.op; }
-  pintarSalidas(id);
-}
-function opActual(r){
-  var P=propuestasDe(r);
-  return P.filter(function(x){ return x.k===PEND_SEL; })[0] || P[0];
-}
-function pintarSalidas(id){
-  var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
-  var o=opActual(r), c=$('#pSalidas'); if(!c) return;
+  TRAB_ABIERTAS[id]=que; caja.className='caja2 on';
   var h='';
-  if(o.texto){
-    h+='<button class="bFirmar" data-sal="copiar">Copiar el texto</button>';
-    if(o.wa) h+='<button class="bOtro" data-sal="wa">Abrir WhatsApp con él ya escrito</button>';
-    h+='<button class="bOtro" data-sal="claudet">Que lo mande Claudet (con tu firma)</button>';
+  if(que==='terminar'){
+    h='<p><b>Terminar «'+esc(String(r.actividad||'').slice(0,80))+'»</b>. Se escribe estado Terminado, la fecha de cierre y el historial, y deja de contar entre las vencidas.</p>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Qué quedó (opcional): «pagado el viernes», «entregado a Sayri»…"></textarea>';
+  } else if(que==='pasar'){
+    h='<p><b>Pasar a otra persona.</b> Cambia el dueño de la tarjeta y le deja anotado por qué.</p>'
+      +'<div class="fila"><select id="tjs_'+esc(id)+'">'+opsPersonas('').replace('— el que nombres al dictar —','— escoge a quién —')+'</select></div>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Qué le pides (opcional)"></textarea>';
+  } else if(que==='fecha'){
+    h='<p><b>Nueva fecha.</b> Se cambia la fecha en el tablero y queda anotado que la moviste.</p>'
+      +'<div class="fila"><select id="tjs_'+esc(id)+'"><option value="hoy">para hoy</option><option value="semana" selected>este viernes</option><option value="proxima">la próxima semana</option></select></div>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Por qué se mueve (opcional)"></textarea>';
+  } else {
+    h='<p><b>Nota en la tarjeta.</b> Queda escrita con tu nombre y la fecha.</p>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Escribe o dicta…"></textarea>';
   }
-  if(o.accion) h+='<button class="bFirmar" data-sal="hazlo">'+(o.accion==='aClaudet'?'Déjaselo a Claudet':'Hazlo')+'</button>';
-  h+='<button class="bOtro" data-sal="nota">Anotar algo</button>';
-  c.innerHTML=h;
-  if(o.texto){ var pv=$('#pPrev'); pv.hidden=false; pv.textContent=o.texto; }
-  else { $('#pPrev').hidden=true; }
-  Array.prototype.forEach.call(c.querySelectorAll('[data-sal]'),function(b){
-    b.onclick=function(){ salida(id, b.dataset.sal, b); };
-  });
+  h+='<div class="fila"><button class="bOtro" data-tjdic="'+esc(id)+'">🎙 Dictar</button>'
+    +'<button class="bFirmar" data-tjok="'+esc(id)+'" data-que="'+que+'">Ver qué se escribe</button>'
+    +'<button class="bOtro" data-tjcancel="'+esc(id)+'">Cancelar</button><span class="smsg" id="tjm_'+esc(id)+'"></span></div>'
+    +'<div class="prev" id="tjp_'+esc(id)+'" hidden></div>';
+  caja.innerHTML=h;
+  caja.querySelector('[data-tjcancel]').onclick=function(){ delete TRAB_ABIERTAS[id]; caja.className='caja2'; caja.innerHTML=''; };
+  caja.querySelector('[data-tjdic]').onclick=function(){ dictarEn(document.getElementById('tjx_'+id), this); };
+  caja.querySelector('[data-tjok]').onclick=function(){ ejecutarAccion(id, que, this); };
 }
-async function salida(id, cual, btn){
-  var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
-  var o=opActual(r), m=$('#pMsg');
-  if(cual==='copiar'){
-    try{ await navigator.clipboard.writeText(o.texto); m.className='pMsg ok'; m.textContent='Copiado. Pégalo donde quieras.'; }
-    catch(e){ m.className='pMsg mal'; m.textContent='No pude copiar: selecciónalo del recuadro.'; }
-    return;
-  }
-  if(cual==='wa'){
-    window.open('https://wa.me/'+o.wa+'?text='+encodeURIComponent(o.texto),'_blank');
-    m.className='pMsg'; m.textContent='Se abrió WhatsApp. Cuando lo mandes, anótalo aquí con «Anotar algo».';
-    return;
-  }
-  if(cual==='nota'){
-    var t=prompt('¿Qué anoto en '+id+'?'); if(!t) return;
-    await escribirEnTarjeta(id, {}, '📝 '+t, 'Nota escrita.', btn); return;
-  }
-  if(cual==='claudet'){
-    if(!CFG_MSJ || !CFG_MSJ.webhook_url){ m.className='pMsg mal'; m.textContent='Falta config.despacho.json: no sé a qué URL encolarlo.'; return; }
-    btn.disabled=true; btn.textContent='encolando…';
-    try{
-      var res=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',
-        headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({action:'encolar',k:credencial(),para:o.wa||'',texto:o.texto,requiere_firma:true,tarjeta:id})});
-      var d=JSON.parse(await res.text());
-      if(!d.ok) throw new Error(d.error||'no lo aceptó');
-      await escribirEnTarjeta(id, {}, '📤 Encolado para Claudet (Despacho, '+hoyLocal()+'): '+o.texto.slice(0,140), 'Encolado ('+d.id+'). Sale cuando lo firmes en El Hilo.', btn);
-    }catch(e){ btn.disabled=false; btn.textContent='Que lo mande Claudet (con tu firma)';
-      m.className='pMsg mal'; m.textContent='No se pudo encolar: '+enCristiano(e.message); }
-    return;
-  }
-  /* hazlo: las acciones que tocan la tarjeta */
+function patchDeAccion(r, que){
+  var txt=(document.getElementById('tjx_'+r.id)||{}).value||''; txt=String(txt).trim();
+  var sel=document.getElementById('tjs_'+r.id); var v=sel?String(sel.value||'').trim():'';
   var hoy=hoyLocal(), patch={}, linea='', dice='';
-  if(o.accion==='terminar'){
+  if(que==='terminar'){
     patch.estado='Terminado'; patch.fechaTerminado=hoy;
-    linea='✅ Terminada (Despacho, '+hoy+') por Alejandro.'; dice='Terminada. Deja de contar entre las vencidas.';
-  } else if(o.accion==='tomar'){
-    patch.responsable='Alejandro';
-    linea='🔄 Retomada (Despacho, '+hoy+'): Alejandro deja de esperar a '+String(r.responsable||'alguien')+' y se la queda.';
-    dice='Ahora es tuya.';
-  } else if(o.accion==='pasar'){
-    var q=prompt('¿A quién se la pasas?\n'+Object.keys(CONTACTOS).join(', ')); if(!q) return;
-    patch.responsable=q.trim(); linea='➡️ Pasada a '+q.trim()+' (Despacho, '+hoy+') por Alejandro.'; dice='Ahora es de '+q.trim()+'.';
-  } else if(o.accion==='fecha' || o.accion==='manana'){
-    var cual2 = o.accion==='manana' ? 'hoy' : (prompt('¿Para cuándo?\nhoy / semana / proxima','semana')||'semana').trim();
-    var f=fechaTexto(cual2==='hoy'&&o.accion==='manana'?'hoy':cual2);
-    if(o.accion==='manana'){ var x=new Date(HOY); x.setDate(x.getDate()+1);
-      var dow=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      var mesN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      f={fecha:dow[x.getDay()]+' '+x.getDate(), mes:mesN[x.getMonth()], semana:f.semana}; }
-    patch.fecha=f.fecha; patch.mes=f.mes; patch.semana=f.semana;
-    linea='📅 Fecha nueva: '+f.fecha+' de '+f.mes+' (Despacho, '+hoy+') por Alejandro.';
+    var hist=String(r.historial||''); var ult=hist?hist.split('|').pop().trim():'';
+    if(!/\sTerminado$/.test(ult)) patch.historial=(hist?hist+'|':'')+hoy+' Terminado';
+    linea='✅ Terminada (Despacho, '+hoy+') por Alejandro'+(txt?(': '+txt):'')+'.';
+    dice='Terminada. Deja de contar entre las vencidas.';
+  } else if(que==='pasar'){
+    if(!v) return {error:'Escoge a quién se la pasas.'};
+    patch.responsable=v;
+    linea='➡️ Pasada a '+v+' (Despacho, '+hoy+') por Alejandro'+(txt?(': '+txt):'')+'.';
+    dice='Ahora es de '+v+'.';
+  } else if(que==='fecha'){
+    var f=fechaTexto(v||'semana'); patch.fecha=f.fecha; patch.mes=f.mes; patch.semana=f.semana;
+    linea='📅 Fecha nueva: '+f.fecha+' de '+f.mes+' (Despacho, '+hoy+') por Alejandro'+(txt?(': '+txt):'')+'.';
     dice='Queda para el '+f.fecha+' de '+f.mes+'.';
-  } else if(o.accion==='aClaudet'){
-    linea='🤖 Para Claudet (Despacho, '+hoy+'): redactar lo que sale de la decisión y dejarlo para revisar.';
-    dice='Anotado. Claudet lo redacta en su próxima pasada.';
+  } else {
+    if(!txt) return {error:'Escribe o dicta la nota.'};
+    linea='📝 '+txt; dice='Nota escrita.';
   }
-  await escribirEnTarjeta(id, patch, linea, dice, btn);
+  return {patch:patch, linea:linea, dice:dice};
 }
-/* Escribe en la tarjeta: ve antes, relee antes de escribir, y relee despues
-   para decir ✓ solo si de verdad quedo. */
-async function escribirEnTarjeta(id, patch, linea, dice, btn){
-  var m=$('#pMsg'), pv=$('#pPrev');
-  var firma=JSON.stringify(patch)+'|'+linea;
-  if(btn && (btn.dataset.confirmado!=='1' || btn.dataset.visto!==firma)){
-    pv.hidden=false;
-    pv.textContent='En '+id+' se escribe:\n'+linea+(Object.keys(patch).length?('\n'+Object.keys(patch).map(function(k){return k+' → '+patch[k];}).join('\n')):'');
-    btn.dataset.confirmado='1'; btn.dataset.visto=firma;
-    btn.dataset.antes=btn.dataset.antes||btn.textContent; btn.textContent='Sí, hazlo';
-    m.className='pMsg'; m.textContent='Míralo y confirma.'; return;
+async function ejecutarAccion(id, que, btn){
+  var m=document.getElementById('tjm_'+id), pv=document.getElementById('tjp_'+id);
+  var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+  var a=patchDeAccion(r, que);
+  if(a.error){ m.className='smsg mal'; m.textContent=a.error; return; }
+  /* primero se ve, luego pasa */
+  var firma=JSON.stringify(a.patch)+'|'+a.linea;
+  if(btn.dataset.confirmado!=='1' || btn.dataset.visto!==firma){
+    pv.hidden=false; pv.textContent='En '+id+' se escribe:\n'+a.linea+(Object.keys(a.patch).length?('\n'+Object.keys(a.patch).map(function(k){return k+' → '+a.patch[k];}).join('\n')):'');
+    btn.dataset.confirmado='1'; btn.dataset.visto=firma; btn.textContent='Sí, hazlo'; m.className='smsg'; m.textContent='Míralo y confirma.'; return;
   }
-  if(!credencial()){ m.className='pMsg mal'; m.textContent='Entra con el Portero: sin credencial no puedo escribir.'; return; }
-  if(btn){ btn.disabled=true; btn.textContent='leyendo la tarjeta…'; }
+  if(!credencial()){ m.className='smsg mal'; m.textContent='Entra con el Portero: sin credencial no puedo escribir.'; return; }
+  btn.disabled=true; btn.textContent='leyendo la tarjeta…';
   try{
     var fresco=await llamar('getAll',{});
     if(!fresco||!fresco.ok) throw new Error('no pude releer el tablero antes de escribir');
     var actual=(fresco.tasks||[]).filter(function(x){return x.id===id;})[0];
     if(!actual) throw new Error('esa tarjeta ya no está en el tablero');
-    var prev=String(actual.comentarios||''), nueva='Alejandro~'+hoyLocal()+'~'+linea;
-    var pp=Object.assign({}, patch, {comentarios: prev?(prev+'|||'+nueva):nueva});
-    if(patch.estado==='Terminado'){
-      var hist=String(actual.historial||''), ult=hist?hist.split('|').pop().trim():'';
-      if(!/\sTerminado$/.test(ult)) pp.historial=(hist?hist+'|':'')+hoyLocal()+' Terminado';
-      if(!String(actual.fechaTerminado||'').trim()) pp.fechaTerminado=hoyLocal();
-    }
-    if(btn) btn.textContent='escribiendo…';
-    var w=await llamar('update',{id:id,patch:pp});
+    var prev=String(actual.comentarios||''), nueva='Alejandro~'+hoyLocal()+'~'+a.linea;
+    var patch=Object.assign({}, a.patch, {comentarios: prev?(prev+'|||'+nueva):nueva});
+    if(que==='terminar'){ var hist=String(actual.historial||''); var ult=hist?hist.split('|').pop().trim():''; if(!/\sTerminado$/.test(ult)) patch.historial=(hist?hist+'|':'')+hoyLocal()+' Terminado'; else delete patch.historial; }
+    btn.textContent='escribiendo…';
+    var w=await llamar('update',{id:id,patch:patch});
     if(!w||w.ok===false) throw new Error(w&&w.error?w.error:'el tablero no lo aceptó');
-    var chk=await llamar('getAll',{}), t2=(chk.tasks||[]).filter(function(x){return x.id===id;})[0];
-    var quedo=t2 && String(t2.comentarios||'').indexOf(linea)>=0;
-    m.className=quedo?'pMsg ok':'pMsg mal';
-    m.textContent=quedo?('✓ '+dice+' Leído de vuelta del tablero.'):'Se mandó, pero al releer no lo veo: recarga antes de repetir.';
+    /* leer despues de escribir: solo se dice ✓ si quedo */
+    var chk=await llamar('getAll',{}); var t2=(chk.tasks||[]).filter(function(x){return x.id===id;})[0];
+    var quedo = t2 && String(t2.comentarios||'').indexOf(a.linea)>=0;
+    m.className=quedo?'smsg ok':'smsg mal'; m.textContent=quedo?('✓ '+a.dice+' Leído de vuelta del tablero.'):'Se mandó, pero al releer no lo veo: recarga antes de repetir.';
+    delete TRAB_ABIERTAS[id];
     await cargar();
-    setTimeout(function(){ cerrarPanel('panelPend'); },1400);
   }catch(e){
-    if(btn){ btn.disabled=false; btn.textContent=btn.dataset.antes||'Hazlo'; btn.dataset.confirmado=''; }
-    m.className='pMsg mal'; m.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.';
+    btn.disabled=false; btn.textContent='Ver qué se escribe'; btn.dataset.confirmado='';
+    m.className='smsg mal'; m.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.';
   }
 }
-function mostrarPanel(cual, html){
-  var p=document.getElementById(cual); if(!p) return;
-  p.querySelector('.panelCaja').innerHTML=html; p.hidden=false;
-  document.body.style.overflow='hidden';
-  Array.prototype.forEach.call(p.querySelectorAll('[data-cerrar]'),function(b){ b.onclick=function(){ cerrarPanel(b.dataset.cerrar); }; });
-  Array.prototype.forEach.call(p.querySelectorAll('[data-abrir]'),function(b){ b.onclick=function(){ abrirPendiente(b.dataset.abrir); }; });
-  p.onclick=function(e){ if(e.target===p) cerrarPanel(cual); };
-}
-function cerrarPanel(cual){
-  var p=document.getElementById(cual); if(!p) return;
-  p.hidden=true;
-  if(document.querySelectorAll('.panel:not([hidden])').length===0) document.body.style.overflow='';
-}
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){ cerrarPanel('panelPend'); cerrarPanel('panelCrujia'); }
-});
 
 /* ══════════════ EL LIBRO DE DECISIONES ══════════════
    Cada comentario con «DECISIÓN» es una decision de Alejandro. Lo que vino
@@ -2455,9 +2242,10 @@ function pintar(){
   armarMesa();
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
-  acuerdo(); pintarPlanta(); pintarEntrada(); pintarMarcador();
+  acuerdo(); pintarTrabajo(); pintarMarcador(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
   try{ pintarLibro(); pintarBitacora(); }catch(e){ console.error('libro/bitacora',e); }
   pintarConstancias();
+  pintarAurum(); pintarMandar(); pintarSalientes(); pintarEnviadosHoy(); pintarPendiente(); pintarMomentos();
   var f=new Date();
   $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
   var h=f.getHours();
@@ -2507,7 +2295,7 @@ function marcarGrabando(on){
   if(RECbtn && RECbtn!==b){ RECbtn.textContent = on?'⏹ Parar':'🎙 Dictar'; }
   if(b && (!RECdest || RECdest===$('#sTexto'))){
     b.classList.toggle('on',on);
-    if(t) t.textContent = on?'Te estoy oyendo — aprieta para parar':'Dictar';
+    if(t) t.textContent = on?'Te estoy oyendo — aprieta para parar':'Grabar';
   }
   if(m && (!RECdest || RECdest===$('#sTexto')))
     m.textContent = on?'Habla normal. Cuando pares, lo dejo escrito abajo.':'Apriétalo y habla. Yo lo escribo.';
@@ -2938,7 +2726,7 @@ document.addEventListener('DOMContentLoaded',function(){
   var tp=$('#trabajoProy'); if(tp) tp.addEventListener('change',pintarTrabajo);
   Array.prototype.forEach.call(document.querySelectorAll('#trabajoFiltros [data-tf]'),function(b){ b.addEventListener('click',function(){ TF=b.dataset.tf; TRAB_MAX=12; pintarTrabajo(); }); });
   /* la historia se pliega: no empuja el trabajo hacia abajo */
-  ['#zHilo','#zMarcador','#zLibro','#zBitacora','#zConst'].forEach(function(sel){
+  ['#zLibro','#zBitacora','#zConst','.zona.salientes','.zona.enviados'].forEach(function(sel){
     var z=document.querySelector(sel); if(!z) return; z.classList.add('plegable','plegada');
     var h=z.querySelector('h2'); if(h) h.addEventListener('click',function(){ z.classList.toggle('plegada'); });
   });
@@ -2957,21 +2745,19 @@ document.addEventListener('DOMContentLoaded',function(){
   $('#hoy').textContent=dow[d.getDay()]+' '+d.getDate()+' de '+mes[d.getMonth()];
   /* el boton grande de la charola de entrada */
   var mb=$('#micBtn');
-  if(mb) mb.addEventListener('click',function(){
-    /* el cuerpo del dictado (texto, proyecto, dueño, fecha) se despliega solo
-       al apretar: en el iPhone lo primero que se ve es el boton, nada mas. */
-    var z=$('#zDictado'); if(z) z.classList.add('abierto');
-    dictarEn($('#sTexto'), null);
-  });
-  var tx=$('#sTexto');
-  if(tx) tx.addEventListener('focus',function(){ var z=$('#zDictado'); if(z) z.classList.add('abierto'); });
+  if(mb) mb.addEventListener('click',function(){ dictarEn($('#sTexto'), null); });
   if(!hayDictado()){
     if(mb){ mb.disabled=true; }
     var me=$('#micEst'); if(me) me.textContent='Este navegador no sabe oír. En Chrome sí funciona; mientras, escríbelo aquí abajo.';
   }
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && REC) REC.stop(); });
 })();
-(async function(){ await cargarConfigMensajes(); })();
+(async function(){
+  await cargarConfigMensajes();
+  await refrescarSalientes();
+  await refrescarEnviadosHoy();
+  pintarSalientes(); pintarEnviadosHoy();
+})();
 cargar();
 /* Si el tablero se abrio en una pestaña de atras y Chrome le apago los relojes,
    al volver a verla se carga en ese momento en vez de esperar al siguiente tick. */
