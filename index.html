@@ -205,7 +205,33 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .rama.on .hoja2.esa{background:var(--oroS);border-radius:0 10px 10px 0}
 .rama.on .hoja2.esa b{color:var(--oro2)}
 /* ── salida y atoro ── */
-.filtros{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px;align-items:center}
+.filtros .bOtro{padding:6px 12px;font-size:12px} .filtros .bOtro.on{border-color:var(--oro);color:var(--oro)}
+/* la tarjeta de trabajo: mas compacta que la de firma, con sus acciones a la vista */
+.tj{display:grid;grid-template-columns:auto 1fr auto;gap:10px 14px;align-items:start;padding:12px 4px;border-bottom:1px solid var(--hair)}
+.tj .d{font-family:var(--mono);font-size:12px;min-width:58px;text-align:right;padding-top:3px;color:var(--faint)}
+.tj .d.venc{color:var(--rojo);font-weight:700} .tj .d.hoy{color:var(--ambar);font-weight:700}
+.tj .cuerpo{min-width:0}
+.tj .r{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--oro);text-transform:uppercase}
+.tj h4{font-family:var(--serif);font-size:16.5px;line-height:1.25;color:var(--ink);margin:2px 0 4px;font-weight:400}
+.tj .m{font-size:12px;color:var(--faint)} .tj .m b{color:var(--ink2);font-weight:500}
+.tj .m .din{color:var(--oro2)}
+.tj .acc{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:300px}
+.tj .acc button{padding:6px 10px;font-size:11.5px;border-radius:10px}
+.tj .caja2{grid-column:1/-1;background:var(--panel3);border:1px solid var(--hair2);border-radius:12px;padding:11px;display:none}
+.tj .caja2.on{display:block}
+.tj .caja2 .fila{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:8px}
+.tj .caja2 p{font-size:12.5px;color:var(--ink2);margin:0}
+.tj .caja2 select,.tj .caja2 textarea{background:var(--panel2);color:var(--ink);border:1px solid var(--hair2);border-radius:10px;padding:7px 9px;font:inherit;font-size:12.5px}
+.tj .caja2 textarea{width:100%;min-height:54px;resize:vertical}
+.tj .caja2 .prev{font-family:var(--mono);font-size:11.5px;color:var(--faint);background:var(--panel2);border-radius:8px;padding:8px 10px;margin-top:8px;white-space:pre-wrap}
+.tj.hecha{opacity:.45}
+.verMas{margin:12px auto 0;display:block}
+/* historia plegada: no empuja el trabajo hacia abajo */
+.zona.plegada > *:not(h2){display:none}
+.zona.plegable h2{cursor:pointer;user-select:none}
+.zona.plegable h2::before{content:'▾ ';color:var(--faint);font-family:var(--mono);font-size:12px}
+.zona.plegada h2::before{content:'▸ '}
 .filtros select{background:var(--panel2);color:var(--ink2);border:1px solid var(--hair2);border-radius:10px;padding:6px 10px;font-size:12.5px}
 /* el arbol: meta > proyecto > decision > pasos. Lineas finas, sin cajas encima de cajas */
 .lb-meta{margin:10px 0 4px;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--oro2)}
@@ -428,6 +454,23 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <p class="sub" id="acuerdoSub2"></p>
     <div class="din" id="acuerdoDin" hidden></div>
     <div class="hist" id="acuerdoHist" hidden></div>
+  </section>
+
+  <!-- LA MESA DE HOY: TODO lo vivo, por urgencia, con acciones reales. Antes la
+       mesa solo enseñaba decisiones y, con las 14 ejecutadas, decia «la mesa esta
+       limpia» mientras habia 34 tarjetas vivas y 7 vencidas: el trabajo no estaba
+       al frente. Ahora esta aqui, arriba de todo. -->
+  <section class="zona trabajo" id="zTrabajo" data-mom="arranque firma cierre">
+    <h2>La mesa de hoy <span class="sub" style="display:inline;margin-left:8px" id="trabajoSub"></span></h2>
+    <div class="filtros" id="trabajoFiltros">
+      <button class="bOtro on" data-tf="todo" type="button">todo</button>
+      <button class="bOtro" data-tf="vencidas" type="button">vencidas</button>
+      <button class="bOtro" data-tf="mias" type="button">mías</button>
+      <button class="bOtro" data-tf="otros" type="button">de otros</button>
+      <button class="bOtro" data-tf="dinero" type="button">con dinero</button>
+      <select id="trabajoProy"><option value="">todos los proyectos</option></select>
+    </div>
+    <div id="trabajo"></div>
   </section>
 
   <!-- El Hilo: la conversacion con Claudet (casos A/B/C, movimientos, respuestas).
@@ -1865,6 +1908,152 @@ async function despuesSaliente(id,btn){
   btn.disabled=true; btn.textContent='oculto por ahora';
 }
 
+/* ══════════════ LA MESA DE HOY ══════════════
+   Todo lo vivo, por urgencia: vencidas (las mas viejas primero), luego lo que
+   vence esta semana, luego lo demas por fecha, al final lo que no tiene fecha.
+   Cada tarjeta trae las cuatro acciones que de verdad mueven una tarea:
+   terminarla, pasarla a alguien, darle fecha nueva, o anotarle algo. Todas
+   ven antes de escribir, escriben por el mismo Apps Script, y releen. */
+var TF='todo', TRAB_MAX=12, TRAB_ABIERTAS={};
+function ordenTrabajo(r){ var d=dias(r._f); if(d===null) return [3,0]; if(d>0) return [0,-d]; if(d>=-7) return [1,-d]; return [2,-d]; }
+function trabajoLista(){
+  var fp=$('#trabajoProy').value;
+  var L=VIVAS.filter(function(r){ return !r._frio; });
+  if(TF==='vencidas') L=L.filter(function(r){ var d=dias(r._f); return d!==null && d>0; });
+  else if(TF==='mias') L=L.filter(function(r){ return r._mio; });
+  else if(TF==='otros') L=L.filter(function(r){ return !r._mio; });
+  else if(TF==='dinero') L=L.filter(function(r){ return r._din>0; });
+  if(fp) L=L.filter(function(r){ return sujetoDe(r)===fp; });
+  L.sort(function(a,b){ var A=ordenTrabajo(a),B=ordenTrabajo(b); return A[0]-B[0] || A[1]-B[1] || (b._din||0)-(a._din||0); });
+  return L;
+}
+function pintarTrabajo(){
+  var c=$('#trabajo'); if(!c) return;
+  llenarSelect('#trabajoProy', VIVAS.filter(function(r){return !r._frio;}).map(sujetoDe), $('#trabajoProy').value);
+  var L=trabajoLista(), todas=VIVAS.filter(function(r){return !r._frio;});
+  var venc=todas.filter(function(r){ var d=dias(r._f); return d!==null&&d>0; }).length;
+  var sem=todas.filter(function(r){ var d=dias(r._f); return d!==null&&d<=0&&d>=-7; }).length;
+  $('#trabajoSub').textContent=todas.length+' vivas · '+venc+(venc===1?' vencida':' vencidas')+' · '+sem+' vencen esta semana · '+todas.filter(function(r){return r._mio;}).length+' tuyas';
+  Array.prototype.forEach.call(document.querySelectorAll('#trabajoFiltros [data-tf]'),function(b){ b.classList.toggle('on', b.dataset.tf===TF); });
+  if(!L.length){ c.innerHTML='<div class="vacio">Nada con ese filtro. Cambia el filtro o suelta algo en la charola.</div>'; return; }
+  var vis=L.slice(0, TRAB_MAX);
+  c.innerHTML=vis.map(function(r){
+    var d=dias(r._f), ra=ramaDe(r);
+    var cd = d===null?'' : (d>0?'venc':(d===0?'hoy':''));
+    var dtx = d===null?'sin fecha' : (d>0?(d+' d tarde'):(d===0?'HOY':('en '+(-d)+' d')));
+    var tieneDec = r._dec || r._miaCerrar || r._espAotro;
+    return '<div class="tj'+(r._mio?' mia':'')+'" data-id="'+esc(r.id)+'">'
+      +'<div class="d '+cd+'">'+esc(dtx)+'</div>'
+      +'<div class="cuerpo"><div class="r">'+esc(sujetoDe(r))+(ra.meta?(' · '+esc(metaCorta(ra.meta))):'')+'</div>'
+      +'<h4>'+esc(String(r.actividad||'').slice(0,140))+'</h4>'
+      +'<div class="m"><b>'+esc(r.responsable||'sin dueño')+'</b>'+(r.estado?(' · '+esc(r.estado)):'')
+      +(r._dinTxt?(' · <span class="din">'+esc(r._dinTxt)+'</span>'):'')
+      +(String(r.observaciones||'').trim()?(' · '+esc(String(r.observaciones).slice(0,90))):'')
+      +(tieneDec?' · <span style="color:var(--oro)">tiene una decisión abajo en la mesa de firmas</span>':'')+'</div></div>'
+      +'<div class="acc">'
+      +'<button class="bFirmar" data-tj="terminar" data-id="'+esc(r.id)+'">Terminada</button>'
+      +'<button class="bOtro" data-tj="pasar" data-id="'+esc(r.id)+'">Pasar a…</button>'
+      +'<button class="bOtro" data-tj="fecha" data-id="'+esc(r.id)+'">Nueva fecha</button>'
+      +'<button class="bOtro" data-tj="nota" data-id="'+esc(r.id)+'">Nota</button>'
+      +'</div>'
+      +'<div class="caja2" id="tjc_'+esc(r.id)+'"></div>'
+      +'</div>';
+  }).join('')
+  +(L.length>vis.length?('<button class="bOtro verMas" id="trabMas">ver '+(L.length-vis.length)+' más</button>'):'');
+  Array.prototype.forEach.call(c.querySelectorAll('[data-tj]'),function(b){ b.onclick=function(){ abrirAccion(b.dataset.id, b.dataset.tj); }; });
+  var vm=$('#trabMas'); if(vm) vm.onclick=function(){ TRAB_MAX+=12; pintarTrabajo(); };
+  Object.keys(TRAB_ABIERTAS).forEach(function(id){ if(document.getElementById('tjc_'+id)) abrirAccion(id, TRAB_ABIERTAS[id]); });
+}
+function abrirAccion(id, que){
+  var caja=document.getElementById('tjc_'+id); if(!caja) return;
+  var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+  TRAB_ABIERTAS[id]=que; caja.className='caja2 on';
+  var h='';
+  if(que==='terminar'){
+    h='<p><b>Terminar «'+esc(String(r.actividad||'').slice(0,80))+'»</b>. Se escribe estado Terminado, la fecha de cierre y el historial, y deja de contar entre las vencidas.</p>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Qué quedó (opcional): «pagado el viernes», «entregado a Sayri»…"></textarea>';
+  } else if(que==='pasar'){
+    h='<p><b>Pasar a otra persona.</b> Cambia el dueño de la tarjeta y le deja anotado por qué.</p>'
+      +'<div class="fila"><select id="tjs_'+esc(id)+'">'+opsPersonas('').replace('— el que nombres al dictar —','— escoge a quién —')+'</select></div>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Qué le pides (opcional)"></textarea>';
+  } else if(que==='fecha'){
+    h='<p><b>Nueva fecha.</b> Se cambia la fecha en el tablero y queda anotado que la moviste.</p>'
+      +'<div class="fila"><select id="tjs_'+esc(id)+'"><option value="hoy">para hoy</option><option value="semana" selected>este viernes</option><option value="proxima">la próxima semana</option></select></div>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Por qué se mueve (opcional)"></textarea>';
+  } else {
+    h='<p><b>Nota en la tarjeta.</b> Queda escrita con tu nombre y la fecha.</p>'
+      +'<textarea id="tjx_'+esc(id)+'" placeholder="Escribe o dicta…"></textarea>';
+  }
+  h+='<div class="fila"><button class="bOtro" data-tjdic="'+esc(id)+'">🎙 Dictar</button>'
+    +'<button class="bFirmar" data-tjok="'+esc(id)+'" data-que="'+que+'">Ver qué se escribe</button>'
+    +'<button class="bOtro" data-tjcancel="'+esc(id)+'">Cancelar</button><span class="smsg" id="tjm_'+esc(id)+'"></span></div>'
+    +'<div class="prev" id="tjp_'+esc(id)+'" hidden></div>';
+  caja.innerHTML=h;
+  caja.querySelector('[data-tjcancel]').onclick=function(){ delete TRAB_ABIERTAS[id]; caja.className='caja2'; caja.innerHTML=''; };
+  caja.querySelector('[data-tjdic]').onclick=function(){ dictarEn(document.getElementById('tjx_'+id), this); };
+  caja.querySelector('[data-tjok]').onclick=function(){ ejecutarAccion(id, que, this); };
+}
+function patchDeAccion(r, que){
+  var txt=(document.getElementById('tjx_'+r.id)||{}).value||''; txt=String(txt).trim();
+  var sel=document.getElementById('tjs_'+r.id); var v=sel?String(sel.value||'').trim():'';
+  var hoy=hoyLocal(), patch={}, linea='', dice='';
+  if(que==='terminar'){
+    patch.estado='Terminado'; patch.fechaTerminado=hoy;
+    var hist=String(r.historial||''); var ult=hist?hist.split('|').pop().trim():'';
+    if(!/\sTerminado$/.test(ult)) patch.historial=(hist?hist+'|':'')+hoy+' Terminado';
+    linea='✅ Terminada (Despacho, '+hoy+') por Alejandro'+(txt?(': '+txt):'')+'.';
+    dice='Terminada. Deja de contar entre las vencidas.';
+  } else if(que==='pasar'){
+    if(!v) return {error:'Escoge a quién se la pasas.'};
+    patch.responsable=v;
+    linea='➡️ Pasada a '+v+' (Despacho, '+hoy+') por Alejandro'+(txt?(': '+txt):'')+'.';
+    dice='Ahora es de '+v+'.';
+  } else if(que==='fecha'){
+    var f=fechaTexto(v||'semana'); patch.fecha=f.fecha; patch.mes=f.mes; patch.semana=f.semana;
+    linea='📅 Fecha nueva: '+f.fecha+' de '+f.mes+' (Despacho, '+hoy+') por Alejandro'+(txt?(': '+txt):'')+'.';
+    dice='Queda para el '+f.fecha+' de '+f.mes+'.';
+  } else {
+    if(!txt) return {error:'Escribe o dicta la nota.'};
+    linea='📝 '+txt; dice='Nota escrita.';
+  }
+  return {patch:patch, linea:linea, dice:dice};
+}
+async function ejecutarAccion(id, que, btn){
+  var m=document.getElementById('tjm_'+id), pv=document.getElementById('tjp_'+id);
+  var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+  var a=patchDeAccion(r, que);
+  if(a.error){ m.className='smsg mal'; m.textContent=a.error; return; }
+  /* primero se ve, luego pasa */
+  var firma=JSON.stringify(a.patch)+'|'+a.linea;
+  if(btn.dataset.confirmado!=='1' || btn.dataset.visto!==firma){
+    pv.hidden=false; pv.textContent='En '+id+' se escribe:\n'+a.linea+(Object.keys(a.patch).length?('\n'+Object.keys(a.patch).map(function(k){return k+' → '+a.patch[k];}).join('\n')):'');
+    btn.dataset.confirmado='1'; btn.dataset.visto=firma; btn.textContent='Sí, hazlo'; m.className='smsg'; m.textContent='Míralo y confirma.'; return;
+  }
+  if(!credencial()){ m.className='smsg mal'; m.textContent='Entra con el Portero: sin credencial no puedo escribir.'; return; }
+  btn.disabled=true; btn.textContent='leyendo la tarjeta…';
+  try{
+    var fresco=await llamar('getAll',{});
+    if(!fresco||!fresco.ok) throw new Error('no pude releer el tablero antes de escribir');
+    var actual=(fresco.tasks||[]).filter(function(x){return x.id===id;})[0];
+    if(!actual) throw new Error('esa tarjeta ya no está en el tablero');
+    var prev=String(actual.comentarios||''), nueva='Alejandro~'+hoyLocal()+'~'+a.linea;
+    var patch=Object.assign({}, a.patch, {comentarios: prev?(prev+'|||'+nueva):nueva});
+    if(que==='terminar'){ var hist=String(actual.historial||''); var ult=hist?hist.split('|').pop().trim():''; if(!/\sTerminado$/.test(ult)) patch.historial=(hist?hist+'|':'')+hoyLocal()+' Terminado'; else delete patch.historial; }
+    btn.textContent='escribiendo…';
+    var w=await llamar('update',{id:id,patch:patch});
+    if(!w||w.ok===false) throw new Error(w&&w.error?w.error:'el tablero no lo aceptó');
+    /* leer despues de escribir: solo se dice ✓ si quedo */
+    var chk=await llamar('getAll',{}); var t2=(chk.tasks||[]).filter(function(x){return x.id===id;})[0];
+    var quedo = t2 && String(t2.comentarios||'').indexOf(a.linea)>=0;
+    m.className=quedo?'smsg ok':'smsg mal'; m.textContent=quedo?('✓ '+a.dice+' Leído de vuelta del tablero.'):'Se mandó, pero al releer no lo veo: recarga antes de repetir.';
+    delete TRAB_ABIERTAS[id];
+    await cargar();
+  }catch(e){
+    btn.disabled=false; btn.textContent='Ver qué se escribe'; btn.dataset.confirmado='';
+    m.className='smsg mal'; m.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.';
+  }
+}
+
 /* ══════════════ EL LIBRO DE DECISIONES ══════════════
    Cada comentario con «DECISIÓN» es una decision de Alejandro. Lo que vino
    despues en esa misma tarjeta (Redactado, Ejecutado, Aplazada, Cambio, 💬)
@@ -2053,7 +2242,7 @@ function pintar(){
   armarMesa();
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
-  acuerdo(); pintarMarcador(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
+  acuerdo(); pintarTrabajo(); pintarMarcador(); pintarEntrada(); pintarArbol(); pintarMesa(); pintarSalida(); pintarAtoro(); riesgos();
   try{ pintarLibro(); pintarBitacora(); }catch(e){ console.error('libro/bitacora',e); }
   pintarConstancias();
   pintarAurum(); pintarMandar(); pintarSalientes(); pintarEnviadosHoy(); pintarPendiente(); pintarMomentos();
@@ -2534,6 +2723,13 @@ async function cargar(){
 document.addEventListener('DOMContentLoaded',function(){
   var b=$('#sBtn'); if(b) b.addEventListener('click',soltar);
   ['#libroProy','#libroPers','#libroEst'].forEach(function(s){ var e=$(s); if(e) e.addEventListener('change',pintarLibro); });
+  var tp=$('#trabajoProy'); if(tp) tp.addEventListener('change',pintarTrabajo);
+  Array.prototype.forEach.call(document.querySelectorAll('#trabajoFiltros [data-tf]'),function(b){ b.addEventListener('click',function(){ TF=b.dataset.tf; TRAB_MAX=12; pintarTrabajo(); }); });
+  /* la historia se pliega: no empuja el trabajo hacia abajo */
+  ['#zLibro','#zBitacora','#zConst','.zona.salientes','.zona.enviados'].forEach(function(sel){
+    var z=document.querySelector(sel); if(!z) return; z.classList.add('plegable','plegada');
+    var h=z.querySelector('h2'); if(h) h.addEventListener('click',function(){ z.classList.toggle('plegada'); });
+  });
   ['#bitacDias','#bitacProy','#bitacPers'].forEach(function(s){ var e=$(s); if(e) e.addEventListener('change',pintarBitacora); });
   var on=$('#mkOn');
   if(on){ on.hidden=JUEGO;
