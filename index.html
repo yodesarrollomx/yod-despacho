@@ -2588,11 +2588,18 @@ function pintarSala(){
     var a = avanceDe(p.pieza);
     var mia = String(p.espera||'')==='yo';
     var pie = [];
-    if(p.etapa) pie.push('va en '+p.etapa);
-    if(a && a.falta && a.pct<100) pie.push('falta: '+a.falta);
+    /* Se dice con las palabras de la SALA, no con las mías. `siguiente` es la
+       frase que ella misma escribe («El video está armado y esperando tu
+       palabra en la mesa»), y dice mucho más que repetir el nombre de la etapa
+       — «va en publicada» no le decía nada a nadie. La etapa sólo entra cuando
+       la Sala no dejó frase. */
+    var sig = String(p.siguiente||'').trim().replace(/\.$/,'');
+    if(sig && sig.toLowerCase()!=='en producción') pie.push(sig);
+    else if(p.etapa) pie.push('en producción · va en '+p.etapa);
+    if(a && a.falta && a.pct<100) pie.push('falta '+a.falta.toLowerCase());
     /* Cuándo termina: sólo se dice cuando de verdad se sabe. Si te espera a ti,
        el reloj lo traes tú — eso es el dato, no una fecha inventada. */
-    pie.push(mia ? 'te espera a ti' : 'la trae la máquina');
+    pie.push(mia ? 'TE ESPERA A TI' : 'la trae la máquina');
     return '<div class="slFila'+(mia?' tuya':'')+'">'
       +'<span class="n"><b>'+esc(p.pieza)+'</b>'
       +'<span>'+esc(pie.join(' · '))+'</span>'
