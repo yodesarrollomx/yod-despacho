@@ -18,5 +18,7 @@
     "fecha_firma",
     "wamid",
     "estado"
-  ]
+  ],
+  "sala_datos_url": "https://yodesarrollomx.github.io/sala-edicion/datos/",
+  "_sala_nota": "De aquí sale el estado de producción que se ve en el Despacho: piezas.json (estado, etapa, qué sigue y quién tiene la pelota) y progreso.json (los pasos con hechos/total). Los mantiene estado_piezas.py derivándolos de tres fuentes verificables; el Despacho NO los deduce, los lee. Es el MISMO origen (yodesarrollomx.github.io), así que no hay CORS ni backend de por medio."
 }

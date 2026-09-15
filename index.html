@@ -791,6 +791,10 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
  border-radius:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
  border:1px solid var(--hair2);color:var(--dim)}
 .estadoPill.andando{color:var(--morado);border-color:#3D2F5A;background:#1A1526}
+/* Atascada: lleva más días en proceso que 3 de cada 4 tarjetas que sí
+   terminaron. Se pinta morado LLENO, no rojo — sigue sin ser una fecha
+   vencida, es otra cosa: algo que arrancó y no avanza. */
+.estadoPill.andando.trabada{color:#EDE7FA;border-color:var(--morado);background:#3A2A63;font-weight:700}
 .estadoPill.pausa{color:var(--azul);border-color:#25384A;background:#121A22}
 .estadoPill.vencida{color:var(--rojo);border-color:#4A2A24;background:var(--rojoS)}
 
@@ -2424,6 +2428,35 @@ function ordenPila(a,b){
   if(A===null) return 0;
   return B-A;                                          /* la mas tarde, arriba */
 }
+/* ══════════════ EL RELOJ DE «EN PROCESO» ══════════════
+   Él, el 15-sep: «lo que estoy resolviendo en el Despacho que dice En proceso
+   no he visto que lo procese Claudet». Parte del problema era que ni él ni
+   nadie podía ver DESDE CUÁNDO lleva algo andando: la columna `historial`
+   guarda «AAAA-MM-DD Estado» pero esta pantalla no la leía, y hasta hoy
+   tampoco la escribía salvo al Terminar.
+
+   Se toma el ÚLTIMO arranque, no el primero: A-080 y A-149 se reabrieron
+   después de Terminado, y lo que cuenta es la vuelta en la que van.
+   Mismo cálculo, renglón por renglón, que ~/.claudet/operador/movio.py. */
+var UMBRAL_ANDANDO = 17;   /* p75 medido sobre 33 tarjetas del propio tablero
+                              el 15-sep: 3 de cada 4 terminaron antes de eso.
+                              Para volver a medirlo: movio.py medir */
+function andandoDesde(r){
+  if(sinac(r.estado)!=='en proceso') return null;
+  var desde=null;
+  String(r.historial||'').split('|').forEach(function(t){
+    var m=/^\s*(\d{4})-(\d{2})-(\d{2})\s+(.+?)\s*$/.exec(t);
+    if(!m) return;
+    var est=m[4];
+    if(est==='En proceso'){ if(!desde) desde=new Date(+m[1], +m[2]-1, +m[3]); }
+    else if(est==='Pendiente'||est==='En standby'||est==='Terminado'){ desde=null; }
+  });
+  return desde;
+}
+function diasAndando(r){
+  var d=andandoDesde(r); if(!d) return null;
+  return Math.max(0, Math.round((HOY - d)/86400000));
+}
 function renglonPila(r){
   var d=dias(r._f), cl='', big, chico;
   if(d===null){ big='—'; chico='sin fecha'; }
@@ -2442,7 +2475,12 @@ function renglonPila(r){
   var pie=[String(r.responsable||'').trim()||'sin dueño', sujetoDe(r)];
   if(r._dinTxt) pie.push(r._dinTxt);
   var pill='';
-  if(andando) pill='<span class="estadoPill andando">▶ en proceso</span>';
+  if(andando){
+    var da=diasAndando(r);
+    if(da===null) pill='<span class="estadoPill andando">▶ en proceso</span>';
+    else if(da>UMBRAL_ANDANDO) pill='<span class="estadoPill andando trabada">▶ atascada · '+da+' d</span>';
+    else pill='<span class="estadoPill andando">▶ en proceso · '+da+' d</span>';
+  }
   else if(sinac(r.estado)==='en standby') pill='<span class="estadoPill pausa">⏸ en pausa</span>';
   return '<button class="plFila'+cl+'" type="button" data-abrir="'+esc(r.id)+'">'
     +'<span class="d"><b>'+esc(String(big))+'</b>'+esc(chico)+'</span>'
@@ -3067,10 +3105,25 @@ async function escribirEnTarjeta(id, patch, linea, dice, btn){
     if(!actual) throw new Error('esa tarjeta ya no está en el tablero');
     var prev=String(actual.comentarios||''), nueva='Alejandro~'+hoyLocal()+'~'+linea;
     var pp=Object.assign({}, patch, {comentarios: prev?(prev+'|||'+nueva):nueva});
-    if(patch.estado==='Terminado'){
-      var hist=String(actual.historial||''), ult=hist?hist.split('|').pop().trim():'';
-      if(!/\sTerminado$/.test(ult)) pp.historial=(hist?hist+'|':'')+hoyLocal()+' Terminado';
-      if(!String(actual.fechaTerminado||'').trim()) pp.fechaTerminado=hoyLocal();
+    /* EL RELOJ. Hasta el 15-sep esta pantalla solo sellaba el historial al
+       TERMINAR: marcabas «En proceso» y no quedaba ni un rastro de cuando
+       empezaste. Por eso el vio seis tarjetas en proceso sin que nadie supiera
+       desde cuando, y por eso Claudet no tenia nada que leer — su queja
+       textual: «lo que estoy resolviendo en el despacho que dice en proceso no
+       he visto que lo procese en claudet tu rutina».
+       Ahora se sella CUALQUIER cambio de estado, con el mismo formato que usa
+       board.py campo() y el board de siempre: «AAAA-MM-DD Estado», unidos por
+       «|». Sin segunda base de datos: la columna historial ya existia. */
+    var antes=String(actual.estado||'').trim();
+    if(patch.estado && patch.estado!==antes){
+      var hist=String(actual.historial||'');
+      var ult=hist?hist.split('|').pop().trim():'';
+      if(!new RegExp('\\s'+patch.estado+'$').test(ult)) pp.historial=(hist?hist+'|':'')+hoyLocal()+' '+patch.estado;
+      if(patch.estado==='Terminado'){
+        if(!String(actual.fechaTerminado||'').trim()) pp.fechaTerminado=hoyLocal();
+      } else if(antes==='Terminado'){
+        pp.fechaTerminado='';   /* se reabrio: el board limpia la fecha de cierre */
+      }
     }
     if(btn) btn.textContent='escribiendo…';
     var w=await llamar('update',{id:id,patch:pp});
