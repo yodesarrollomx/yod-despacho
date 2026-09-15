@@ -3501,7 +3501,26 @@ async function llamar(action,payload){
   }
   if(tope) clearTimeout(tope);
   var t=await r.text();
-  var j; try{ j=JSON.parse(t); }catch(e){ throw new Error('el tablero contestó algo que no entiendo'); }
+  var j;
+  try{ j=JSON.parse(t); }
+  catch(e){
+    /* Google contestó HTML, no JSON: la Location del echo ya se había gastado.
+       Pasa seguido y es lo que él vivía como «falla mucho la entrada a los
+       tableros»: la pantalla se rendía al PRIMER intento.
+       Un POST nuevo genera una Location NUEVA, así que repetir una LECTURA es
+       gratis y seguro. Repetir una ESCRITURA no: Google ejecuta y después
+       contesta 404, y repetir duplica (A-149, 14-sep). Por eso sólo se repite
+       lo que se puede repetir sin daño. */
+    var REPETIBLES={getAll:1, ping:1, checkkey:1};
+    var vuelta=(payload&&payload._vuelta)||0;
+    if(REPETIBLES[action] && vuelta<2){
+      await new Promise(function(ok){ setTimeout(ok, 1200*(vuelta+1)); });
+      return await llamar(action, Object.assign({}, payload||{}, {_vuelta:vuelta+1}));
+    }
+    throw new Error(REPETIBLES[action]
+      ? 'Google contestó tres veces con una página en vez de datos'
+      : 'el tablero contestó algo que no entiendo');
+  }
   /* El board a veces contesta «liga» a una credencial buena (parpadeo). En una
      lectura se repregunta hasta dos veces antes de creerle; en una escritura
      NO, porque el 404/liga llega despues de ejecutar y repetir duplica. */
