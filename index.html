@@ -747,6 +747,16 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
   .micGrande{min-height:58px;padding:15px}
 }
 
+/* ══════════════ ADJUNTAR · foto, plano o PDF ══════════════
+   La foto se achica en el teléfono ANTES de mandarla: una de iPhone pesa 4 MB
+   y en base64 se infla a 5.5; a 1600 px de lado y calidad 82 baja a ~300 KB y
+   se sube en un parpadeo aunque estés en obra con mala señal. */
+.adjCaja{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0 0}
+.adjCaja .bOtro{min-height:44px}
+.adjMsg{display:block;width:100%;font-size:12.5px;line-height:1.45;margin-top:4px;color:var(--faint)}
+.adjMsg.ok{color:var(--verde)} .adjMsg.mal{color:var(--rojo)}
+.adjMsg.trabajando{color:var(--oro)}
+
 </style>
 </head>
 <body>
@@ -2550,7 +2560,10 @@ function abrirPendiente(id){
       +'<div><b>'+esc(x.t)+(x.rec?' <span style="color:var(--oro);font-size:11px">★ te lo recomiendo</span>':'')+'</b>'
       +'<span>'+esc(x.q)+'</span></div></div>';
   });
-  h+='</div><div class="pSalidas" id="pSalidas"></div><div class="pNota" id="pNota" hidden></div><div class="pPrev" id="pPrev" hidden></div><div class="pMsg" id="pMsg"></div>';
+  h+='</div><div class="pSalidas" id="pSalidas"></div>'
+   +cajaAdjuntar()
+   +'<div class="pNota" id="pNota" hidden></div>'
+   +'<div class="pPrev" id="pPrev" hidden></div><div class="pMsg" id="pMsg"></div>';
   h+=cajaEditar(r);
   mostrarPanel('panelPend', h);
   var caja=document.querySelector('#panelPend .panelCaja');
@@ -2563,6 +2576,7 @@ function abrirPendiente(id){
   });
   var rec=caja.querySelector('.opcion.sel'); if(rec){ PEND_SEL=rec.dataset.op; }
   pintarSalidas(id);
+  prenderAdjuntar(id);
   prenderEditar(id);
 }
 /* Cualquier sitio de la página que nombre una tarjeta la puede abrir. Antes el
@@ -2689,6 +2703,123 @@ async function salida(id, cual, btn){
 }
 /* Escribe en la tarjeta: ve antes, relee antes de escribir, y relee despues
    para decir ✓ solo si de verdad quedo. */
+/* ══════════════ ADJUNTAR · foto, plano o PDF ══════════════
+   Lo que pidió: «llegando a soluciones que A) me propongas o B) que yo te
+   dicte o escriba o SUBA ARCHIVO O IMAGEN». Esto es la tercera.
+
+   El archivo se achica aquí mismo y se manda al Apps Script de Claudet, que
+   lo guarda en Drive y devuelve la liga. La liga se escribe en la columna
+   `links` de la tarjeta por el camino de siempre: vista previa, confirmas,
+   se escribe y se relee. No se hace público: se comparte sólo con tus dos
+   cuentas. */
+function cajaAdjuntar(){
+  return '<div class="adjCaja">'
+    +'<input type="file" id="adjFile" accept="image/*,application/pdf" hidden>'
+    +'<button class="bOtro" type="button" id="adjBtn">📎 Subir foto o archivo</button>'
+    +'<button class="bOtro" type="button" id="adjLiga">🔗 Pegar una liga</button>'
+    +'<span class="adjMsg" id="adjMsg"></span></div>';
+}
+function achicarImagen(file, maxLado, calidad){
+  return new Promise(function(ok, mal){
+    var fr=new FileReader();
+    fr.onerror=function(){ mal(new Error('no pude leer el archivo')); };
+    fr.onload=function(){
+      var img=new Image();
+      img.onerror=function(){ mal(new Error('no pude abrir esa imagen')); };
+      img.onload=function(){
+        var e=Math.min(1, maxLado/Math.max(img.width,img.height));
+        var c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(img.width*e));
+        c.height=Math.max(1,Math.round(img.height*e));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        var u=c.toDataURL('image/jpeg', calidad||0.82);
+        ok({ datos:u.split(',')[1], tipo:'image/jpeg',
+             nombre:String(file.name||'foto').replace(/\.[^.]+$/,'')+'.jpg',
+             ancho:c.width, alto:c.height });
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+function leerTalCual(file){
+  return new Promise(function(ok, mal){
+    var fr=new FileReader();
+    fr.onerror=function(){ mal(new Error('no pude leer el archivo')); };
+    fr.onload=function(){
+      ok({ datos:String(fr.result).split(',')[1],
+           tipo:file.type||'application/octet-stream',
+           nombre:String(file.name||'archivo') });
+    };
+    fr.readAsDataURL(file);
+  });
+}
+function ligasMas(r, url){
+  var prev=String(r.links||'').trim();
+  return prev ? (prev+' '+url) : url;
+}
+function prenderAdjuntar(id){
+  var caja=document.querySelector('#panelPend .panelCaja'); if(!caja) return;
+  var inp=caja.querySelector('#adjFile'), bt=caja.querySelector('#adjBtn'),
+      bl=caja.querySelector('#adjLiga'), m=caja.querySelector('#adjMsg');
+  if(!inp||!bt||!m) return;
+  bt.onclick=function(){ inp.click(); };
+
+  /* Pegar una liga no necesita backend ni permisos: funciona hoy, y es la
+     salida cuando el Drive todavía no está autorizado. */
+  bl.onclick=function(){
+    var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+    var u=prompt('Pega la liga (Drive, foto, plano, PDF):','https://');
+    if(!u) return;
+    u=String(u).trim();
+    if(!/^https?:\/\//i.test(u)){ m.className='adjMsg mal'; m.textContent='Eso no parece una liga.'; return; }
+    escribirEnTarjeta(id, {links: ligasMas(r,u)}, '🔗 Liga agregada: '+u,
+      'Quedó en la tarjeta.', bt);
+  };
+
+  inp.onchange=async function(){
+    var f=inp.files && inp.files[0]; if(!f) return;
+    var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+    if(!CFG_MSJ || !CFG_MSJ.webhook_url){
+      m.className='adjMsg mal';
+      m.textContent='No sé a dónde mandarlo: falta la configuración. Usa «Pegar una liga».';
+      return;
+    }
+    if(!credencial()){
+      m.className='adjMsg mal'; m.textContent='Entra con tu acceso: sin él no puedo subir nada.'; return;
+    }
+    m.className='adjMsg trabajando'; m.textContent='Preparando '+f.name+'…';
+    bt.disabled=true;
+    try{
+      var esImagen=/^image\//i.test(f.type||'');
+      var a = esImagen ? await achicarImagen(f, 1600, 0.82) : await leerTalCual(f);
+      var kb = Math.round(a.datos.length*0.75/1024);
+      if(kb > 11000) throw new Error('pesa '+Math.round(kb/1024)+' MB y el tope son 11');
+      m.textContent='Subiendo '+a.nombre+' ('+kb+' KB)…';
+      var res=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',
+        redirect:'follow',cache:'no-store',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({action:'subir',k:credencial(),tarjeta:id,
+                             nombre:a.nombre,tipo:a.tipo,datos:a.datos})});
+      var d=JSON.parse(await res.text());
+      if(!d.ok) throw new Error(d.error||'no lo aceptó');
+      m.className='adjMsg ok';
+      m.textContent='Subido. Ahora confirma que lo escriba en la tarjeta.';
+      escribirEnTarjeta(id, {links: ligasMas(r, d.ver||d.url)},
+        '📎 '+a.nombre+' — '+(d.ver||d.url), 'Quedó adjuntado a la tarjeta.', bt);
+    }catch(e){
+      var t=String(e.message||e);
+      m.className='adjMsg mal';
+      /* Si es el permiso de Drive, se dice EXACTAMENTE qué falta y qué sí se
+         puede hacer mientras. Un «no se pudo» a secas no sirve de nada. */
+      m.textContent = /permiso de Drive|drive/i.test(t)
+        ? 'Todavía no tengo permiso de Drive para guardarlo. Mientras, usa «Pegar una liga» — eso sí funciona.'
+        : ('No se pudo: '+enCristiano(t)+'. No se escribió nada.');
+      bt.disabled=false;
+    }
+    inp.value='';
+  };
+}
 /* ══════════════ EDITAR LA TARJETA DESDE AQUÍ ══════════════
    El Apps Script del tablero siempre acepto cualquier columna en el patch:
    lo unico que faltaba era la pantalla. Se escribe por el mismo camino que
