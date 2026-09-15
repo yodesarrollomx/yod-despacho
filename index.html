@@ -641,6 +641,28 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   .planta{display:grid}
 }
 
+/* ══════════════ EL MICRÓFONO, EN TODAS PARTES ══════════════
+   El dictado de arriba (dictarEn) siempre fue generico: recibe cualquier
+   caja de texto. Lo que faltaba era un boton al lado de cada una. Los
+   prompt() del navegador no se pueden dictar — por eso «Anotar algo» dejo
+   de ser un prompt y es una caja de verdad, aqui dentro. */
+.micChico{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:44px;
+ padding:0 15px;border:1px solid var(--hair2);border-radius:12px;background:var(--panel2);
+ color:var(--ink2);font-family:var(--mono);font-size:11.5px;letter-spacing:.06em}
+.micChico:active{background:var(--panel3)}
+.micChico.on{border-color:var(--oro);background:var(--oroS);color:var(--oro2)}
+.edCtl{display:flex;gap:8px;align-items:flex-start}
+.edCtl>:first-child{flex:1;min-width:0}
+.edCtl .micChico{min-height:42px;padding:0 12px}
+.pNota{margin:14px 0 0;background:var(--panel2);border:1px solid var(--hair2);
+ border-radius:16px;padding:14px}
+.pNota>.k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+ color:var(--faint);margin-bottom:9px}
+.pNota textarea{width:100%;min-height:96px;background:var(--panel);border:1px solid var(--hair2);
+ border-radius:12px;padding:12px;color:var(--ink);font:inherit;font-size:15px;line-height:1.45;resize:vertical}
+.pNota textarea:focus{border-color:var(--oro);outline:none}
+@media(max-width:520px){ .edCtl{flex-direction:column} .edCtl .micChico{width:100%;justify-content:center} }
+
 </style>
 </head>
 <body>
@@ -2383,7 +2405,7 @@ function abrirPendiente(id){
       +'<div><b>'+esc(x.t)+(x.rec?' <span style="color:var(--oro);font-size:11px">★ te lo recomiendo</span>':'')+'</b>'
       +'<span>'+esc(x.q)+'</span></div></div>';
   });
-  h+='</div><div class="pSalidas" id="pSalidas"></div><div class="pPrev" id="pPrev" hidden></div><div class="pMsg" id="pMsg"></div>';
+  h+='</div><div class="pSalidas" id="pSalidas"></div><div class="pNota" id="pNota" hidden></div><div class="pPrev" id="pPrev" hidden></div><div class="pMsg" id="pMsg"></div>';
   h+=cajaEditar(r);
   mostrarPanel('panelPend', h);
   var caja=document.querySelector('#panelPend .panelCaja');
@@ -2445,8 +2467,30 @@ async function salida(id, cual, btn){
     return;
   }
   if(cual==='nota'){
-    var t=prompt('¿Qué anoto en '+id+'?'); if(!t) return;
-    await escribirEnTarjeta(id, {}, '📝 '+t, 'Nota escrita.', btn); return;
+    /* Un prompt() del navegador no se puede dictar: es una ventana del sistema
+       y el reconocimiento no llega ahi. Por eso la nota se escribe —o se
+       habla— en una caja de verdad, dentro del panel. */
+    var z=$('#pNota'); if(!z) return;
+    z.hidden=false;
+    z.innerHTML='<span class="k">ANOTAR EN '+esc(id)+'</span>'
+      +'<textarea id="notaTxt" placeholder="Escríbelo… o apriétale al micrófono y háblalo."></textarea>'
+      +'<div class="edPie">'
+      +(hayDictado()?'<button class="micChico" type="button" data-mic="notaTxt">🎙 Dictar</button>':'')
+      +'<button class="bFirmar" id="notaOk" type="button">Escribir la nota</button>'
+      +'<button class="bOtro" id="notaNo" type="button">Cancelar</button></div>';
+    var ta=$('#notaTxt'); if(ta) ta.focus();
+    $('#notaNo').onclick=function(){
+      if(REC){ try{ REC.stop(); }catch(e){} }
+      z.hidden=true; z.innerHTML='';
+      var mm=$('#pMsg'); if(mm){ mm.className='pMsg'; mm.textContent=''; }
+    };
+    $('#notaOk').onclick=function(){
+      var t=String(($('#notaTxt')||{}).value||'').trim();
+      if(!t){ m.className='pMsg mal'; m.textContent='Escribe o dicta algo primero.'; return; }
+      escribirEnTarjeta(id, {}, '📝 '+t, 'Nota escrita.', $('#notaOk'));
+    };
+    z.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
   }
   if(cual==='claudet'){
     if(!CFG_MSJ || !CFG_MSJ.webhook_url){ m.className='pMsg mal'; m.textContent='Falta config.despacho.json: no sé a qué URL encolarlo.'; return; }
@@ -2538,15 +2582,21 @@ function cajaEditar(r){
     +esc(r.id)+'</span>';
   ED_CAMPOS.forEach(function(C){
     var campo=C[0], rot=C[1], tipo=C[2], val=String(r[campo]||'');
+    var eid='ed_'+campo;
     h+='<label class="edCampo" data-campo="'+campo+'"><span>'+rot+'</span>';
-    if(tipo==='area') h+='<textarea data-ed="'+campo+'">'+esc(val)+'</textarea>';
-    else if(tipo==='lista') h+='<select data-ed="'+campo+'">'+opsDe(campo,val)+'</select>';
-    else if(tipo==='fecha') h+='<input type="date" data-ed="fecha" value="'+esc(isoDe(r._f))+'">';
+    /* Lo que se escribe a mano lleva microfono al lado; lo que se escoge de una
+       lista, no: dictar «Alta» a un desplegable no tiene sentido. */
+    var conMic=(tipo==='area'||tipo==='texto') && hayDictado();
+    if(conMic) h+='<div class="edCtl">';
+    if(tipo==='area') h+='<textarea id="'+eid+'" data-ed="'+campo+'">'+esc(val)+'</textarea>';
+    else if(tipo==='lista') h+='<select id="'+eid+'" data-ed="'+campo+'">'+opsDe(campo,val)+'</select>';
+    else if(tipo==='fecha') h+='<input id="'+eid+'" type="date" data-ed="fecha" value="'+esc(isoDe(r._f))+'">';
     else if(tipo.indexOf('opc:')===0){
-      h+='<select data-ed="'+campo+'">'+tipo.slice(4).split('|').map(function(o){
+      h+='<select id="'+eid+'" data-ed="'+campo+'">'+tipo.slice(4).split('|').map(function(o){
         return '<option'+(sinac(o)===sinac(val)?' selected':'')+'>'+esc(o)+'</option>'; }).join('')+'</select>';
     }
-    else h+='<input type="text" data-ed="'+campo+'" value="'+esc(val)+'">';
+    else h+='<input id="'+eid+'" type="text" data-ed="'+campo+'" value="'+esc(val)+'">';
+    if(conMic) h+='<button class="micChico" type="button" data-mic="'+eid+'">🎙</button></div>';
     h+='</label>';
   });
   return h+'<div class="edPie"><button class="bFirmar" id="edGuardar" type="button">Guardar los cambios</button>'
@@ -2884,14 +2934,36 @@ function dictarEn(dest, btn){
       'network':'Se cortó la conexión mientras te oía. Vuelve a apretar.',
       'aborted':'Se cortó la grabación. Vuelve a apretar cuando quieras.',
       'service-not-allowed':'El navegador no deja usar el dictado aquí. Escríbelo mientras tanto.'};
-    var m=$('#micEst'); if(m) m.textContent = POR[e.error] || 'No pude oír. Escríbelo si urge.';
+    var aviso = POR[e.error] || 'No pude oír. Escríbelo si urge.';
+    var m=$('#micEst'); if(m) m.textContent = aviso;
+    /* Si estabas dictando dentro de un panel, el aviso de arriba te queda
+       tapado: se repite donde lo puedes leer. */
+    var pm=$('#pMsg');
+    if(pm && RECdest && RECdest!==$('#sTexto')){ pm.className='pMsg mal'; pm.textContent=aviso; }
   };
   REC.onend=function(){ marcarGrabando(false); REC=null; };
   try{ REC.start(); }catch(e){ REC=null; marcarGrabando(false); }
 }
+/* Un solo oyente para TODOS los microfonos de la pagina, incluidos los que
+   todavia no existen: los paneles se dibujan despues. Cualquier boton con
+   data-mic="id-de-la-caja" dicta en esa caja. */
+document.addEventListener('click', function(e){
+  var b = e.target && e.target.closest ? e.target.closest('[data-mic]') : null;
+  if(!b) return;
+  var dest = document.getElementById(b.dataset.mic);
+  if(!dest){ return; }
+  e.preventDefault();
+  dictarEn(dest, b);
+});
 function marcarGrabando(on){
   var b=$('#micBtn'), t=$('#micTxt'), m=$('#micEst');
-  if(RECbtn && RECbtn!==b){ RECbtn.textContent = on?'⏹ Parar':'🎙 Dictar'; }
+  if(RECbtn && RECbtn!==b){
+    RECbtn.classList.toggle('on', on);
+    /* El microfono de un campo de edicion es un icono solo: si le metieramos
+       la palabra «Parar» crecería y movería el campo de al lado. */
+    var solo = RECbtn.classList.contains('micChico') && RECbtn.closest('.edCtl');
+    RECbtn.textContent = solo ? (on?'⏹':'🎙') : (on?'⏹ Parar':'🎙 Dictar');
+  }
   if(b && (!RECdest || RECdest===$('#sTexto'))){
     b.classList.toggle('on',on);
     if(t) t.textContent = on?'Te estoy oyendo — aprieta para parar':'Dictar';
