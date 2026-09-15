@@ -37,8 +37,56 @@ PY1, PY0 = 1020.0, 692.0
 BAND = (PY1-PY0)/3.0
 EJES = [("A","OPERACIÓN INTERNA"), ("B","OPERACIÓN CON CLIENTES"), ("C","NUEVOS CLIENTES")]
 EJEY = [PY1 - BAND*(i+0.5) for i in range(3)]
-CUENTA = {("I","A"):3, ("I","B"):6, ("I","C"):2,
-          ("II","A"):4, ("II","B"):10, ("II","C"):18}
+# ─── las cifras se LEEN, no se escriben ────────────────────────────────────
+# 14-sep-2026: esta lámina salió con tres de seis cifras inventadas para que el
+# dibujo quedara balanceado (B-fb6bf79c). Una cifra falsa en una pieza que se ve
+# bien es peor que ninguna: se ve autorizada. Ahora los conteos salen del Sheet
+# por board.bajar(); si el tablero no contesta, la lámina NO se dibuja —antes de
+# rellenar un hueco, se levanta la mano.
+import sys, unicodedata
+sys.path.insert(0, os.path.expanduser("~/.claudet"))
+
+def _sa(x):
+    x = unicodedata.normalize("NFD", str(x or "")).encode("ascii", "ignore").decode()
+    return " ".join(x.lower().split())
+
+def _carril(proyecto, mapa):
+    n = _sa(proyecto)
+    if any(_sa(x) == n for x in mapa["proyectos"]): return "B"
+    if any(_sa(x) == n for x in mapa["nuevos"]):    return "C"
+    if "cliente" in n:                               return "C"
+    return "A"
+
+def leer_cuenta():
+    """{(predio, crujía): abiertas}. Abiertas = viva y NO en pausa —proyecto
+    congelado o estado «En standby»— que es como las cuenta El Despacho."""
+    import board
+    MAPA = {"proyectos": ["Casa Alysa", "Casa María", "Casa Maria",
+                          "Real de Miramar Guaymas", "RNM"],
+            "nuevos":    ["La Cercada", "Torre Ruiseñor", "Gym ECOS", "Depas Guaymas"]}
+    CONGELADOS = {"la cercada"}
+    filas = board.bajar(guardar=False)
+    if not filas:
+        raise SystemExit("El tablero contestó vacío: no dibujo una lámina en ceros.")
+    out = {}
+    for r in filas:
+        if str(r.get("borrada", "")).upper() == "TRUE":   continue
+        if str(r.get("archivada", "")).upper() == "TRUE": continue
+        if _sa(r.get("estado")) == "terminado":           continue
+        if _sa(r.get("proyecto")) in CONGELADOS:          continue
+        if _sa(r.get("estado")) == "en standby":          continue
+        predio = "I" if "aurum" in _sa(r.get("empresa")) else "II"
+        out[(predio, _carril(r.get("proyecto"), MAPA))] = \
+            out.get((predio, _carril(r.get("proyecto"), MAPA)), 0) + 1
+    for pr in ("I", "II"):
+        for cr in "ABC":
+            out.setdefault((pr, cr), 0)
+    return out
+
+CUENTA = leer_cuenta()
+TOTAL  = sum(CUENTA.values())
+print("  leído del tablero:", " ".join("%s-%s=%d" % (a, b, CUENTA[(a, b)])
+      for a in ("I", "II") for b in "ABC"), "| total", TOTAL)
 RMARCA = 5.6
 
 # ─── utilidades ────────────────────────────────────────────────────────────
@@ -110,7 +158,7 @@ for (cx, cy) in [(94,94),(748,94),(94,1097),(748,1097)]:
 tx(CX0, 1090, "CATASTRO ÍNTIMO", "Jura", 10.5, 5.0, INK)
 tx(CX1, 1090, "SERIE I — LÁMINA ÚNICA", "Mono", 6.0, 1.7, GREY, align="r")
 line(CX0, 1076, CX1, 1076, wd=0.7)
-tx(CX0, 1062, "PLANTA DE CONJUNTO · DOS PREDIOS · SEIS EJES · CUARENTA Y TRES MARCAS",
+tx(CX0, 1062, ("PLANTA DE CONJUNTO · DOS PREDIOS · SEIS EJES · %d MARCAS" % TOTAL),
    "Mono", 5.6, 1.4, GREY, alpha=0.95)
 
 # ═══ 3 · el tejido del intersticio (se dibuja antes que los predios) ═══════
@@ -195,6 +243,27 @@ def predio(px, romano, titulo, sub, lado):
         la = "l" if lado == "izq" else "r"
         tx(lx, ey+19.0, letra+" · "+nombre, "Jura", 6.8, 2.6, INK, align=la, alpha=0.72)
 
+        # Una crujía en cero NO se rellena ni se borra: se dibuja el hueco.
+        # Es la regla que salió del B-fb6bf79c — si no hay qué medir, se dice.
+        if not n:
+            hx = x0+16.0 if lado == "izq" else x1-16.0
+            hx2 = hx + (54.0 if lado == "izq" else -54.0)
+            line(min(hx,hx2), ey-24.0, max(hx,hx2), ey-24.0,
+                 wd=0.35, alpha=0.45, dash=[2.4,2.4])
+            tx((hx+hx2)/2.0, ey-20.4, "00", "Mono", 6.4, 1.0,
+               GREY, align="c", alpha=0.75)
+            continue
+
+        # Una sola marca no se acota: no hay distancia que medir. Se pone un
+        # travesaño corto con su cifra, que es lo que hace un plano de verdad.
+        if n == 1:
+            m0 = xs[0]
+            line(m0-15.0, ey-24.0, m0+15.0, ey-24.0, wd=0.35, alpha=0.85)
+            for e in (m0-15.0, m0+15.0):
+                line(e-2.2, ey-26.2, e+2.2, ey-21.8, wd=0.5, alpha=0.9)
+            tx(m0, ey-20.4, "01", "Mono", 6.4, 1.0, OCHRE, align="c")
+            continue
+
         # cota de la corrida
         cy = ey - (27.0 if stagger else 24.0)
         a, b = xs[0], xs[-1]
@@ -229,8 +298,8 @@ for romano in ("I","II"):
         line(TX0, row_y-6.5, TX1, row_y-6.5, wd=0.2, alpha=0.32)
         row_y -= 19.0
 tx(TX0, row_y-2, "SUMA", "Mono", 5.0, 1.3, GREY)
-tx(TX1-58, row_y-2, "43", "MonoB", 5.8, 0.8, INK, align="r")
-tx(TX1, row_y-2, "%0.2f" % (43.0/(2.0*RUN)*100.0), "Mono", 5.8, 0.8, INK, align="r", alpha=0.72)
+tx(TX1-58, row_y-2, "%02d" % TOTAL, "MonoB", 5.8, 0.8, INK, align="r")
+tx(TX1, row_y-2, "%0.2f" % (TOTAL/(2.0*RUN)*100.0), "Mono", 5.8, 0.8, INK, align="r", alpha=0.72)
 line(TX0, row_y-9, TX1, row_y-9, wd=0.6)
 
 # ═══ 6 · signos ════════════════════════════════════════════════════════════
@@ -335,7 +404,7 @@ line(RX+RW*0.56, RY, RX+RW*0.56, RY+28, wd=0.35, alpha=0.7)
 tx(RX+9, RY+RH-20, "CATASTRO ÍNTIMO", "Jura", 9.0, 4.2, INK)
 tx(RX+RW-9, RY+RH-20, "I", "Display", 13.0, 0, OCHRE, align="r")
 tx(RX+9, RY+RH-44, "PLANTA DE CONJUNTO", "Jura", 7.0, 2.4, INK, alpha=0.9)
-tx(RX+9, RY+RH-56, "LEVANTAMIENTO PARCIAL — EN CURSO", "Mono", 5.0, 1.2, GREY)
+tx(RX+9, RY+RH-56, "LEVANTADO DEL TABLERO — EN CURSO", "Mono", 5.0, 1.2, GREY)
 tx(RX+9, RY+11, "ESC. 1:1   14·IX", "Mono", 5.2, 1.2, INK, alpha=0.9)
 tx(RX+RW-9, RY+11, "LÁM. 01 / 01", "Mono", 5.2, 1.2, GREY, align="r")
 
