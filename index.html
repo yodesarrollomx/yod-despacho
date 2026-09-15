@@ -3093,18 +3093,6 @@ async function escribirEnTarjeta(id, patch, linea, dice, btn){
    Cuatro pestañas, una hoja que sube y una pila de paneles con ATRÁS de
    verdad. Antes «cerrar» y la tecla Escape te sacaban hasta arriba desde el
    tercer nivel; ahora se sube de uno en uno y la ruta se ve escrita. */
-var PANES=['paneHoy','paneAreas','paneClaudet','paneHistoria'];
-var PANE='paneHoy';
-function irA(pane){
-  if(PANES.indexOf(pane)<0) return;
-  PANE=pane;
-  PANES.forEach(function(id){ var el=$('#'+id); if(el) el.hidden=(id!==pane); });
-  Array.prototype.forEach.call(document.querySelectorAll('#tabs [data-pane]'),function(b){
-    b.classList.toggle('on', b.dataset.pane===pane); });
-  try{ window.scrollTo(0,0); }catch(e){}
-}
-/* El número rojo de la pestaña sólo aparece si de verdad hay algo. Un globo
-   que no se actualiza es una mentira de pantalla, y de esas ya hubo. */
 function abrirHoja(id){
   var h=$('#'+id); if(!h) return;
   h.hidden=false; document.body.style.overflow='hidden';
@@ -3934,9 +3922,7 @@ document.addEventListener('DOMContentLoaded',function(){
   $('#hoy').textContent=dow[d.getDay()]+' '+d.getDate()+' de '+mes[d.getMonth()];
   /* el boton grande de la charola de entrada */
   /* ══ la app: pestañas, botón flotante y el acuerdo convertido en puerta ══ */
-  Array.prototype.forEach.call(document.querySelectorAll('#tabs [data-pane]'),function(b){
-    b.addEventListener('click',function(){ irA(b.dataset.pane); });
-  });
+
   var fab=$('#fab');
   if(fab) fab.addEventListener('click',function(){ abrirHoja('hojaNueva'); });
   Array.prototype.forEach.call(document.querySelectorAll('[data-cerrar-hoja]'),function(b){
@@ -3948,7 +3934,7 @@ document.addEventListener('DOMContentLoaded',function(){
      ningún lado. Ahora es la puerta a esas mismas tarjetas. */
   var ac=$('#acuerdo');
   if(ac) ac.addEventListener('click',function(){
-    FILTRO=null; VER_SOLO_VENCIDAS=true; irA('paneHoy'); pintarCinta(); pintarPila();
+    FILTRO=null; VER_SOLO_VENCIDAS=true; pintarCinta(); pintarPila();
     var pl=$('#pila'); if(pl) pl.scrollIntoView({behavior:'smooth',block:'start'});
   });
 
