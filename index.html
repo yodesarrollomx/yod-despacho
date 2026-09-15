@@ -726,8 +726,13 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
 /* densidad: lo que midió el auditor, aplicado sólo en el teléfono */
 @media(max-width:560px){
+  /* «Los últimos días que abriste» es historia, no trabajo: en el teléfono le
+     robaba ~90 px a la primera pantalla, justo donde debe estar la primera
+     tarjeta. Vive en la pestaña Historia. */
+  #acuerdoHist{display:none}
   .hola{padding:16px 0 2px}
-  .hola h1{font-size:23px}
+  .hola h1{font-size:22px;margin-top:1px}
+  .hola .d{font-size:12px}
   .acuerdo{padding:14px 15px;margin-top:10px}
   .cinta{margin-top:12px}
   .cnChip{min-height:58px;padding:9px 10px 8px}
