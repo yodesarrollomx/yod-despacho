@@ -3844,7 +3844,12 @@ async function cargar(){
        queda en la consola con su rastro completo. */
     try{ console.error('[cargar] falló:', e && e.message, e && e.stack); }catch(_l){}
     $('#viva').className='viva mal';
-    $('#estado').textContent='no pude leer el tablero';
+    /* «No entraste» y «no pude leer» son dos cosas distintas y la de arriba
+       decía siempre la segunda. El 15-sep su sesión había expirado: la puerta
+       del Portero estaba abierta, el aviso decía «todavía no entras» y el
+       semáforo, tres centímetros arriba, decía «no pude leer el tablero».
+       Dos mensajes que se contradicen valen menos que ninguno. */
+    $('#estado').textContent = credencial() ? 'no pude leer el tablero' : 'necesitas entrar';
     if(b){ b.hidden=false; b.className='aviso mal'; }
     CAIDO=true;
     /* Que las secciones DIGAN que no hay tablero. Cazado el 15-sep verificando:
@@ -3985,6 +3990,11 @@ document.addEventListener('visibilitychange',function(){
 });
 </script>
 <script src="https://yodesarrollomx.github.io/potenciales-yod/portero.js"></script>
+<!-- La Chinche, la misma que traen tablero.html, obra.html y os/index.html.
+     El Despacho no la tenía y por eso era el único tablero donde Alejandro no
+     podía clavar una falla señalándola: «ni chinches ni nada… es algo sui
+     generis cuando no debe ser así» (15-sep). -->
+<script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=os2"></script>
 <script src="https://yodesarrollomx.github.io/yod-portal/os/shell.js"></script>
 </body>
 </html>
