@@ -790,6 +790,23 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
    esté avanzando no lo vuelve menos tarde. */
 .plFila.venc.andando{border-left-color:var(--rojo)}
 .plFila.venc.andando .d,.plFila.venc.andando .d b{color:var(--rojo)}
+/* ══ LA SALA EN VIVO ══ Misma lengua que la pila: raya a la izquierda, un
+   renglón por pieza, la barra dice cuánto lleva hecho de verdad. */
+.sala{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.slFila{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+ padding:11px 14px;border-radius:12px;border:1px solid var(--hair);background:var(--card);
+ border-left:3px solid var(--hair2)}
+.slFila.tuya{border-left-color:var(--oro)}
+.slFila .n{flex:1;min-width:0}
+.slFila .n b{display:block;font-size:14.5px;line-height:1.35;color:var(--ink);font-weight:500}
+.slFila .n span{display:block;margin-top:5px;font-size:12px;color:var(--faint);line-height:1.35}
+.slBarra{margin-top:7px;height:3px;border-radius:2px;background:var(--hair2);overflow:hidden}
+.slBarra i{display:block;height:100%;background:var(--morado);border-radius:2px}
+.slFila.tuya .slBarra i{background:var(--oro)}
+.slPct{flex:0 0 auto;font-family:var(--mono);font-size:11px;color:var(--dim);
+ letter-spacing:.06em;padding-top:2px}
+.slAviso{padding:11px 14px;border-radius:12px;border:1px solid var(--hair);
+ background:var(--card);font-size:12.5px;color:var(--faint);line-height:1.4}
 .estadoPill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;
  border-radius:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
  border:1px solid var(--hair2);color:var(--dim)}
@@ -861,6 +878,19 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
   </div>
   <section class="pila" id="pila"></section>
   <button class="capaPausa" id="capaPausa" type="button" hidden></button>
+
+  <!-- LA SALA, EN VIVO. Él lo pidió el 15-sep: «quiero que me pongas cuando
+       esté algo en producción en la Sala de Edición y cuándo está por terminar
+       o más o menos cuándo estimas que termine, ojalá se pueda conectar todo
+       para que vea el proceso real de las cosas en tiempo real».
+       Se puede sin backend: la Sala y el Despacho viven los dos en
+       yodesarrollomx.github.io, así que es mismo origen — un fetch pelón, sin
+       CORS y sin inventar un puente. -->
+  <div class="pilaCab" id="salaCab" hidden>
+    <h2>La Sala</h2>
+    <span class="q" id="salaQ"></span>
+  </div>
+  <section class="sala" id="salaPanel" hidden></section>
 
   <!-- ══ PESTAÑA 2 · ÁREAS: las dos empresas y sus tres carriles ══ -->
 
@@ -2490,6 +2520,88 @@ function renglonPila(r){
     +'<span class="c"><b>'+esc(String(r.actividad||'sin texto').slice(0,120))+'</b>'
     +'<span>'+esc(pie.join(' · '))+(pill?(' '+pill):'')+'</span></span></button>';
 }
+/* ══════════════════ LA SALA, EN VIVO ══════════════════
+   Lee los dos archivos que la Sala publica cada vez que corre:
+     piezas.json   — qué pieza va en qué etapa y a quién espera
+     progreso.json — los pasos de cada pieza, hechos/total
+   Mismo origen, así que es un fetch pelón. No se recalcula nada aquí: si la
+   Sala dice «4 de 4 voces», eso se pinta. Volver a derivarlo desde otro lado
+   fue justo el error del 15-sep, cuando por contar tiras viejas estuve a punto
+   de reportarle «16 piezas detenidas» siendo cuatro.
+
+   SOBRE LA ESTIMACIÓN. Él la pidió: «más o menos cuándo estimas que termine».
+   La respuesta honesta casi siempre es que no depende de la máquina: cuando la
+   pieza espera SU palabra, el reloj lo trae él, y poner ahí una fecha sería
+   inventarla. Así que se dice quién la tiene detenida, que es el dato con el
+   que sí se decide algo. */
+var SALA = null;
+async function cargarSala(){
+  var base = (CFG_MSJ && CFG_MSJ.sala_datos_url) || 'https://yodesarrollomx.github.io/sala-edicion/datos/';
+  try{
+    var r = await Promise.all([
+      fetch(base+'piezas.json',   {cache:'no-store'}).then(function(x){return x.json();}),
+      fetch(base+'progreso.json', {cache:'no-store'}).then(function(x){return x.json();})
+    ]);
+    SALA = {piezas:(r[0]&&r[0].piezas)||[], progreso:(r[1]&&r[1].piezas)||[],
+            actualizado:(r[0]&&r[0].actualizado)||''};
+  }catch(e){ SALA = {error: e.message||'no cargó'}; }
+  pintarSala();
+}
+function avanceDe(nombre){
+  if(!SALA || !SALA.progreso) return null;
+  var p = SALA.progreso.filter(function(x){ return x.pieza===nombre; })[0];
+  if(!p || !p.pasos || !p.pasos.length) return null;
+  var hechos=0, total=0;
+  p.pasos.forEach(function(s){
+    var t=Number(s.total)||0, h=Number(s.hechos)||0;
+    /* «9 de 8 voces» pasa de verdad: se grabaron tomas de más. Un paso no
+       puede ir a más del 100% o la barra miente hacia arriba. */
+    total += t; hechos += Math.min(h, t);
+  });
+  if(!total) return null;
+  var faltan = p.pasos.filter(function(s){ return (Number(s.hechos)||0) < (Number(s.total)||0); });
+  return {pct: Math.round(hechos*100/total), hechos:hechos, total:total,
+          falta: faltan.length? faltan[0].que : null};
+}
+function pintarSala(){
+  var cab=$('#salaCab'), q=$('#salaQ'), c=$('#salaPanel');
+  if(!cab||!c) return;
+  if(!SALA){ cab.hidden=true; c.hidden=true; return; }
+  cab.hidden=false; c.hidden=false;
+  if(SALA.error){
+    q.textContent='';
+    c.innerHTML='<div class="slAviso">No pude leer la Sala ('+esc(SALA.error)+'). '
+      +'No te pongo ceros: es que no cargó, no que no haya nada.</div>';
+    return;
+  }
+  var vivas = SALA.piezas.filter(function(p){ return String(p.estado||'')!=='publicada'; });
+  if(!vivas.length){
+    q.textContent='';
+    c.innerHTML='<div class="slAviso">Nada en producción ahora mismo.</div>';
+    return;
+  }
+  var tuyas = vivas.filter(function(p){ return String(p.espera||'')==='yo'; }).length;
+  q.textContent = vivas.length+' EN PRODUCCIÓN'
+    + (tuyas? (' · '+tuyas+' TE ESPERAN') : '')
+    + (SALA.actualizado? (' · AL '+SALA.actualizado) : '');
+  c.innerHTML = vivas.map(function(p){
+    var a = avanceDe(p.pieza);
+    var mia = String(p.espera||'')==='yo';
+    var pie = [];
+    if(p.etapa) pie.push('va en '+p.etapa);
+    if(a && a.falta && a.pct<100) pie.push('falta: '+a.falta);
+    /* Cuándo termina: sólo se dice cuando de verdad se sabe. Si te espera a ti,
+       el reloj lo traes tú — eso es el dato, no una fecha inventada. */
+    pie.push(mia ? 'te espera a ti' : 'la trae la máquina');
+    return '<div class="slFila'+(mia?' tuya':'')+'">'
+      +'<span class="n"><b>'+esc(p.pieza)+'</b>'
+      +'<span>'+esc(pie.join(' · '))+'</span>'
+      +(a? ('<span class="slBarra"><i style="width:'+a.pct+'%"></i></span>') : '')
+      +'</span>'
+      +(a? ('<span class="slPct">'+a.pct+'%</span>') : '')
+      +'</div>';
+  }).join('');
+}
 function pintarPila(){
   var c=$('#pila'); if(!c) return;
   var T=$('#pilaT'), Q=$('#pilaQ'), LP=$('#pilaLimpiar');
@@ -4059,7 +4171,13 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && REC) REC.stop(); });
 })();
-(async function(){ await cargarConfigMensajes(); })();
+(async function(){ await cargarConfigMensajes();
+  /* La Sala va DESPUES de la config, que es de donde sale su direccion, y
+     se refresca sola cada 5 min: la Sala publica sus dos json cada vez que
+     corre, asi que el «tiempo real» que el pidio es ver lo ultimo que
+     publico sin tener que recargar la pagina. */
+  cargarSala(); setInterval(cargarSala, 5*60*1000);
+})();
 cargar();
 /* Si el tablero se abrio en una pestaña de atras y Chrome le apago los relojes,
    al volver a verla se carga en ese momento en vez de esperar al siguiente tick. */
