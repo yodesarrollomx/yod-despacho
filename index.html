@@ -686,7 +686,12 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
  font-size:9.5px;line-height:17px;text-align:center;padding:0 4px;font-weight:600}
 .tabs .b.cal{background:var(--oro)}
 
-.fab{position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:2450;
+/* A la IZQUIERDA. La esquina de abajo a la derecha NO es nuestra: ahí viven
+   los tres botones que comparte toda la casa —la pastilla de La Chinche, el
+   tema y Accesos—. Medido el 15-sep con La Chinche prendida: el ＋ estaba
+   encima de chn-pastilla y de engraneBtn. Un botón que tapa otro botón es un
+   botón que se aprieta por error. */
+.fab{position:fixed;left:16px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:2450;
  width:58px;height:58px;border-radius:20px;background:var(--oro);color:#14100A;
  display:flex;align-items:center;justify-content:center;font-size:31px;line-height:0;
  padding-bottom:4px;box-shadow:0 10px 26px rgba(0,0,0,.5)}
@@ -2298,12 +2303,16 @@ function crujiaDe(emp, car){
     var k = VISTA==='persona' ? (String(r.responsable||'').trim()||'sin dueño') : sujetoDe(r);
     (por[k]=por[k]||{nombre:k, tarjetas:[], frios:0, vencidas:0, dinero:0}).tarjetas.push(r);
     if(r._frio) por[k].frios++;
-    var d=dias(r._f); if(d!==null && d>0 && !r._frio) por[k].vencidas++;
+    /* _pausa, no _frio: la cinta y la pila cuentan fuera lo congelado Y lo
+       «En standby». La planta contaba sólo lo congelado, así que en la compu
+       sumaba 22 mientras la pila decía 19. Dos pantallas del mismo tablero que
+       no cuadran es una que miente, y da igual cuál. */
+    var d=dias(r._f); if(d!==null && d>0 && !r._pausa) por[k].vencidas++;
     por[k].dinero+=(r._din||0);
   });
   var P=Object.keys(por).map(function(k){ return por[k]; });
   P.forEach(function(x){
-    x.abiertas=x.tarjetas.filter(function(r){ return !r._frio; }).length;
+    x.abiertas=x.tarjetas.filter(function(r){ return !r._pausa; }).length;
     x.tarjetas.sort(function(a,b){ var A=dias(a._f), B=dias(b._f);
       if(A===null) return 1; if(B===null) return -1; return B-A; });
     x.dmax=Math.max.apply(null, x.tarjetas.map(function(r){ var d=dias(r._f); return d===null?-999:d; }));
@@ -2324,7 +2333,7 @@ function pintarPlanta(){
   c.innerHTML = EMPRESAS.map(function(E){
     var emp=E[0];
     var todas=VIVAS.filter(function(r){ return empresaDe(r)===emp; });
-    var abiertas=todas.filter(function(r){ return !r._frio; }).length;
+    var abiertas=todas.filter(function(r){ return !r._pausa; }).length;
     var h='<div class="predio" data-emp="'+esc(emp)+'">'
       +'<div class="predioCab"><img src="'+esc(E[3])+'" alt="'+esc(E[1])+'">'
       +'<div class="t"><b>'+esc(E[1])+'</b><span>'+esc(E[2])+'</span></div>'
