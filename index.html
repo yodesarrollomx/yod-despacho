@@ -663,6 +663,85 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .pNota textarea:focus{border-color:var(--oro);outline:none}
 @media(max-width:520px){ .edCtl{flex-direction:column} .edCtl .micChico{width:100%;justify-content:center} }
 
+/* ══════════════════ LA APP ══════════════════
+   Cinco auditores midieron la pantalla vieja: 746 px de mobiliario antes de
+   la primera tarjeta que se puede tocar. Cero por ciento de la primera
+   pantalla era trabajo. Esto lo reordena como una app: cuatro pestañas
+   abajo —donde alcanza el pulgar—, un botón flotante para meter cosas, y
+   hojas que se abren encima con ATRÁS de verdad, no «cerrar». */
+body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+.pane[hidden]{display:none}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:2400;
+ display:grid;grid-template-columns:repeat(4,1fr);
+ background:rgba(11,10,8,.95);backdrop-filter:blur(18px);
+ border-top:1px solid var(--hair);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{position:relative;display:flex;flex-direction:column;align-items:center;
+ justify-content:center;gap:5px;min-height:62px;color:var(--faint);
+ font-family:var(--mono);font-size:9px;letter-spacing:.11em}
+.tabs button i{font-style:normal;font-size:18px;line-height:1}
+.tabs button.on{color:var(--oro)}
+.tabs .b{position:absolute;top:9px;left:calc(50% + 9px);min-width:17px;height:17px;
+ border-radius:9px;background:var(--rojo);color:#15100E;font-family:var(--mono);
+ font-size:9.5px;line-height:17px;text-align:center;padding:0 4px;font-weight:600}
+.tabs .b.cal{background:var(--oro)}
+
+.fab{position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:2450;
+ width:58px;height:58px;border-radius:20px;background:var(--oro);color:#14100A;
+ display:flex;align-items:center;justify-content:center;font-size:31px;line-height:0;
+ padding-bottom:4px;box-shadow:0 10px 26px rgba(0,0,0,.5)}
+.fab:active{transform:scale(.94)}
+
+/* la hoja que sube desde abajo: meter algo nuevo */
+.hoja{position:fixed;inset:0;z-index:2500;background:rgba(6,5,4,.74);
+ backdrop-filter:blur(7px);display:flex;align-items:flex-end}
+.hoja[hidden]{display:none}
+.hojaCaja{width:100%;max-height:90vh;overflow:auto;background:var(--panel);
+ border:1px solid var(--hair);border-bottom:0;border-radius:26px 26px 0 0;
+ padding:8px 16px calc(22px + env(safe-area-inset-bottom))}
+.hojaTirador{width:42px;height:4px;border-radius:2px;background:var(--hair2);margin:6px auto 14px}
+.hojaCab{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.hojaCab h3{font-family:var(--serif);font-size:19px;color:var(--ink);font-weight:400}
+.hojaCab button{margin-left:auto;font-family:var(--mono);font-size:10.5px;
+ letter-spacing:.06em;color:var(--faint);min-height:40px;padding:0 6px}
+
+/* atrás de verdad, un nivel a la vez, con la ruta a la vista */
+.pAtras{display:inline-flex;align-items:center;gap:8px;min-height:42px;
+ padding:0 12px 0 4px;margin:-4px 0 6px -4px;border-radius:12px;
+ color:var(--ink2);font-size:13.5px}
+.pAtras:active{background:var(--panel2)}
+.pAtras b{font-size:17px;line-height:1;font-weight:400}
+.pRuta{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.13em;
+ color:var(--faint);margin:0 0 10px}
+
+/* el acuerdo deja de ser un cartel y se vuelve una puerta */
+.acuerdo{cursor:pointer}
+.acuerdo .ir{display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+ font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--oro)}
+
+/* vacíos: un solo componente chico, no un párrafo */
+.nada{display:flex;align-items:center;gap:9px;padding:14px 4px;
+ color:var(--faint);font-size:13px}
+.nada b{font-family:var(--serif);font-size:20px;color:var(--mute);font-weight:400}
+
+/* densidad: lo que midió el auditor, aplicado sólo en el teléfono */
+@media(max-width:560px){
+  .hola{padding:16px 0 2px}
+  .hola h1{font-size:23px}
+  .acuerdo{padding:14px 15px;margin-top:10px}
+  .cinta{margin-top:12px}
+  .cnChip{min-height:58px;padding:9px 10px 8px}
+  .pilaCab{margin:14px 0 7px}
+  .plFila{padding:11px 12px}
+  .capaPausa{margin-top:9px;padding:11px 13px}
+  .zona{padding:14px 14px 12px}
+  .panelCaja{padding:16px 16px 22px}
+  .pCab{padding-bottom:9px;margin-bottom:9px}
+  .pQue{padding:10px 11px;margin-bottom:9px}
+  .opcion{padding:10px 11px;margin-bottom:6px}
+  .micGrande{min-height:58px;padding:15px}
+}
+
 </style>
 </head>
 <body>
@@ -673,6 +752,9 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 </div></div>
 
 <div class="w">
+
+  <!-- ══ PESTAÑA 1 · HOY: lo que puedes tocar, sin scroll ══ -->
+  <div class="pane" id="paneHoy">
   <div class="hola">
     <p class="d" id="hoy"></p>
     <h1 id="saludo">Buenos días, Alejandro</h1>
@@ -691,45 +773,6 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   <!-- ═══════════════ EL DICTADO ═══════════════
        Lo primero y lo mas grande: en el iPhone se aprieta con el pulgar sin
        buscar nada. Todo lo demas de la pantalla empieza aqui. -->
-  <div class="aviso" id="banner" hidden></div>
-
-  <section class="dictado" id="zDictado">
-    <button class="micGrande" id="micBtn" type="button"><i></i><span id="micTxt">Dictar</span></button>
-    <p class="micEst" id="micEst">Apriétalo y habla. Yo lo escribo.</p>
-    <div class="dicCuerpo" id="dicCuerpo">
-      <textarea id="sTexto" placeholder="…o escríbelo aquí"></textarea>
-      <div class="dicPie">
-        <select id="sProy"></select>
-        <select id="sResp"></select>
-        <select id="sFecha">
-          <option value="hoy">para hoy</option>
-          <option value="semana" selected>esta semana</option>
-          <option value="proxima">la próxima semana</option>
-        </select>
-        <button class="bp" id="sBtn" type="button" disabled>cargando el tablero…</button>
-        <span class="smsg" id="sMsg"></span>
-      </div>
-      <div id="entrada"></div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ LA PLANTA ═══════════════
-       Dos predios (las dos empresas) sobre el mismo eje. Cada predio con tres
-       crujias: A operacion interna, B operacion con clientes, C nuevos
-       clientes. Cada crujia se lee como un eje estructural: la linea de eje
-       con sus marcas numeradas (los proyectos) y la cota al final (la letra y
-       el total abierto). Se pica una marca y sale el pendiente; se pica la
-       cota y sale la crujia entera. -->
-  <!-- LA CINTA: la planta entera en dos renglones de tres cotas. Se aprieta
-       una y la pila de abajo se queda solo con esa crujia. -->
-  <section class="cinta" id="cinta"></section>
-
-  <div class="vistaSw">
-    <span>La planta, vista</span>
-    <button class="bOtro on" data-vista="proyecto" type="button">por proyecto</button>
-    <button class="bOtro" data-vista="persona" type="button">por persona</button>
-  </div>
-  <section class="planta" id="planta"></section>
 
   <!-- LA PILA: lo que de verdad esta abierto, un renglon por tarjeta, en el
        orden en que se esta pudriendo. Debajo, lo pausado en una sola linea. -->
@@ -740,18 +783,34 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
   </div>
   <section class="pila" id="pila"></section>
   <button class="capaPausa" id="capaPausa" type="button" hidden></button>
+  </div>
 
-  <!-- los dos paneles que se abren encima: la crujia y el pendiente -->
-  <div class="panel" id="panelCrujia" hidden><div class="panelCaja"></div></div>
-  <div class="panel" id="panelPend" hidden><div class="panelCaja"></div></div>
+  <!-- ══ PESTAÑA 2 · ÁREAS: las dos empresas y sus tres carriles ══ -->
+  <div class="pane" id="paneAreas" hidden>
+  <!-- LA CINTA: la planta entera en dos renglones de tres cotas. Se aprieta
+       una y la pila de abajo se queda solo con esa crujia. -->
+  <section class="cinta" id="cinta"></section>
 
+  <div class="vistaSw">
+    <span>La planta, vista</span>
+    <button class="bOtro on" data-vista="proyecto" type="button">por proyecto</button>
+    <button class="bOtro" data-vista="persona" type="button">por persona</button>
+  </div>
+  <section class="planta" id="planta"></section>
+  </div>
+
+  <!-- ══ PESTAÑA 3 · CLAUDET: lo que te pregunta y lo que hizo solo ══ -->
+  <div class="pane" id="paneClaudet" hidden>
   <!-- Abajo, y plegado: la conversacion con Claudet y la historia. Se abre con
        un clic en su titulo; nunca empuja el trabajo hacia abajo. -->
   <section class="zona hiloZ" id="zHilo">
     <h2>El Hilo <span class="sub" style="display:inline;margin-left:8px">lo que Claudet te pregunta y lo que hizo solo</span></h2>
     <iframe id="hiloFrame" src="hilo.html?embed=1" title="El Hilo" loading="lazy"></iframe>
   </section>
+  </div>
 
+  <!-- ══ PESTAÑA 4 · HISTORIA: lo ya pasado, que no estorba lo de hoy ══ -->
+  <div class="pane" id="paneHistoria" hidden>
   <section class="zona mkZ" id="zMarcador">
     <h2>El marcador de la casa <span class="sub" style="display:inline;margin-left:8px">récord, racha y las cinco metas</span></h2>
     <div id="marcador" hidden></div>
@@ -797,9 +856,61 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
     <h2>¿Cómo sé que jala?</h2>
     <div class="fgrid" id="focos"></div>
   </div>
+  </div>
 
-  <p class="pie">LEE Y ESCRIBE EL MISMO SHEET DE SIEMPRE, POR EL APPS SCRIPT DEL TABLERO · EL PORTERO DECIDE QUIÉN ENTRA · NADA VIVE FUERA DEL SISTEMA</p>
+  <!-- los dos paneles que se abren encima: la crujia y el pendiente -->
+  <div class="panel" id="panelCrujia" hidden><div class="panelCaja"></div></div>
+  <div class="panel" id="panelPend" hidden><div class="panelCaja"></div></div>
+
+  <p class="pie">LEE Y ESCRIBE EL MISMO SHEET DE SIEMPRE, POR EL APPS SCRIPT DEL TABLERO · TU ACCESO DECIDE QUIÉN ENTRA · NADA VIVE FUERA DEL SISTEMA</p>
 </div>
+
+<!-- ══ LA HOJA DE ENTRADA · sube con el botón ＋ ══
+     Antes esto vivía en medio de la pantalla de inicio y costaba 160 px que
+     nunca eran trabajo. Ahora se llama cuando la necesitas. -->
+<div class="hoja" id="hojaNueva" hidden>
+  <div class="hojaCaja">
+    <div class="hojaTirador"></div>
+    <div class="hojaCab"><h3>Meter algo nuevo</h3>
+      <button type="button" data-cerrar-hoja="hojaNueva">cerrar</button></div>
+  <section class="dictado" id="zDictado">
+    <button class="micGrande" id="micBtn" type="button"><i></i><span id="micTxt">Dictar</span></button>
+    <p class="micEst" id="micEst">Apriétalo y habla. Yo lo escribo.</p>
+    <div class="dicCuerpo" id="dicCuerpo">
+      <textarea id="sTexto" placeholder="…o escríbelo aquí"></textarea>
+      <div class="dicPie">
+        <select id="sProy"></select>
+        <select id="sResp"></select>
+        <select id="sFecha">
+          <option value="hoy">para hoy</option>
+          <option value="semana" selected>esta semana</option>
+          <option value="proxima">la próxima semana</option>
+        </select>
+        <button class="bp" id="sBtn" type="button" disabled>cargando el tablero…</button>
+        <span class="smsg" id="sMsg"></span>
+      </div>
+      <div id="entrada"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ LA PLANTA ═══════════════
+       Dos predios (las dos empresas) sobre el mismo eje. Cada predio con tres
+       crujias: A operacion interna, B operacion con clientes, C nuevos
+       clientes. Cada crujia se lee como un eje estructural: la linea de eje
+       con sus marcas numeradas (los proyectos) y la cota al final (la letra y
+       el total abierto). Se pica una marca y sale el pendiente; se pica la
+       cota y sale la crujia entera. -->  </div>
+</div>
+
+<button class="fab" id="fab" type="button" aria-label="Meter algo nuevo">＋</button>
+
+<nav class="tabs" id="tabs">
+  <button type="button" data-pane="paneHoy" class="on"><i>◉</i>HOY<span class="b" id="bHoy" hidden></span></button>
+  <button type="button" data-pane="paneAreas"><i>▤</i>ÁREAS</button>
+  <button type="button" data-pane="paneClaudet"><i>◈</i>CLAUDET<span class="b cal" id="bCla" hidden></span></button>
+  <button type="button" data-pane="paneHistoria"><i>≡</i>HISTORIA</button>
+</nav>
+
 
 
 <script>
@@ -889,7 +1000,7 @@ var $ = function(s){ return document.querySelector(s); };
 function enCristiano(msg){
   var m=String(msg||'');
   if(m==='liga')  return 'Google no reconoció el acceso ahorita';
-  if(m==='clave') return 'el Portero no reconoció tu acceso: vuelve a entrar';
+  if(m==='clave') return 'tu acceso no fue reconocido: vuelve a entrar';
   if(/no pude releer/.test(m)) return 'no pude releer el tablero antes de escribir, así que mejor no escribí nada';
   return m;
 }
@@ -2201,6 +2312,7 @@ function pintarPlanta(){
    lo vencido; la barrita de abajo, cuanto pesa esa crujia contra la mas
    cargada. Se aprieta y la pila de abajo se queda solo con esa crujia. */
 var FILTRO=null;   /* {emp, car} o null */
+var VER_SOLO_VENCIDAS=false;   /* lo prende el acuerdo del día */
 var ABC_CORTO={A:'INTERNA', B:'CLIENTES', C:'NUEVOS'};
 function deCrujia(emp, car){
   return VIVAS.filter(function(r){ return empresaDe(r)===emp && carrilABC(r)===car; });
@@ -2272,7 +2384,11 @@ function renglonPila(r){
 function pintarPila(){
   var c=$('#pila'); if(!c) return;
   var T=$('#pilaT'), Q=$('#pilaQ'), LP=$('#pilaLimpiar');
-  if(LP){ LP.hidden=!FILTRO; LP.onclick=function(){ FILTRO=null; pintarCinta(); pintarPila(); }; }
+  if(LP){
+    LP.hidden=!(FILTRO||VER_SOLO_VENCIDAS);
+    LP.textContent = VER_SOLO_VENCIDAS ? 'ver todo lo abierto' : 'ver todo';
+    LP.onclick=function(){ FILTRO=null; VER_SOLO_VENCIDAS=false; pintarCinta(); pintarPila(); };
+  }
   if(!TAREAS.length){
     c.innerHTML='<div class="vacio">Aquí se apila tu trabajo en cuanto conteste el tablero.</div>';
     if(Q) Q.textContent=''; pintarPausa(); return;
@@ -2280,17 +2396,20 @@ function pintarPila(){
   var L=VIVAS.filter(function(r){ return !r._pausa; });
   if(FILTRO) L=L.filter(function(r){
     return empresaDe(r)===FILTRO.emp && carrilABC(r)===FILTRO.car; });
+  if(VER_SOLO_VENCIDAS) L=L.filter(function(r){ var d=dias(r._f); return d!==null && d>0; });
   L.sort(ordenPila);
   if(T){
     var A=(ABC.filter(function(x){return FILTRO&&x[0]===FILTRO.car;})[0]||[])[1];
-    T.textContent = FILTRO ? (FILTRO.emp.split(' ')[0]+' · '+A) : 'Lo abierto';
+    T.textContent = VER_SOLO_VENCIDAS ? 'Lo vencido'
+      : (FILTRO ? (FILTRO.emp.split(' ')[0]+' · '+A) : 'Lo abierto');
   }
   if(Q){
     var vn=L.filter(function(r){ var d=dias(r._f); return d!==null&&d>0; }).length;
     Q.textContent = L.length + (L.length===1?' TARJETA':' TARJETAS') + (vn?(' · '+vn+' VENCIDA'+(vn===1?'':'S')):'');
   }
   c.innerHTML = L.length ? L.map(renglonPila).join('')
-    : '<div class="vacio">'+(FILTRO?'Nada abierto en esta crujía.':'Nada abierto. Todo lo vivo está en pausa.')+'</div>';
+    : '<div class="nada"><b>0</b>'+(VER_SOLO_VENCIDAS?'Nada vencido.'
+        :(FILTRO?'Nada abierto en esta área.':'Nada abierto: todo lo vivo está en pausa.'))+'</div>';
   Array.prototype.forEach.call(c.querySelectorAll('[data-abrir]'),function(b){
     b.onclick=function(){ abrirPendiente(b.dataset.abrir); };
   });
@@ -2312,12 +2431,9 @@ function pintarPausa(){
   b.onclick=function(){ abrirPausa(F); };
 }
 function abrirPausa(F){
-  var h='<div class="pCab"><div class="t"><div class="k">FUERA DEL FLUJO</div>'
-    +'<h3>'+F.length+' en pausa</h3></div>'
-    +'<button class="pCerrar" data-cerrar="panelCrujia">cerrar</button></div>'
-    +'<p style="font-size:12.5px;color:var(--faint);margin:-6px 0 14px">'
-    +'Proyecto congelado o estado «En standby». No cuentan como vencidas y no te las pongo enfrente. '
-    +'Ábrela y cámbiale el estado para regresarla al flujo.</p>';
+  var h=cabPanel('FUERA DEL FLUJO', F.length+' en pausa',
+    'Tú las apagaste: proyecto en pausa o estado «En standby». No cuentan como vencidas. '
+    +'Ábrela y cámbiale el estado para regresarla.');
   var por={}; F.forEach(function(r){ (por[sujetoDe(r)]=por[sujetoDe(r)]||[]).push(r); });
   Object.keys(por).sort(function(a,b){ return por[b].length-por[a].length; }).forEach(function(k){
     h+='<div style="margin:16px 0 4px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--oro)">'
@@ -2335,10 +2451,8 @@ function abrirPausa(F){
 function abrirCrujia(emp, car, resaltar){
   var A=ABC.filter(function(x){return x[0]===car;})[0]||['','',''];
   var P=crujiaDe(emp,car);
-  var h='<div class="pCab"><div class="t"><div class="k">'+esc(emp)+' · CRUJÍA '+car+'</div>'
-    +'<h3>'+esc(A[1])+'</h3></div><button class="pCerrar" data-cerrar="panelCrujia">cerrar</button></div>'
-    +'<p style="font-size:12.5px;color:var(--faint);margin:-6px 0 14px">'+esc(A[2])+'</p>';
-  if(!P.length) h+='<div class="vacio">Nada abierto en esta crujía.</div>';
+  var h=cabPanel(esc(emp)+' · ÁREA '+car, A[1], A[2]);
+  if(!P.length) h+='<div class="vacio">Nada abierto en esta área.</div>';
   P.forEach(function(x){
     h+='<div style="margin:16px 0 4px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--oro)">'
       +esc(x.nombre.toUpperCase())+' · '+x.abiertas+(x.frios?(' · '+x.frios+' en pausa'):'')+'</div>';
@@ -2380,20 +2494,43 @@ function propuestasDe(r){
   P.push({k:'D', t:'Recordármelo mañana', q:'La deja con fecha de mañana y una nota de que la pospusiste tú.', accion:'manana'});
   return P.map(function(x,i){ x.k=['A','B','C','D','E','F'][i]; return x; });
 }
+/* Lo que esté en la columna `links` se vuelve algo que se puede abrir. Puede
+   traer varias, separadas por espacio, coma o el ||| de siempre. */
+function ligasDe(r){
+  var crudo=String(r.links||'').trim(); if(!crudo) return '';
+  var L=crudo.split(/\|\|\||[\s,;]+/).filter(function(x){ return /^https?:\/\//i.test(x); });
+  if(!L.length) return '<br><span style="font-size:12px;color:var(--faint)">'+esc(crudo.slice(0,160))+'</span>';
+  return '<br>'+L.map(function(u,i){
+    var q=/\.(png|jpe?g|gif|webp|heic)(\?|$)/i.test(u)?'🖼':(/\.pdf(\?|$)/i.test(u)?'📄':'🔗');
+    return '<a href="'+esc(u)+'" target="_blank" rel="noopener" '
+      +'style="display:inline-block;margin:7px 7px 0 0;padding:7px 11px;border:1px solid var(--hair2);'
+      +'border-radius:11px;font-family:var(--mono);font-size:11px">'+q+' liga '+(i+1)+'</a>';
+  }).join('');
+}
 var PEND_SEL=null;
 function abrirPendiente(id){
-  var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+  var r=VIVAS.filter(function(x){return x.id===id;})[0];
+  if(!r){
+    /* Antes esto era `return` a secas: picabas el número desde la bitácora y no
+       pasaba NADA. Si la tarjeta ya se cerró o se archivó, se dice. */
+    var vieja=TAREAS.filter(function(x){return x.id===id;})[0];
+    mostrarPanel('panelPend', cabPanel('ARCHIVO · '+id,
+      vieja?String(vieja.actividad||'').slice(0,150):'No encuentro '+id,
+      vieja?('Esta tarjeta ya no está abierta'+(vieja.estado?(': '+vieja.estado):'')
+            +(vieja.fechaTerminado?(' el '+vieja.fechaTerminado):'')+'. Se queda aquí como historia.')
+           :'No está en el tablero que tengo cargado. Puede que se haya borrado.'));
+    return;
+  }
   PEND_SEL=null;
   var ra=ramaDe(r), d=dias(r._f);
   var dtx = d===null?'sin fecha' : (d>0?('vencida hace '+d+' días'):(d===0?'vence hoy':('vence en '+(-d)+' días')));
   var cs=comentarios(r).slice(-4).reverse();
-  var h='<div class="pCab"><div class="t"><div class="k">'+esc(sujetoDe(r))+' · '+esc(r.id)+'</div>'
-    +'<h3>'+esc(String(r.actividad||'').slice(0,150))+'</h3></div>'
-    +'<button class="pCerrar" data-cerrar="panelPend">cerrar</button></div>'
+  var h=cabPanel(sujetoDe(r)+' · '+r.id, String(r.actividad||'').slice(0,150), '')
     +'<div class="pQue"><b>'+esc(r.responsable||'sin dueño')+'</b> · '+esc(dtx)
     +(r.estado?(' · '+esc(r.estado)):'')+(r._dinTxt?(' · <b>'+esc(r._dinTxt)+'</b>'):'')
     +(ra.meta?('<br><span style="font-size:12px;color:var(--faint)">'+esc(metaCorta(ra.meta))+'</span>'):'')
-    +(String(r.observaciones||'').trim()?('<br>'+esc(String(r.observaciones).slice(0,220))):'')+'</div>';
+    +(String(r.observaciones||'').trim()?('<br>'+esc(String(r.observaciones).slice(0,220))):'')
+    +ligasDe(r)+'</div>';
   if(cs.length){
     h+='<div class="pHist">'+cs.map(function(c){
       return '<div><span class="f">'+esc(c.fecha)+' · '+esc(c.autor)+'</span>'+esc(limpiaSello(c.texto).slice(0,180))+'</div>';
@@ -2420,6 +2557,14 @@ function abrirPendiente(id){
   pintarSalidas(id);
   prenderEditar(id);
 }
+/* Cualquier sitio de la página que nombre una tarjeta la puede abrir. Antes el
+   libro y la bitácora la enseñaban como TEXTO: veías el número y no podías
+   entrar. Eran callejones sin salida, y eran cuatro. */
+document.addEventListener('click',function(e){
+  var b=e.target && e.target.closest ? e.target.closest('[data-ir]') : null;
+  if(!b) return;
+  e.preventDefault(); abrirPendiente(b.dataset.ir);
+});
 function opActual(r){
   var P=propuestasDe(r);
   return P.filter(function(x){ return x.k===PEND_SEL; })[0] || P[0];
@@ -2554,7 +2699,11 @@ var ED_CAMPOS=[
   ['estado','ESTADO','opc:Pendiente|En proceso|En standby|Terminado'],
   ['prioridad','PRIORIDAD','opc:Alta|Media|Baja'],
   ['entregable','ENTREGABLE','texto'],
-  ['observaciones','NOTAS','area']
+  ['observaciones','NOTAS','area'],
+  /* La columna `links` existía en el Sheet desde siempre y el tablero nunca la
+     enseñaba: si alguien pegaba ahí un plano o una foto, no se veía por ningún
+     lado. Ahora se ve y se edita. */
+  ['links','LIGAS / FOTOS','area']
 ];
 function partesDeFecha(d){
   var dow=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -2659,7 +2808,7 @@ async function escribirEnTarjeta(id, patch, linea, dice, btn){
     btn.dataset.antes=btn.dataset.antes||btn.textContent; btn.textContent='Sí, hazlo';
     m.className='pMsg'; m.textContent='Míralo y confirma.'; return;
   }
-  if(!credencial()){ m.className='pMsg mal'; m.textContent='Entra con el Portero: sin credencial no puedo escribir.'; return; }
+  if(!credencial()){ m.className='pMsg mal'; m.textContent='Entra con tu acceso: sin él no puedo escribir en el tablero.'; return; }
   if(btn){ btn.disabled=true; btn.textContent='leyendo la tarjeta…'; }
   try{
     var fresco=await llamar('getAll',{});
@@ -2687,22 +2836,88 @@ async function escribirEnTarjeta(id, patch, linea, dice, btn){
     m.className='pMsg mal'; m.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.';
   }
 }
+/* ══════════════════ EL MOTOR DE LA APP ══════════════════
+   Cuatro pestañas, una hoja que sube y una pila de paneles con ATRÁS de
+   verdad. Antes «cerrar» y la tecla Escape te sacaban hasta arriba desde el
+   tercer nivel; ahora se sube de uno en uno y la ruta se ve escrita. */
+var PANES=['paneHoy','paneAreas','paneClaudet','paneHistoria'];
+var PANE='paneHoy';
+function irA(pane){
+  if(PANES.indexOf(pane)<0) return;
+  PANE=pane;
+  PANES.forEach(function(id){ var el=$('#'+id); if(el) el.hidden=(id!==pane); });
+  Array.prototype.forEach.call(document.querySelectorAll('#tabs [data-pane]'),function(b){
+    b.classList.toggle('on', b.dataset.pane===pane); });
+  try{ window.scrollTo(0,0); }catch(e){}
+}
+/* El número rojo de la pestaña sólo aparece si de verdad hay algo. Un globo
+   que no se actualiza es una mentira de pantalla, y de esas ya hubo. */
+function pintarGlobos(){
+  var b=$('#bHoy');
+  if(b){
+    var v=VIVAS.filter(function(r){ var d=dias(r._f); return !r._pausa && d!==null && d>0; }).length;
+    b.hidden=!v; b.textContent=v||'';
+  }
+}
+function abrirHoja(id){
+  var h=$('#'+id); if(!h) return;
+  h.hidden=false; document.body.style.overflow='hidden';
+  /* La charola nace ABIERTA. Antes el cuerpo (texto, proyecto, dueño, fecha)
+     venía colapsado y lo único que lo abría era el botón del micrófono: si el
+     navegador no sabía oír, ese botón nacía apagado y escribir a mano dejaba
+     de existir. Escribir nunca debió depender del micrófono. */
+  var z=$('#zDictado'); if(z) z.classList.add('abierto');
+}
+function cerrarHoja(id){
+  var h=$('#'+id); if(!h) return;
+  if(REC){ try{ REC.stop(); }catch(e){} }
+  h.hidden=true;
+  if(document.querySelectorAll('.panel:not([hidden]), .hoja:not([hidden])').length===0)
+    document.body.style.overflow='';
+}
+/* La pila de paneles: quién está encima de quién. */
+var PILA_P=[];
+function atras(){
+  if(!PILA_P.length){
+    var ha=document.querySelector('.hoja:not([hidden])');
+    if(ha) cerrarHoja(ha.id);
+    return;
+  }
+  cerrarPanel(PILA_P[PILA_P.length-1]);
+}
+/* El encabezado de cualquier panel: atrás + la ruta escrita, para que nunca
+   sea un cuarto sin puerta. */
+function cabPanel(ruta, titulo, sub){
+  return '<button class="pAtras" type="button" data-atras="1"><b>‹</b>atrás</button>'
+    +'<span class="pRuta">'+esc(ruta)+'</span>'
+    +'<div class="pCab"><div class="t"><h3>'+esc(titulo)+'</h3></div></div>'
+    +(sub?('<p style="font-size:12.5px;color:var(--faint);margin:-8px 0 14px">'+esc(sub)+'</p>'):'');
+}
 function mostrarPanel(cual, html){
   var p=document.getElementById(cual); if(!p) return;
   p.querySelector('.panelCaja').innerHTML=html; p.hidden=false;
   document.body.style.overflow='hidden';
+  if(PILA_P.indexOf(cual)<0) PILA_P.push(cual);
   Array.prototype.forEach.call(p.querySelectorAll('[data-cerrar]'),function(b){ b.onclick=function(){ cerrarPanel(b.dataset.cerrar); }; });
+  Array.prototype.forEach.call(p.querySelectorAll('[data-atras]'),function(b){ b.onclick=function(){ atras(); }; });
   Array.prototype.forEach.call(p.querySelectorAll('[data-abrir]'),function(b){ b.onclick=function(){ abrirPendiente(b.dataset.abrir); }; });
-  p.onclick=function(e){ if(e.target===p) cerrarPanel(cual); };
+  p.onclick=function(e){ if(e.target===p) atras(); };
+  try{ p.querySelector('.panelCaja').scrollTop=0; }catch(e){}
 }
 function cerrarPanel(cual){
   var p=document.getElementById(cual); if(!p) return;
   p.hidden=true;
-  if(document.querySelectorAll('.panel:not([hidden])').length===0) document.body.style.overflow='';
+  var k=PILA_P.indexOf(cual); if(k>=0) PILA_P.splice(k,1);
+  if(document.querySelectorAll('.panel:not([hidden]), .hoja:not([hidden])').length===0)
+    document.body.style.overflow='';
 }
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){ cerrarPanel('panelPend'); cerrarPanel('panelCrujia'); }
+/* Escape sube UN nivel, no te avienta hasta el inicio. Lo mismo hace el
+   botón físico de atrás del teléfono. */
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') atras(); });
+window.addEventListener('popstate',function(){
+  if(PILA_P.length || document.querySelector('.hoja:not([hidden])')){ atras(); history.pushState({d:1},''); }
 });
+try{ history.pushState({d:1},''); }catch(e){}
 
 /* ══════════════ EL LIBRO DE DECISIONES ══════════════
    Cada comentario con «DECISIÓN» es una decision de Alejandro. Lo que vino
@@ -2772,7 +2987,9 @@ function pintarLibro(){
       h+='<div class="lb-proy">'+esc(pr)+'</div>';
       proys[pr].sort(function(a,b){return a.fecha<b.fecha?1:-1;}).forEach(function(d){
         h+='<div class="lb-dec"><div class="cab"><b>'+esc(d.decision.slice(0,160))+'</b>'
-          +'<span class="f">'+esc(d.fecha)+' · '+esc(d.tarjeta)+(d.responsable?(' · '+esc(d.responsable)):'')+'</span>'
+          +'<span class="f">'+esc(d.fecha)+' · '
+          +(d.tarjeta?('<button type="button" data-ir="'+esc(d.tarjeta)+'" style="font:inherit;color:var(--oro);padding:4px 2px">'+esc(d.tarjeta)+'</button>'):'—')
+          +(d.responsable?(' · '+esc(d.responsable)):'')+'</span>'
           +'<span class="e '+d.estado+'">'+EST[d.estado]+'</span></div>';
         d.pasos.forEach(function(p){
           h+='<div class="lb-paso"><span class="f">'+esc(p.fecha)+'</span><span class="q">'+esc(p.tipo)+' · '+esc(p.autor)+'</span><span>'+esc(p.texto.slice(0,180))+'</span></div>';
@@ -2834,7 +3051,9 @@ function pintarBitacora(){
       Object.keys(pp[pr]).sort().forEach(function(pe){
         h+='<div class="bt-pers">'+esc(pe)+'</div>';
         pp[pr][pe].forEach(function(a){
-          h+='<div class="bt-acc"><span class="t">'+esc(a.tipo)+'</span><span class="id" title="'+esc(a.actividad)+'">'+esc(a.tarjeta)+'</span><span>'+esc(a.texto.slice(0,170))+'</span></div>';
+          h+='<div class="bt-acc"><span class="t">'+esc(a.tipo)+'</span>'
+            +'<button type="button" class="id" data-ir="'+esc(a.tarjeta)+'" title="'+esc(a.actividad)+'" style="font:inherit;color:var(--oro)">'+esc(a.tarjeta)+'</button>'
+            +'<span>'+esc(a.texto.slice(0,170))+'</span></div>';
         });
       });
     });
@@ -2892,7 +3111,7 @@ function pintar(){
   armarMesa();
   /* el arbol se dibuja ANTES que la mesa: la mesa es la que prende la rama
      de su primera tarjeta, y si el arbol se redibujara despues la apagaria. */
-  acuerdo(); pintarPlanta(); pintarCinta(); pintarPila(); pintarEntrada(); pintarMarcador();
+  acuerdo(); pintarPlanta(); pintarCinta(); pintarPila(); pintarGlobos(); pintarEntrada(); pintarMarcador();
   try{ pintarLibro(); pintarBitacora(); }catch(e){ console.error('libro/bitacora',e); }
   pintarConstancias();
   var f=new Date();
@@ -2975,7 +3194,7 @@ function marcarGrabando(on){
 /* ══════════ los otros dos actos de la mesa ══════════ */
 async function escribirComentario(id, texto, btn, dice){
   var m=document.getElementById('fm_'+id);
-  if(!credencial()){ if(m){m.className='smsg mal';m.textContent='Entra con el Portero: sin credencial no puedo escribir.';} return false; }
+  if(!credencial()){ if(m){m.className='smsg mal';m.textContent='Entra con tu acceso: sin él no puedo escribir en el tablero.';} return false; }
   var antes=btn.textContent; btn.disabled=true; btn.textContent='…';
   try{
     /* releer antes de escribir: el patch reemplaza la columna completa */
@@ -3451,6 +3670,25 @@ document.addEventListener('DOMContentLoaded',function(){
   var d=new Date();
   $('#hoy').textContent=dow[d.getDay()]+' '+d.getDate()+' de '+mes[d.getMonth()];
   /* el boton grande de la charola de entrada */
+  /* ══ la app: pestañas, botón flotante y el acuerdo convertido en puerta ══ */
+  Array.prototype.forEach.call(document.querySelectorAll('#tabs [data-pane]'),function(b){
+    b.addEventListener('click',function(){ irA(b.dataset.pane); });
+  });
+  var fab=$('#fab');
+  if(fab) fab.addEventListener('click',function(){ abrirHoja('hojaNueva'); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-cerrar-hoja]'),function(b){
+    b.addEventListener('click',function(){ cerrarHoja(b.dataset.cerrarHoja); });
+  });
+  var hj=$('#hojaNueva');
+  if(hj) hj.addEventListener('click',function(e){ if(e.target===hj) cerrarHoja('hojaNueva'); });
+  /* El acuerdo del día era un cartel con el número de vencidas y no llevaba a
+     ningún lado. Ahora es la puerta a esas mismas tarjetas. */
+  var ac=$('#acuerdo');
+  if(ac) ac.addEventListener('click',function(){
+    FILTRO=null; VER_SOLO_VENCIDAS=true; irA('paneHoy'); pintarCinta(); pintarPila();
+    var pl=$('#pila'); if(pl) pl.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
   var mb=$('#micBtn');
   if(mb) mb.addEventListener('click',function(){
     /* el cuerpo del dictado (texto, proyecto, dueño, fecha) se despliega solo
@@ -3461,8 +3699,12 @@ document.addEventListener('DOMContentLoaded',function(){
   var tx=$('#sTexto');
   if(tx) tx.addEventListener('focus',function(){ var z=$('#zDictado'); if(z) z.classList.add('abierto'); });
   if(!hayDictado()){
-    if(mb){ mb.disabled=true; }
-    var me=$('#micEst'); if(me) me.textContent='Este navegador no sabe oír. En Chrome sí funciona; mientras, escríbelo aquí abajo.';
+    /* B-e9238b34: antes esto ponía disabled al botón que era la ÚNICA forma de
+       abrir la charola, así que sin micrófono no se podía ni escribir. Ahora el
+       micrófono simplemente no aparece y la caja de texto queda al frente. */
+    if(mb) mb.hidden=true;
+    var me=$('#micEst'); if(me) me.hidden=true;
+    var z0=$('#zDictado'); if(z0) z0.classList.add('abierto');
   }
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && REC) REC.stop(); });
 })();
