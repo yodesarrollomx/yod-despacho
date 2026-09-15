@@ -770,9 +770,12 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
     <div class="hist" id="acuerdoHist" hidden></div>
   </section>
 
-  <!-- ═══════════════ EL DICTADO ═══════════════
-       Lo primero y lo mas grande: en el iPhone se aprieta con el pulgar sin
-       buscar nada. Todo lo demas de la pantalla empieza aqui. -->
+  <!-- El aviso de arriba: caída de Google, esperando el acceso, tablero viejo.
+       Se perdió al reordenar la pantalla en pestañas y su ausencia tiraba TODO
+       el pintado al catch: la ruta de éxito hacía b.hidden=true sobre null, así
+       que el semáforo decía «no pude leer el tablero» con 151 tarjetas ya
+       cargadas. La peor clase de mentira: la que se contradice a sí misma. -->
+  <div class="aviso" id="banner" hidden></div>
 
   <!-- LA PILA: lo que de verdad esta abierto, un renglon por tarjeta, en el
        orden en que se esta pudriendo. Debajo, lo pausado en una sola linea. -->
@@ -3581,7 +3584,8 @@ async function cargar(){
     $('#viva').className='viva';
     var mias=VIVAS.filter(function(r){return r._mio;}).length;
     $('#estado').textContent=mias+' de '+n+' son tuyas · leído ahora mismo';
-    b.hidden=true; _fallos=0;
+    if(b) b.hidden=true;
+    _fallos=0;
     pintar();
     llenarSoltar();
   }catch(e){
@@ -3591,7 +3595,7 @@ async function cargar(){
     try{ console.error('[cargar] falló:', e && e.message, e && e.stack); }catch(_l){}
     $('#viva').className='viva mal';
     $('#estado').textContent='no pude leer el tablero';
-    b.hidden=false; b.className='aviso mal';
+    if(b){ b.hidden=false; b.className='aviso mal'; }
     CAIDO=true;
     /* Que las secciones DIGAN que no hay tablero. Cazado el 15-sep verificando:
        con Google caído, la pila y las áreas se quedaban COMPLETAMENTE EN BLANCO
