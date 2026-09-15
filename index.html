@@ -3588,6 +3588,18 @@ async function cargar(){
     $('#viva').className='viva mal';
     $('#estado').textContent='no pude leer el tablero';
     b.hidden=false; b.className='aviso mal';
+    CAIDO=true;
+    /* Que las secciones DIGAN que no hay tablero. Cazado el 15-sep verificando:
+       con Google caído, la pila y las áreas se quedaban COMPLETAMENTE EN BLANCO
+       y el acuerdo decía «leyendo tu tablero…» para siempre. Una sección vacía
+       se lee como «no tienes nada que hacer», y esa es la mentira por omisión
+       que más duele aquí. Los pintores ya saben decirlo: sólo faltaba llamarlos. */
+    try{ pintarCinta(); pintarPila(); pintarGlobos(); }catch(_e){}
+    if(!TAREAS.length){
+      var an=$('#acuerdoN'); if(an) an.textContent='No pude leer tu tablero';
+      var a1=$('#acuerdoSub'); if(a1) a1.textContent='Google no está contestando. Lo sigo intentando — no es que no tengas pendientes.';
+      var a2=$('#acuerdoSub2'); if(a2) a2.textContent='';
+    }
     if(!credencial()){
       /* Carrera real, cazada el 14-sep: esta pagina arranca cargar() antes de
          que portero.js termine de canjear la liga, asi que ve el localStorage
