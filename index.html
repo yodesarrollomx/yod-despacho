@@ -3585,6 +3585,10 @@ async function cargar(){
     pintar();
     llenarSoltar();
   }catch(e){
+    /* El catch se tragaba el error sin dejar rastro, así que «no pude leer el
+       tablero» podía significar diez cosas distintas y ninguna se sabía. Ahora
+       queda en la consola con su rastro completo. */
+    try{ console.error('[cargar] falló:', e && e.message, e && e.stack); }catch(_l){}
     $('#viva').className='viva mal';
     $('#estado').textContent='no pude leer el tablero';
     b.hidden=false; b.className='aviso mal';
