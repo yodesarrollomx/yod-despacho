@@ -759,24 +759,29 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
 /* ══════════════ UNA SOLA PANTALLA ══════════════
    Las pestañas partían el Despacho en cuatro y lo volvían otra cosa: él pidió
-   UNA pantalla. Lo que ya pasó vive abajo y PLEGADO — está a un toque, pero no
-   empuja el trabajo de hoy. */
-.zona.plegable > h2{cursor:pointer;display:flex;align-items:center;gap:10px;
- min-height:44px;margin:-4px 0}
-.zona.plegable > h2::before{content:"›";display:inline-block;font-family:var(--mono);
- font-size:20px;color:var(--oro);transition:transform .2s;line-height:1}
-.zona.plegable.abierta > h2::before{transform:rotate(90deg)}
-.zona.plegable > h2 .sub{color:var(--faint)}
-.zona.plegable > *:not(h2){display:none}
-.zona.plegable.abierta > *{display:revert}
-.zona.plegable.abierta > h2{display:flex}
+   UNA pantalla. Lo que ya pasó vive abajo y plegado.
+
+   OJO: el motor de plegado ES el de siempre — la clase `plegada` de la línea
+   359 y el JS que la conmuta. Aquí se escribió un SEGUNDO motor con la clase
+   `abierta`, y como nadie ponía `abierta`, mi propia regla dejó las cinco
+   secciones cerradas PARA SIEMPRE: El Hilo, el marcador, el libro, la bitácora
+   y las constancias. Se picaba el título y sólo giraba la flecha.
+   Dos motores para lo mismo es uno que gana y otro que estorba. Se quedó el
+   que ya funcionaba; aquí sólo va lo que le faltaba: que el título se vea
+   como un botón. */
+.zona.plegable > h2{cursor:pointer;display:flex;align-items:center;gap:10px;min-height:44px}
 .zona.plegable{padding-bottom:14px}
+.zona.plegable + .zona.plegable{margin-top:10px}
 
 /* ══════════════ EN PROCESO NO ES UNA ALARMA ══════════════
    El rojo es para lo vencido. Algo «En proceso» está andando: es otra
    categoría y merece otro color, no el de peligro. */
 .plFila.andando{border-left-color:var(--morado)}
 .plFila.andando .d,.plFila.andando .d b{color:var(--morado)}
+/* Vencida Y andando a la vez: la raya y los días se quedan ROJOS. Que algo
+   esté avanzando no lo vuelve menos tarde. */
+.plFila.venc.andando{border-left-color:var(--rojo)}
+.plFila.venc.andando .d,.plFila.venc.andando .d b{color:var(--rojo)}
 .estadoPill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;
  border-radius:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
  border:1px solid var(--hair2);color:var(--dim)}
@@ -828,7 +833,9 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
     <button class="bOtro" data-vista="persona" type="button">por persona</button>
   </div>
   <section class="planta" id="planta"></section>
-  </div>
+  <!-- (aquí estaba el cierre de .w, demasiado pronto: la pila, las
+       cinco zonas plegadas y el pie quedaban FUERA del contenedor, o sea sin
+       sus 20 px de margen lateral en el teléfono. Se movió al final.) -->
 
   <!-- ══ PESTAÑA 3 · CLAUDET: lo que te pregunta y lo que hizo solo ══ -->
 
@@ -842,7 +849,6 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
   </div>
   <section class="pila" id="pila"></section>
   <button class="capaPausa" id="capaPausa" type="button" hidden></button>
-  </div>
 
   <!-- ══ PESTAÑA 2 · ÁREAS: las dos empresas y sus tres carriles ══ -->
 
@@ -854,7 +860,6 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
     <h2>El Hilo <span class="sub" style="display:inline;margin-left:8px">lo que Claudet te pregunta y lo que hizo solo</span></h2>
     <iframe id="hiloFrame" src="hilo.html?embed=1" title="El Hilo" loading="lazy"></iframe>
   </section>
-  </div>
 
   <!-- ══ PESTAÑA 4 · HISTORIA: lo ya pasado, que no estorba lo de hoy ══ -->
   <section class="zona mkZ plegable" id="zMarcador">
@@ -1567,7 +1572,11 @@ function ramaDe(r){
    Una regla fija, no un tablero: lo que mas duele hoy es lo que se ve mas grande.
    Vencidas SIN lo congelado, porque un proyecto en pausa no es una urgencia. */
 function acuerdo(){
-  var venc=VIVAS.filter(function(r){ return !r._frio && r._f && r._f<HOY; }).length;
+  /* MISMO criterio que la pila que se abre al picarle: fuera lo congelado Y lo
+     «En standby». Estaba con `!_frio` a secas, así que el número grande decía 8
+     y la lista que abría enseñaba 6. Un número que no cuadra con la lista que
+     abre es peor que no tener número. */
+  var venc=VIVAS.filter(function(r){ return !r._pausa && r._f && r._f<HOY; }).length;
   var frias=VIVAS.filter(function(r){ return r._frio; }).length;
   var porFirmar=MESA.filter(function(x){return x.clase==='firmar';}).length;
   var porCerrar=MESA.filter(function(x){return x.clase==='cerrar';}).length;
@@ -2416,7 +2425,11 @@ function renglonPila(r){
      se reserva a lo vencido. Se lo pidió él el 15-sep: «creo que debería cambiar
      de color a un azul o morado para dar a entender que es otra categoría». */
   var andando = sinac(r.estado)==='en proceso';
-  if(andando) cl=' andando';
+  /* SE SUMA, no se pisa. Estaba escrito `cl=' andando'` y borraba el ' venc':
+     una tarjeta vencida hace 23 días que además está en proceso perdía su raya
+     roja y se veía tan tranquila como cualquier otra. Lo vencido manda sobre el
+     color de la raya; lo andando se dice con su pastilla. */
+  if(andando) cl += ' andando';
   var pie=[String(r.responsable||'').trim()||'sin dueño', sujetoDe(r)];
   if(r._dinTxt) pie.push(r._dinTxt);
   var pill='';
@@ -3995,6 +4008,10 @@ document.addEventListener('visibilitychange',function(){
      podía clavar una falla señalándola: «ni chinches ni nada… es algo sui
      generis cuando no debe ser así» (15-sep). -->
 <script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=os2"></script>
+<!-- Cargar el archivo NO la prende: hay que llamar a init, igual que
+     os/index.html. El commit de esta mañana pegó la etiqueta y se quedó
+     a medias — el script se descargaba y no hacía nada. -->
+<script>if(window.YODChinche) YODChinche.init({pantalla:"despacho"});</script>
 <script src="https://yodesarrollomx.github.io/yod-portal/os/shell.js"></script>
 </body>
 </html>
