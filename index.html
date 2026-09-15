@@ -2683,10 +2683,17 @@ async function salida(id, cual, btn){
     linea='🔄 Retomada (Despacho, '+hoy+'): Alejandro deja de esperar a '+String(r.responsable||'alguien')+' y se la queda.';
     dice='Ahora es tuya.';
   } else if(o.accion==='pasar'){
-    var q=prompt('¿A quién se la pasas?\n'+Object.keys(CONTACTOS).join(', ')); if(!q) return;
-    patch.responsable=q.trim(); linea='➡️ Pasada a '+q.trim()+' (Despacho, '+hoy+') por Alejandro.'; dice='Ahora es de '+q.trim()+'.';
+    var q=await elegirEnPanel('¿A quién se la pasas?',
+      Object.keys(CONTACTOS).map(function(n){ return {t:n, v:n}; }));
+    if(!q) return;
+    patch.responsable=String(q).trim(); linea='➡️ Pasada a '+q.trim()+' (Despacho, '+hoy+') por Alejandro.'; dice='Ahora es de '+q.trim()+'.';
   } else if(o.accion==='fecha' || o.accion==='manana'){
-    var cual2 = o.accion==='manana' ? 'hoy' : (prompt('¿Para cuándo?\nhoy / semana / proxima','semana')||'semana').trim();
+    var cual2='hoy';
+    if(o.accion!=='manana'){
+      cual2 = await elegirEnPanel('¿Para cuándo?', [
+        {t:'Esta semana', v:'semana'}, {t:'Hoy', v:'hoy'}, {t:'La próxima', v:'proxima'}]);
+      if(!cual2) return;
+    }
     var f=fechaTexto(cual2==='hoy'&&o.accion==='manana'?'hoy':cual2);
     if(o.accion==='manana'){ var x=new Date(HOY); x.setDate(x.getDate()+1);
       var dow=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -2754,6 +2761,23 @@ function leerTalCual(file){
     fr.readAsDataURL(file);
   });
 }
+/* Elegir algo SIN prompt() del navegador: botones dentro del panel. Un prompt
+   en el iPhone es una ventana del sistema, no se puede dictar y tapa todo. */
+function elegirEnPanel(titulo, opciones){
+  return new Promise(function(ok){
+    var z=$('#pNota'); if(!z){ ok(null); return; }
+    z.hidden=false;
+    z.innerHTML='<span class="k">'+esc(titulo)+'</span><div class="edPie">'
+      +opciones.map(function(o,i){
+        return '<button class="'+(i===0?'bFirmar':'bOtro')+'" type="button" data-eleg="'+esc(o.v)+'">'+esc(o.t)+'</button>';
+      }).join('')
+      +'<button class="bOtro" type="button" data-eleg="">Cancelar</button></div>';
+    Array.prototype.forEach.call(z.querySelectorAll('[data-eleg]'),function(b){
+      b.onclick=function(){ z.hidden=true; z.innerHTML=''; ok(b.dataset.eleg||null); };
+    });
+    try{ z.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
+  });
+}
 function ligasMas(r, url){
   var prev=String(r.links||'').trim();
   return prev ? (prev+' '+url) : url;
@@ -2766,15 +2790,19 @@ function prenderAdjuntar(id){
   bt.onclick=function(){ inp.click(); };
 
   /* Pegar una liga no necesita backend ni permisos: funciona hoy, y es la
-     salida cuando el Drive todavía no está autorizado. */
+     salida cuando el Drive todavía no está autorizado. No abre un prompt() del
+     navegador —esos no se pueden dictar y no se ven en el teléfono—: lleva al
+     campo de ligas de la edición, que ya trae su micrófono. */
   bl.onclick=function(){
-    var r=VIVAS.filter(function(x){return x.id===id;})[0]; if(!r) return;
-    var u=prompt('Pega la liga (Drive, foto, plano, PDF):','https://');
-    if(!u) return;
-    u=String(u).trim();
-    if(!/^https?:\/\//i.test(u)){ m.className='adjMsg mal'; m.textContent='Eso no parece una liga.'; return; }
-    escribirEnTarjeta(id, {links: ligasMas(r,u)}, '🔗 Liga agregada: '+u,
-      'Quedó en la tarjeta.', bt);
+    var blq=caja.querySelector('#edBloque'), ab=caja.querySelector('#edAbrir');
+    if(!blq||!ab) return;
+    if(blq.hidden){ ab.click(); }
+    var campo=caja.querySelector('#ed_links');
+    if(campo){
+      campo.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(function(){ try{ campo.focus(); }catch(e){} },350);
+    }
+    m.className='adjMsg'; m.textContent='Pega la liga abajo, en LIGAS / FOTOS, y guarda los cambios.';
   };
 
   inp.onchange=async function(){
