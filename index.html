@@ -604,7 +604,10 @@ body .yod-canvas{background:var(--bg);color:var(--ink)}
 .plFila.hoy{border-left-color:var(--oro)}
 .plFila.hoy .d,.plFila.hoy .d b{color:var(--oro)}
 .plFila .c b{display:block;font-size:14.5px;line-height:1.35;color:var(--ink);font-weight:500}
-.plFila .c span{display:block;margin-top:5px;font-size:12px;color:var(--faint);line-height:1.35}
+.plFila .c>span{display:block;margin-top:5px;font-size:12px;color:var(--faint);line-height:1.35}
+/* El `>` importa: sin el, este renglon tambien alcanzaba a la pastilla que va
+   DENTRO del pie y le ponia display:block — la pastilla se estiraba a todo el
+   ancho de la tarjeta y ensuciaba la lista. Con el `>` solo toca el pie. */
 .capaPausa{display:flex;align-items:center;gap:12px;width:100%;margin:12px 0 0;
  background:var(--panel);border:1px dashed var(--hair2);border-radius:14px;padding:13px 15px}
 .capaPausa .n{font-family:var(--serif);font-size:22px;color:var(--dim);line-height:1;flex:none}
