@@ -3963,6 +3963,19 @@ function fechaTexto(cual){
   var sem=1+Math.round(((jue-new Date(jue.getFullYear(),0,4))/86400000-3+((new Date(jue.getFullYear(),0,4).getDay()+6)%7))/7);
   return {fecha:dow[d.getDay()]+' '+d.getDate(), mes:mes, semana:'Semana '+sem};
 }
+function pareceDuplicada(txt,proy){
+  function pal(x){return String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9ñ]+/).filter(function(w){return w.length>2;});}
+  var a=pal(txt); if(!a.length) return null;
+  var lista=(VIVAS&&VIVAS.length?VIVAS:TAREAS)||[];
+  for(var i=0;i<lista.length;i++){
+    var t=lista[i]; if(String(t.proyecto||'').trim()!==proy) continue;
+    if(/complet|hecho|cerrad|cancel/i.test(String(t.estado||''))) continue;
+    var b=pal(t.actividad); if(!b.length) continue;
+    var comun=a.filter(function(w){return b.indexOf(w)>-1;}).length;
+    if(comun/Math.min(a.length,b.length)>=0.7) return t;
+  }
+  return null;
+}
 async function soltar(){
   var txt=$('#sTexto').value.trim(), m=$('#sMsg'), b=$('#sBtn');
   if(!txt){ m.className='smsg'; m.textContent='Escribe algo primero.'; return; }
@@ -3981,6 +3994,16 @@ async function soltar(){
       +'la tarjeta nace suelta y no la puedo acomodar. Tu texto no se perdió.';
     return;
   }
+  /* Antes de escribir: ¿ya hay una tarjeta VIVA del mismo proyecto que dice
+     casi lo mismo? Se avisa una vez; si la vuelves a soltar igual, se crea. */
+  var gemela=pareceDuplicada(txt,proy);
+  if(gemela && b.dataset.dup!==txt){
+    b.dataset.dup=txt;
+    m.className='smsg mal';
+    m.textContent='Ya hay una parecida en '+proy+': '+(gemela.id?gemela.id+' · ':'')+'«'+String(gemela.actividad||'').slice(0,90)+'» ('+(gemela.estado||'Pendiente')+', '+(gemela.responsable||'sin dueño')+'). Si es otra cosa, vuelve a tocar el botón y la creo.';
+    return;
+  }
+  delete b.dataset.dup;
   var emp=(TAREAS.filter(function(t){return String(t.proyecto||'').trim()===proy;})[0]||{}).empresa||'YoDesarrollo';
   b.disabled=true; m.className='smsg'; m.textContent='Escribiendo en el tablero…';
   try{
