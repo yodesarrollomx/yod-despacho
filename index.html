@@ -3942,7 +3942,30 @@ function llenarSoltar(){
     if(pri && ks.indexOf(pri)>=0){ ks.splice(ks.indexOf(pri),1); ks.unshift(pri); }
     return ks.map(function(k){return '<option>'+esc(k)+'</option>';}).join('');
   }
-  $('#sProy').innerHTML=ops(proy);
+  /* Fase 3 · folio: la lista OFICIAL (os/proyectos.js, pestaña PROYECTOS del
+     Control Maestro) va primero, con su folio. El valor que se guarda es el
+     nombre tal como ya lo usan las tareas (para no partir un proyecto en dos);
+     lo que las tareas traen sin folio va aparte, marcado para darlo de alta. */
+  var RP=window.YodProyectos;
+  if(RP){
+    var oficiales={}, sueltos=[];
+    Object.keys(proy).forEach(function(k){
+      var p=RP.buscar(k);
+      if(p){ var o=oficiales[p.folio]; if(!o||proy[k]>o.n) oficiales[p.folio]={v:k,n:proy[k],p:p}; }
+      else sueltos.push(k);
+    });
+    RP.lista.forEach(function(p){ if(!oficiales[p.folio]) oficiales[p.folio]={v:p.nombre,n:0,p:p}; });
+    var ofs=Object.keys(oficiales).map(function(f){return oficiales[f];})
+      .sort(function(a,b){return b.n-a.n || a.p.nombre.localeCompare(b.p.nombre);});
+    sueltos.sort(function(a,b){return proy[b]-proy[a];});
+    $('#sProy').innerHTML='<optgroup label="Proyectos con folio">'
+      + ofs.map(function(o){return '<option value="'+esc(o.v)+'">'+esc(o.p.folio.replace(/^PRJ-/,''))+' · '+esc(o.p.nombre)+'</option>';}).join('')
+      + '</optgroup>'
+      + (sueltos.length?'<optgroup label="Sin folio (darlos de alta en PROYECTOS)">'
+      + sueltos.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+'</option>';}).join('')+'</optgroup>':'');
+  } else {
+    $('#sProy').innerHTML=ops(proy);
+  }
   $('#sResp').innerHTML=ops(resp,'Alejandro');
   /* Se apaga hasta que haya con que acomodarla: mas vale un boton gris dos
      segundos que una tarjeta huerfana para siempre. Grabar y escribir siguen
@@ -3968,7 +3991,8 @@ function pareceDuplicada(txt,proy){
   var a=pal(txt); if(!a.length) return null;
   var lista=(VIVAS&&VIVAS.length?VIVAS:TAREAS)||[];
   for(var i=0;i<lista.length;i++){
-    var t=lista[i]; if(String(t.proyecto||'').trim()!==proy) continue;
+    var t=lista[i], RP=window.YodProyectos, fa=RP&&RP.folio(proy);
+    if(fa ? RP.folio(t.proyecto)!==fa : String(t.proyecto||'').trim()!==proy) continue;
     if(/complet|hecho|cerrad|cancel/i.test(String(t.estado||''))) continue;
     var b=pal(t.actividad); if(!b.length) continue;
     var comun=a.filter(function(w){return b.indexOf(w)>-1;}).length;
@@ -4215,6 +4239,7 @@ document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible' && !TAREAS.length && !CAIDO){ _fallos=0; cargar(); }
 });
 </script>
+<script src="https://yodesarrollomx.github.io/yod-portal/os/proyectos.js?v=1" onload="if(window.TAREAS&&TAREAS.length&&window.llenarSoltar)llenarSoltar()"></script>
 <script src="https://yodesarrollomx.github.io/potenciales-yod/portero.js"></script>
 <!-- La Chinche, la misma que traen tablero.html, obra.html y os/index.html.
      El Despacho no la tenía y por eso era el único tablero donde Alejandro no
