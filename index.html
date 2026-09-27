@@ -1672,14 +1672,6 @@ function acuerdo(){
     if(mv==='cobro') cobra+=d; else if(mv==='pago') paga+=d; else suelto+=d;
   });
   var suma=cobra+paga+suelto;
-  /* 27-sep: con la mesa vacía el dinero desaparecía aunque hubiera $110,000 detenidos en
-     tarjetas abiertas. Si la mesa no trae montos, se enseña lo que mencionan las abiertas. */
-  var ambito='mesa', nAmb=MESA.length;
-  if(!suma){
-    var ab=VIVAS.filter(function(r){ return !r._pausa && (r._din||0)>0; });
-    ab.forEach(function(r){ var mv=movimiento(r), d=r._din||0; if(mv==='cobro') cobra+=d; else if(mv==='pago') paga+=d; else suelto+=d; });
-    suma=cobra+paga+suelto; ambito='abiertas'; nAmb=ab.length;
-  }
   var det=[];
   if(cobra) det.push(pesos(cobra)+' por cobrar');
   if(paga) det.push(pesos(paga)+' por pagar');
@@ -1691,10 +1683,9 @@ function acuerdo(){
     dcomp = ' <span class="cmp">(' + (suma>dAyer?'+':'−') + esc(pesos(Math.abs(suma-dAyer)))
           + ' que la última vez)</span>';
   $('#acuerdoDin').innerHTML = suma
-    ? ('<span class="k">'+(ambito==='mesa'?'EN JUEGO EN LA MESA':'DINERO DETENIDO EN LO ABIERTO')+'</span><b>'+esc(pesos(suma))+'</b>'+dcomp
+    ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(suma))+'</b>'+dcomp
        +'<span class="q">'+(det.length?(det.join(' · ')+' — '):'')
-       +(ambito==='abiertas'?(nAmb===1?'lo que menciona 1 tarjeta abierta':('lo que mencionan '+nAmb+' tarjetas abiertas'))
-        :MESA.length===1?'lo que menciona la tarjeta que espera tu firma'
+       +(MESA.length===1?'lo que menciona la tarjeta que espera tu firma'
                         :('lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma'))
        +', leído de sus palabras: no es una cifra del contador</span>')
     : '';
