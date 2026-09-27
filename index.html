@@ -1647,8 +1647,12 @@ function acuerdo(){
 
   /* Dos renglones cortos, no uno de ciento cuarenta caracteres con tres clausulas. */
   var l1=[];
+  /* 27-sep: decía «15 vencidas · la mesa está limpia» — se contradecía. La mesa es lo que TÚ
+     firmas hoy; las vencidas pueden ser de otros. Se dice de quién son. */
+  var vencMias=VIVAS.filter(function(r){ return !r._pausa && r._f && r._f<HOY && r._mio; }).length;
   l1.push(MESA.length ? (MESA.length+' por cerrar hoy · te toma unos '+min+' min')
-                      : 'la mesa está limpia');
+    : (venc ? ('nada tuyo por firmar hoy · '+(vencMias?vencMias+' de las vencidas son tuyas':'las vencidas esperan a otros'))
+            : 'nada por firmar hoy'));
   var aur=VIVAS.filter(function(r){ return /aurum/i.test(String(r.empresa||'')); });
   var firm=aur.filter(function(r){ return etapaDe(r)[1]; }).length;
   /* «Aurum X de 3» sale del hero: ya vive en su propia franja, y aqui competia
@@ -1668,6 +1672,14 @@ function acuerdo(){
     if(mv==='cobro') cobra+=d; else if(mv==='pago') paga+=d; else suelto+=d;
   });
   var suma=cobra+paga+suelto;
+  /* 27-sep: con la mesa vacía el dinero desaparecía aunque hubiera $110,000 detenidos en
+     tarjetas abiertas. Si la mesa no trae montos, se enseña lo que mencionan las abiertas. */
+  var ambito='mesa', nAmb=MESA.length;
+  if(!suma){
+    var ab=VIVAS.filter(function(r){ return !r._pausa && (r._din||0)>0; });
+    ab.forEach(function(r){ var mv=movimiento(r), d=r._din||0; if(mv==='cobro') cobra+=d; else if(mv==='pago') paga+=d; else suelto+=d; });
+    suma=cobra+paga+suelto; ambito='abiertas'; nAmb=ab.length;
+  }
   var det=[];
   if(cobra) det.push(pesos(cobra)+' por cobrar');
   if(paga) det.push(pesos(paga)+' por pagar');
@@ -1679,9 +1691,10 @@ function acuerdo(){
     dcomp = ' <span class="cmp">(' + (suma>dAyer?'+':'−') + esc(pesos(Math.abs(suma-dAyer)))
           + ' que la última vez)</span>';
   $('#acuerdoDin').innerHTML = suma
-    ? ('<span class="k">EN JUEGO EN LA MESA</span><b>'+esc(pesos(suma))+'</b>'+dcomp
+    ? ('<span class="k">'+(ambito==='mesa'?'EN JUEGO EN LA MESA':'DINERO DETENIDO EN LO ABIERTO')+'</span><b>'+esc(pesos(suma))+'</b>'+dcomp
        +'<span class="q">'+(det.length?(det.join(' · ')+' — '):'')
-       +(MESA.length===1?'lo que menciona la tarjeta que espera tu firma'
+       +(ambito==='abiertas'?(nAmb===1?'lo que menciona 1 tarjeta abierta':('lo que mencionan '+nAmb+' tarjetas abiertas'))
+        :MESA.length===1?'lo que menciona la tarjeta que espera tu firma'
                         :('lo que mencionan las '+MESA.length+' tarjetas que esperan tu firma'))
        +', leído de sus palabras: no es una cifra del contador</span>')
     : '';
@@ -2515,6 +2528,10 @@ function renglonPila(r){
     else pill='<span class="estadoPill andando">▶ en proceso · '+da+' d</span>';
   }
   else if(sinac(r.estado)==='en standby') pill='<span class="estadoPill pausa">⏸ en pausa</span>';
+  /* 27-sep: A-152 y A-154 son dictados enteros pegados en «actividad», sin entregable. Se marcan
+     para ordenarlos (un dictado largo no es una tarea: es la materia prima de varias). */
+  if(String(r.actividad||'').length>220 && !String(r.entregable||'').trim())
+    pill+=' <span class="estadoPill pausa" title="Es un dictado completo: hay que partirlo en tareas con entregable">✎ dictado sin ordenar</span>';
   return '<button class="plFila'+cl+'" type="button" data-abrir="'+esc(r.id)+'">'
     +'<span class="d"><b>'+esc(String(big))+'</b>'+esc(chico)+'</span>'
     +'<span class="c"><b>'+esc(String(r.actividad||'sin texto').slice(0,120))+'</b>'
