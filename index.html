@@ -861,21 +861,23 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
   .dc .b{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
   .dc button{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--hair2);background:var(--panel2);color:var(--ink);font:500 14px var(--sans);cursor:pointer}
   .dc button.si{background:var(--oro);color:#1a1408;border-color:var(--oro)}
+  .dc-mas{margin-top:10px;min-height:40px;width:100%;border-radius:10px;border:1px dashed var(--hair2);background:none;color:var(--oro2);font:500 14px var(--sans);cursor:pointer}
+  .decis{margin-bottom:90px}
   .dc .ok{color:var(--verde);font:13px var(--sans)} .dc .er{color:var(--rojo);font:13px var(--sans)}
   </style>
   <script>
   (function(){
     var GAS="https://script.google.com/macros/s/AKfycbx61UWsEYCL_dHzi0JrUv3GuAUFSDWW4iCmlNmbDDvWBIYY4Hhqkf6sYmt4d8UGIlk7MA/exec";
-    var K="despacho_decisiones_v1", hechas={};
+    var K="despacho_decisiones_v1", hechas={}, verTodas=false;
     try{hechas=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
     function llave(){try{return localStorage.getItem("pyod_clave_v1")||localStorage.getItem("sala_clave")||""}catch(e){return ""}}
     function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
     var items=[];
     function pintar(){
-      var L=document.getElementById("decisL"), vivos=items.filter(function(x){return !hechas[x.id]});
-      document.getElementById("decisN").textContent="· "+vivos.length+" abiertas";
-      if(!vivos.length){L.innerHTML='<p class="dc ok">Todo decidido. Claude está ejecutando.</p>';return}
-      L.innerHTML=vivos.map(function(x){return '<div class="dc" data-id="'+esc(x.id)+'"><div class="m"><span class="u-'+esc(x.urg)+'">'+esc(x.urg.toUpperCase())+'</span> · '+esc(x.area)+' · '+esc(x.quien)+'</div><div class="t">'+esc(x.titulo)+'</div><div class="p">→ '+esc(x.propuesta)+'</div><div class="b"><button class="si" data-d="adelante">Adelante</button><button data-d="despues">Después</button><button data-d="no">No</button></div><div class="r"></div></div>'}).join("");
+      var L=document.getElementById("decisL"), R={hoy:0,semana:1,despues:2}, vivos=items.filter(function(x){return !hechas[x.id]}).sort(function(a,b){return (R[a.urg]||0)-(R[b.urg]||0)}), total=vivos.length; if(!verTodas) vivos=vivos.slice(0,5);
+      document.getElementById("decisN").textContent="· "+total+" abiertas";
+      if(!total){L.innerHTML='<p class="dc ok">Todo decidido. Claude está ejecutando.</p>';return}
+      L.innerHTML=vivos.map(function(x){return '<div class="dc" data-id="'+esc(x.id)+'"><div class="m"><span class="u-'+esc(x.urg)+'">'+esc(x.urg.toUpperCase())+'</span> · '+esc(x.area)+' · '+esc(x.quien)+'</div><div class="t">'+esc(x.titulo)+'</div><div class="p">→ '+esc(x.propuesta)+'</div><div class="b"><button class="si" data-d="adelante">'+(/^Tú( \(|$)/.test(x.quien)?'Ya lo hice':'Adelante')+'</button><button data-d="despues">Después</button><button data-d="no">No</button></div><div class="r"></div></div>'}).join("")+(total>vivos.length?'<button class="dc-mas" onclick="this.remove()">Ver las '+total+'</button>':'');
     }
     async function decidir(card,d){
       var id=card.getAttribute("data-id"), x=items.filter(function(i){return i.id===id})[0], r=card.querySelector(".r");
@@ -892,7 +894,7 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
         r.innerHTML='<span class="ok">✓ '+(d==="adelante"?"Encargado a Claude":d==="no"?"Descartado":"Pospuesto")+'</span>'; setTimeout(pintar,1200);
       }catch(e){r.innerHTML='<span class="er">No llegó a la Sala: '+esc(e.message)+'</span>';card.querySelectorAll("button").forEach(function(b){b.disabled=false})}
     }
-    document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".dc button");if(b)decidir(b.closest(".dc"),b.getAttribute("data-d"))});
+    document.addEventListener("click",function(e){if(e.target.classList&&e.target.classList.contains("dc-mas")){verTodas=true;pintar();return}var b=e.target.closest&&e.target.closest(".dc button");if(b)decidir(b.closest(".dc"),b.getAttribute("data-d"))});
     fetch("datos/pendientes.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){items=j.items||[];pintar()})
       .catch(function(){document.getElementById("decisL").textContent="No pude leer la lista de pendientes."});
   })();
@@ -4166,8 +4168,9 @@ async function cargar(){
        que más duele aquí. Los pintores ya saben decirlo: sólo faltaba llamarlos. */
     try{ pintarCinta(); pintarPila(); }catch(_e){}
     if(!TAREAS.length){
-      var an=$('#acuerdoN'); if(an) an.textContent='No pude leer tu tablero';
-      var a1=$('#acuerdoSub'); if(a1) a1.textContent='Google no está contestando. Lo sigo intentando — no es que no tengas pendientes.';
+      var sinClave=!credencial();
+      var an=$('#acuerdoN'); if(an) an.textContent=sinClave?'Entra para ver tu tablero':'No pude leer tu tablero';
+      var a1=$('#acuerdoSub'); if(a1) a1.textContent=sinClave?'Este navegador no tiene tu llave del YOD OS: abre tu liga de entrada del Portero.':'Google no está contestando. Lo sigo intentando — no es que no tengas pendientes.';
       var a2=$('#acuerdoSub2'); if(a2) a2.textContent='';
     }
     if(!credencial()){
