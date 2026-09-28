@@ -26,7 +26,7 @@
 "quien": "Claude"
 },
 {
-"id": "bbva-4a",
+"id": "correo-1",
 "urg": "hoy",
 "area": "Correo",
 "titulo": "Borrador financiero #1 sin enviar",
@@ -34,7 +34,7 @@
 "quien": "Tú revisas; Claude envía"
 },
 {
-"id": "rnm-dro",
+"id": "correo-2",
 "urg": "semana",
 "area": "Correo",
 "titulo": "Borrador de trámite #2 sin enviar",
@@ -42,7 +42,7 @@
 "quien": "Tú revisas; Claude envía"
 },
 {
-"id": "manjarrez",
+"id": "correo-3",
 "urg": "semana",
 "area": "Correo",
 "titulo": "Borrador de postura #3 sin enviar",
@@ -50,7 +50,7 @@
 "quien": "Tú"
 },
 {
-"id": "conejo-14-15",
+"id": "legal-1",
 "urg": "hoy",
 "area": "Legal",
 "titulo": "Respuesta pendiente a una contraparte (2 lotes)",
@@ -58,7 +58,7 @@
 "quien": "Claude borrador"
 },
 {
-"id": "san-diego",
+"id": "admin-1",
 "urg": "semana",
 "area": "Admin",
 "titulo": "Factura por registrar y programar",
@@ -98,7 +98,7 @@
 "quien": "Claude"
 },
 {
-"id": "sayri-360",
+"id": "personas-1",
 "urg": "semana",
 "area": "Personas",
 "titulo": "Evaluación pendiente de agendar",
@@ -106,7 +106,7 @@
 "quien": "Tú"
 },
 {
-"id": "mercado-pago",
+"id": "admin-2",
 "urg": "despues",
 "area": "Admin",
 "titulo": "Propuesta comercial por revisar",
