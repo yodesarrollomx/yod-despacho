@@ -863,6 +863,9 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
   .dc button.si{background:var(--oro);color:#1a1408;border-color:var(--oro)}
   .dc-mas{margin-top:10px;min-height:40px;width:100%;border-radius:10px;border:1px dashed var(--hair2);background:none;color:var(--oro2);font:500 14px var(--sans);cursor:pointer}
   .decis{margin-bottom:90px}
+  .dc button{min-height:44px}
+  @media(max-width:600px){.dc .b{padding-right:58px}}
+  #cabina{overflow-wrap:anywhere} #cabina .cbFila>*{min-width:0}
   .dc-cola{margin-top:12px;padding:10px;border:1px dashed var(--hair2);border-radius:10px;color:var(--dim);font:12px var(--sans)}
   .dc .ok{color:var(--verde);font:13px var(--sans)} .dc .er{color:var(--rojo);font:13px var(--sans)}
   </style>
@@ -2995,6 +2998,11 @@ async function salida(id, cual, btn){
   }
   if(cual==='claudet'){
     if(!CFG_MSJ || !CFG_MSJ.webhook_url){ m.className='pMsg mal'; m.textContent='Falta config.despacho.json: no sé a qué URL encolarlo.'; return; }
+    if(btn.dataset.paso!=='2'){      /* primero se ve lo que va a salir; solo el segundo clic encola */
+      btn.dataset.paso='2'; btn.dataset.antes2=btn.textContent; btn.textContent='Sí, encolarlo (espera tu firma)';
+      var pv0=$('#pPrev'); if(pv0){ pv0.hidden=false; pv0.textContent='Se encola para '+(o.wa||'(sin número)')+':\n'+o.texto; }
+      m.className='pMsg'; m.textContent='Míralo y confirma. Aún no sale nada.'; return;
+    }
     btn.disabled=true; btn.textContent='encolando…';
     try{
       var res=await fetch(CFG_MSJ.webhook_url,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',
@@ -3002,8 +3010,10 @@ async function salida(id, cual, btn){
         body:JSON.stringify({action:'encolar',k:credencial(),para:o.wa||'',texto:o.texto,requiere_firma:true,tarjeta:id})});
       var d=JSON.parse(await res.text());
       if(!d.ok) throw new Error(d.error||'no lo aceptó');
-      await escribirEnTarjeta(id, {}, '📤 Encolado para Claudet (Despacho, '+hoyLocal()+'): '+o.texto.slice(0,140), 'Encolado ('+d.id+'). Sale cuando lo firmes en El Hilo.', btn);
-    }catch(e){ btn.disabled=false; btn.textContent='Que lo mande Claudet (con tu firma)';
+      var lin0='📤 Encolado para Claudet (Despacho, '+hoyLocal()+'): '+o.texto.slice(0,140);
+      btn.disabled=false; btn.dataset.confirmado='1'; btn.dataset.visto=JSON.stringify({})+'|'+lin0;   /* ya se confirmó arriba: que escriba directo */
+      await escribirEnTarjeta(id, {}, lin0, 'Encolado ('+d.id+'). Falta tu firma en «Mensajes por enviar».', btn);
+    }catch(e){ btn.disabled=false; btn.dataset.paso=''; btn.textContent='Que lo mande Claudet (con tu firma)';
       m.className='pMsg mal'; m.textContent='No se pudo encolar: '+enCristiano(e.message); }
     return;
   }
@@ -3590,10 +3600,10 @@ function pintarBitacora(){
   });
   c.innerHTML=h;
   Array.prototype.forEach.call(c.querySelectorAll('[data-copiadia]'),function(b){
-    b.onclick=function(){
+    b.onclick=async function(){
       var f=b.dataset.copiadia, del=porDia[f]||[];
       var txt='Bitácora '+fechaBonita(f)+'\n'+del.map(function(a){ return '· '+a.proyecto+' · '+a.persona+' · '+a.tipo+' · '+a.tarjeta+' · '+a.texto; }).join('\n');
-      try{ navigator.clipboard.writeText(txt); b.textContent='copiado ✓'; setTimeout(function(){b.textContent='copiar el día';},1500); }catch(e){}
+      try{ await navigator.clipboard.writeText(txt); b.textContent='copiado ✓'; setTimeout(function(){b.textContent='copiar el día';},1500); }catch(e){ b.textContent='sin permiso para copiar'; setTimeout(function(){b.textContent='copiar el día';},2500); }
     };
   });
 }
@@ -3685,12 +3695,13 @@ function dictarEn(dest, btn){
       'service-not-allowed':'El navegador no deja usar el dictado aquí. Escríbelo mientras tanto.'};
     var aviso = POR[e.error] || 'No pude oír. Escríbelo si urge.';
     var m=$('#micEst'); if(m) m.textContent = aviso;
+    if(REC) REC.__aviso=aviso;
     /* Si estabas dictando dentro de un panel, el aviso de arriba te queda
        tapado: se repite donde lo puedes leer. */
     var pm=$('#pMsg');
     if(pm && RECdest && RECdest!==$('#sTexto')){ pm.className='pMsg mal'; pm.textContent=aviso; }
   };
-  REC.onend=function(){ marcarGrabando(false); REC=null; };
+  REC.onend=function(){ var av=REC&&REC.__aviso; marcarGrabando(false); if(av){ var mm=$('#micEst'); if(mm) mm.textContent=av; } REC=null; };
   try{ REC.start(); }catch(e){ REC=null; marcarGrabando(false); }
 }
 /* Un solo oyente para TODOS los microfonos de la pagina, incluidos los que
@@ -4139,7 +4150,11 @@ async function soltar(){
     $('#sTexto').value='';
     await cargar();
   }catch(e){
-    m.className='smsg mal'; m.textContent='No se pudo: '+enCristiano(e.message)+'. No se escribió nada.';
+    var entro=false;   /* Google a veces ejecuta y luego contesta error: se relee antes de decir «no se escribió» */
+    try{ var fr=await llamar('getAll',{}); entro=!!(fr&&fr.ok&&(fr.tasks||[]).some(function(t){ return String(t.actividad||'').trim()===txt.trim() && String(t.comentarios||'').indexOf('Charola (Despacho, '+hoyLocal()+')')>=0; })); }catch(_e){}
+    m.className='smsg mal';
+    m.textContent = entro ? 'Sí quedó escrita en el tablero (Google contestó raro). No la repitas.' : 'No se pudo: '+enCristiano(e.message)+'. Releí el tablero y no la veo escrita.';
+    if(entro) { $('#sTexto').value=''; try{ await cargar(); }catch(_e){} }
   }
   b.disabled=false;
 }
