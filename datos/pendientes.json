@@ -5,9 +5,9 @@
 "id": "seg-hf",
 "urg": "hoy",
 "area": "Seguridad",
-"titulo": "Hugging Face: el token expuesto sigue en uso",
-"propuesta": "Crear token Read nuevo, borrar el viejo y guardarlo con gh secret set HF_TOKEN; Claude relanza sala-llaves.",
-"quien": "Tú (3 min)"
+"titulo": "Hugging Face: token nuevo puesto y probado; falta confirmar que el viejo «yod-sala-nube» está borrado",
+"propuesta": "Entrar a huggingface.co → Settings → Access Tokens y borrar «yod-sala-nube» si sigue ahí.",
+"quien": "Tú (1 min)"
 },
 {
 "id": "sala-modal",
