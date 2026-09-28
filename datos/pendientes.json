@@ -1,19 +1,133 @@
-{"actualizado":"2026-09-28","items":[
-{"id":"seg-gcloud","urg":"hoy","area":"Seguridad","titulo":"Google Cloud avisó: credenciales de yod-sala-nube posiblemente expuestas","propuesta":"Rotar la llave de la cuenta de servicio de la Sala (nueva llave en el secreto de GitHub, borrar la vieja).","quien":"Claude prepara, tú apruebas en Google Cloud"},
-{"id":"seg-hf","urg":"hoy","area":"Seguridad","titulo":"Hugging Face venció el token «yod-sala-nube» por estar público","propuesta":"Crear token nuevo solo-lectura y guardarlo únicamente como secreto HF_TOKEN en sala-edicion (Wan y FLUX vuelven a jalar).","quien":"Tú creas el token; Claude lo conecta"},
-{"id":"sala-modal","urg":"semana","area":"Sala","titulo":"Escenas animadas de verdad (LTX en Modal) listas, falta la llave","propuesta":"Poner MODAL_TOKEN_ID y MODAL_TOKEN_SECRET en secretos de sala-edicion; Claude despliega y prueba.","quien":"Tú (5 min)"},
-{"id":"sala-mesa","urg":"hoy","area":"Sala","titulo":"14–15 propuestas de hoy esperan en la mesa","propuesta":"Aprobar en bloque las que pasan reglas y mandar a producir.","quien":"Claude"},
-{"id":"bbva-4a","urg":"hoy","area":"Correo","titulo":"Borrador BBVA · 4a ministración (15-sep) sin enviar","propuesta":"Revisar datos y enviarlo.","quien":"Tú revisas; Claude envía"},
-{"id":"rnm-dro","urg":"semana","area":"Correo","titulo":"Borrador RNM · DRO/MIA (15-sep) sin enviar","propuesta":"Actualizar fechas y enviar.","quien":"Tú revisas; Claude envía"},
-{"id":"manjarrez","urg":"semana","area":"Correo","titulo":"Borrador «Postura Manjarrez» (12-sep) sin enviar","propuesta":"Decidir si sigue vigente; enviar o archivar.","quien":"Tú"},
-{"id":"conejo-14-15","urg":"hoy","area":"Legal","titulo":"Rescisión Lotes 14 y 15 Cerrada del Conejo — Ofelia respondió el 21-sep","propuesta":"Claude redacta respuesta a Ofelia como borrador para tu revisión.","quien":"Claude borrador"},
-{"id":"san-diego","urg":"semana","area":"Admin","titulo":"Factura Operadora San Diego (26-sep)","propuesta":"Registrar y programar pago.","quien":"Administración"},
-{"id":"estimados-jul","urg":"despues","area":"Ventas","titulo":"11 estimados Aurum del 3-jul en borrador (5 sin correo)","propuesta":"Depurar: enviar los que tienen correo, archivar el resto.","quien":"Claude depura"},
-{"id":"suelos-ago","urg":"despues","area":"Obra","titulo":"4 cotizaciones de suelos del 1-ago en borrador","propuesta":"Enviar o archivar.","quien":"Tú"},
-{"id":"borradores-vacios","urg":"despues","area":"Correo","titulo":"3 borradores sin destinatario (9-sep)","propuesta":"Borrarlos.","quien":"Claude"},
-{"id":"tareas-vencidas","urg":"hoy","area":"Tablero","titulo":"5 tareas vencidas: A-058 Mariana 14 d · A-158/A-128/A-095 Sayri · A-155 Claude","propuesta":"Recordatorio a responsables y nueva fecha; Claude cierra A-155.","quien":"Claude"},
-{"id":"sayri-360","urg":"semana","area":"Personas","titulo":"Evaluación 360 de Sayri pendiente","propuesta":"Agendar 30 min esta semana.","quien":"Tú"},
-{"id":"mercado-pago","urg":"despues","area":"Admin","titulo":"Propuesta de Mercado Pago","propuesta":"Revisar comisiones vs. SPEI; responder.","quien":"Tú"},
-{"id":"rally-3oct","urg":"semana","area":"Marca","titulo":"Rally Arquitectx 3-oct","propuesta":"Confirmar asistencia y pieza en la Sala.","quien":"Tú decides"},
-{"id":"moac-kpi","urg":"semana","area":"MOAC","titulo":"Columnas numéricas de metas (meta_num/hoy_num) bloqueadas","propuesta":"Autorizar a Claude escribir R:T en METAS para que el ritmo sea exacto.","quien":"Tú autorizas"}
-]}
+{
+"actualizado": "2026-09-28",
+"items": [
+{
+"id": "seg-hf",
+"urg": "hoy",
+"area": "Seguridad",
+"titulo": "Hugging Face: el token expuesto sigue en uso",
+"propuesta": "Crear token Read nuevo, borrar el viejo y guardarlo con gh secret set HF_TOKEN; Claude relanza sala-llaves.",
+"quien": "Tú (3 min)"
+},
+{
+"id": "sala-modal",
+"urg": "semana",
+"area": "Sala",
+"titulo": "Modal: llaves puestas, el despliegue pide tarjeta para GPU L40S",
+"propuesta": "Agregar tarjeta en modal.com → Settings → Billing (el crédito mensual cubre el uso); Claude relanza sala-modal-deploy.",
+"quien": "Tú (2 min)"
+},
+{
+"id": "sala-mesa",
+"urg": "hoy",
+"area": "Sala",
+"titulo": "14–15 propuestas de hoy esperan en la mesa",
+"propuesta": "Aprobar en bloque las que pasan reglas y mandar a producir.",
+"quien": "Claude"
+},
+{
+"id": "bbva-4a",
+"urg": "hoy",
+"area": "Correo",
+"titulo": "Borrador BBVA · 4a ministración (15-sep) sin enviar",
+"propuesta": "Revisar datos y enviarlo.",
+"quien": "Tú revisas; Claude envía"
+},
+{
+"id": "rnm-dro",
+"urg": "semana",
+"area": "Correo",
+"titulo": "Borrador RNM · DRO/MIA (15-sep) sin enviar",
+"propuesta": "Actualizar fechas y enviar.",
+"quien": "Tú revisas; Claude envía"
+},
+{
+"id": "manjarrez",
+"urg": "semana",
+"area": "Correo",
+"titulo": "Borrador «Postura Manjarrez» (12-sep) sin enviar",
+"propuesta": "Decidir si sigue vigente; enviar o archivar.",
+"quien": "Tú"
+},
+{
+"id": "conejo-14-15",
+"urg": "hoy",
+"area": "Legal",
+"titulo": "Rescisión Lotes 14 y 15 Cerrada del Conejo — Ofelia respondió el 21-sep",
+"propuesta": "Claude redacta respuesta a Ofelia como borrador para tu revisión.",
+"quien": "Claude borrador"
+},
+{
+"id": "san-diego",
+"urg": "semana",
+"area": "Admin",
+"titulo": "Factura Operadora San Diego (26-sep)",
+"propuesta": "Registrar y programar pago.",
+"quien": "Administración"
+},
+{
+"id": "estimados-jul",
+"urg": "despues",
+"area": "Ventas",
+"titulo": "11 estimados Aurum del 3-jul en borrador (5 sin correo)",
+"propuesta": "Depurar: enviar los que tienen correo, archivar el resto.",
+"quien": "Claude depura"
+},
+{
+"id": "suelos-ago",
+"urg": "despues",
+"area": "Obra",
+"titulo": "4 cotizaciones de suelos del 1-ago en borrador",
+"propuesta": "Enviar o archivar.",
+"quien": "Tú"
+},
+{
+"id": "borradores-vacios",
+"urg": "despues",
+"area": "Correo",
+"titulo": "3 borradores sin destinatario (9-sep)",
+"propuesta": "Borrarlos.",
+"quien": "Claude"
+},
+{
+"id": "tareas-vencidas",
+"urg": "hoy",
+"area": "Tablero",
+"titulo": "5 tareas vencidas: A-058 Mariana 14 d · A-158/A-128/A-095 Sayri · A-155 Claude",
+"propuesta": "Recordatorio a responsables y nueva fecha; Claude cierra A-155.",
+"quien": "Claude"
+},
+{
+"id": "sayri-360",
+"urg": "semana",
+"area": "Personas",
+"titulo": "Evaluación 360 de Sayri pendiente",
+"propuesta": "Agendar 30 min esta semana.",
+"quien": "Tú"
+},
+{
+"id": "mercado-pago",
+"urg": "despues",
+"area": "Admin",
+"titulo": "Propuesta de Mercado Pago",
+"propuesta": "Revisar comisiones vs. SPEI; responder.",
+"quien": "Tú"
+},
+{
+"id": "rally-3oct",
+"urg": "semana",
+"area": "Marca",
+"titulo": "Rally Arquitectx 3-oct",
+"propuesta": "Confirmar asistencia y pieza en la Sala.",
+"quien": "Tú decides"
+},
+{
+"id": "moac-kpi",
+"urg": "semana",
+"area": "MOAC",
+"titulo": "Columnas numéricas de metas (meta_num/hoy_num) bloqueadas",
+"propuesta": "Autorizar a Claude escribir R:T en METAS para que el ritmo sea exacto.",
+"quien": "Tú autorizas"
+}
+]
+}
