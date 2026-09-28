@@ -5,129 +5,130 @@
 "id": "seg-hf",
 "urg": "hoy",
 "area": "Seguridad",
-"titulo": "Hugging Face: token nuevo puesto y probado; falta confirmar que el viejo «yod-sala-nube» está borrado",
-"propuesta": "Entrar a huggingface.co → Settings → Access Tokens y borrar «yod-sala-nube» si sigue ahí.",
+"titulo": "Confirmar borrado del token viejo de la nube",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú (1 min)"
 },
 {
 "id": "sala-modal",
 "urg": "despues",
 "area": "Sala",
-"titulo": "Modal rechazó la tarjeta; LTX queda en espera (código listo en GPU A10G)",
-"propuesta": "Reintentar con tarjeta de crédito o digital de límite bajo cuando quieras; mientras, la Sala anima con Wan (2/día) + parallax.",
+"titulo": "Escenas con IA: en espera de método de pago",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú (2 min)"
 },
 {
 "id": "sala-mesa",
 "urg": "hoy",
 "area": "Sala",
-"titulo": "14–15 propuestas de hoy esperan en la mesa",
-"propuesta": "Aprobar en bloque las que pasan reglas y mandar a producir.",
+"titulo": "Propuestas de hoy esperando en la mesa",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Claude"
 },
 {
 "id": "bbva-4a",
 "urg": "hoy",
 "area": "Correo",
-"titulo": "Borrador BBVA · 4a ministración (15-sep) sin enviar",
-"propuesta": "Revisar datos y enviarlo.",
+"titulo": "Borrador financiero #1 sin enviar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú revisas; Claude envía"
 },
 {
 "id": "rnm-dro",
 "urg": "semana",
 "area": "Correo",
-"titulo": "Borrador RNM · DRO/MIA (15-sep) sin enviar",
-"propuesta": "Actualizar fechas y enviar.",
+"titulo": "Borrador de trámite #2 sin enviar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú revisas; Claude envía"
 },
 {
 "id": "manjarrez",
 "urg": "semana",
 "area": "Correo",
-"titulo": "Borrador «Postura Manjarrez» (12-sep) sin enviar",
-"propuesta": "Decidir si sigue vigente; enviar o archivar.",
+"titulo": "Borrador de postura #3 sin enviar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú"
 },
 {
 "id": "conejo-14-15",
 "urg": "hoy",
 "area": "Legal",
-"titulo": "Rescisión Lotes 14 y 15 Cerrada del Conejo — Ofelia respondió el 21-sep",
-"propuesta": "Claude redacta respuesta a Ofelia como borrador para tu revisión.",
+"titulo": "Respuesta pendiente a una contraparte (2 lotes)",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Claude borrador"
 },
 {
 "id": "san-diego",
 "urg": "semana",
 "area": "Admin",
-"titulo": "Factura Operadora San Diego (26-sep)",
-"propuesta": "Registrar y programar pago.",
+"titulo": "Factura por registrar y programar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Administración"
 },
 {
 "id": "estimados-jul",
 "urg": "despues",
 "area": "Ventas",
-"titulo": "11 estimados Aurum del 3-jul en borrador (5 sin correo)",
-"propuesta": "Depurar: enviar los que tienen correo, archivar el resto.",
+"titulo": "Estimados de julio en borrador",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Claude depura"
 },
 {
 "id": "suelos-ago",
 "urg": "despues",
 "area": "Obra",
-"titulo": "4 cotizaciones de suelos del 1-ago en borrador",
-"propuesta": "Enviar o archivar.",
+"titulo": "Cotizaciones de agosto en borrador",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú"
 },
 {
 "id": "borradores-vacios",
 "urg": "despues",
 "area": "Correo",
-"titulo": "3 borradores sin destinatario (9-sep)",
-"propuesta": "Borrarlos.",
+"titulo": "Borradores sin destinatario",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Claude"
 },
 {
 "id": "tareas-vencidas",
 "urg": "hoy",
 "area": "Tablero",
-"titulo": "5 tareas vencidas: A-058 Mariana 14 d · A-158/A-128/A-095 Sayri · A-155 Claude",
-"propuesta": "Recordatorio a responsables y nueva fecha; Claude cierra A-155.",
+"titulo": "Tareas vencidas",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Claude"
 },
 {
 "id": "sayri-360",
 "urg": "semana",
 "area": "Personas",
-"titulo": "Evaluación 360 de Sayri pendiente",
-"propuesta": "Agendar 30 min esta semana.",
+"titulo": "Evaluación pendiente de agendar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú"
 },
 {
 "id": "mercado-pago",
 "urg": "despues",
 "area": "Admin",
-"titulo": "Propuesta de Mercado Pago",
-"propuesta": "Revisar comisiones vs. SPEI; responder.",
+"titulo": "Propuesta comercial por revisar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú"
 },
 {
 "id": "rally-3oct",
 "urg": "semana",
 "area": "Marca",
-"titulo": "Rally Arquitectx 3-oct",
-"propuesta": "Confirmar asistencia y pieza en la Sala.",
+"titulo": "Evento del 3-oct por confirmar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú decides"
 },
 {
 "id": "moac-kpi",
 "urg": "semana",
 "area": "MOAC",
-"titulo": "Columnas numéricas de metas (meta_num/hoy_num) bloqueadas",
-"propuesta": "Autorizar a Claude escribir R:T en METAS para que el ritmo sea exacto.",
+"titulo": "Columnas numéricas de metas por autorizar",
+"propuesta": "Detalle en tu correo «Recorrido de tableros» y en la Sala (no se publica aquí).",
 "quien": "Tú autorizas"
 }
-]
+],
+"_aviso": "Repo PÚBLICO: aquí solo etiquetas genéricas. El detalle vive en el correo y en la Sala."
 }
