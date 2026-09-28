@@ -863,40 +863,69 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
   .dc button.si{background:var(--oro);color:#1a1408;border-color:var(--oro)}
   .dc-mas{margin-top:10px;min-height:40px;width:100%;border-radius:10px;border:1px dashed var(--hair2);background:none;color:var(--oro2);font:500 14px var(--sans);cursor:pointer}
   .decis{margin-bottom:90px}
+  .dc-cola{margin-top:12px;padding:10px;border:1px dashed var(--hair2);border-radius:10px;color:var(--dim);font:12px var(--sans)}
   .dc .ok{color:var(--verde);font:13px var(--sans)} .dc .er{color:var(--rojo);font:13px var(--sans)}
   </style>
   <script>
   (function(){
     var GAS="https://script.google.com/macros/s/AKfycbx61UWsEYCL_dHzi0JrUv3GuAUFSDWW4iCmlNmbDDvWBIYY4Hhqkf6sYmt4d8UGIlk7MA/exec";
-    var K="despacho_decisiones_v1", hechas={}, verTodas=false;
+    var K="despacho_decisiones_v2", hechas={}, verTodas=false, ACT="", items=[];
     try{hechas=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
+    function guardar(){try{localStorage.setItem(K,JSON.stringify(hechas))}catch(e){}}
     function llave(){try{return localStorage.getItem("pyod_clave_v1")||localStorage.getItem("sala_clave")||""}catch(e){return ""}}
-    function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-    var items=[];
+    function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+    function soloTuyo(x){return /^Tú( \(|$)/.test(x.quien||"")}
+    function h4(s){var n=0;for(var i=0;i<s.length;i++)n=(n*31+s.charCodeAt(i))>>>0;return ("0000"+(n&65535).toString(16)).slice(-4)}
+    function hoyMX(){return new Date().toLocaleDateString("en-CA",{timeZone:"America/Hermosillo"})}
+    function vigente(h,x){ if(!h||h.v!==ACT) return false; if(h.d==="despues") return Date.now()-h.t<864e5; return true }
     function pintar(){
-      var L=document.getElementById("decisL"), R={hoy:0,semana:1,despues:2}, vivos=items.filter(function(x){return !hechas[x.id]}).sort(function(a,b){return (R[a.urg]||0)-(R[b.urg]||0)}), total=vivos.length; if(!verTodas) vivos=vivos.slice(0,5);
-      document.getElementById("decisN").textContent="· "+total+" abiertas";
-      if(!total){L.innerHTML='<p class="dc ok">Todo decidido. Claude está ejecutando.</p>';return}
-      L.innerHTML=vivos.map(function(x){return '<div class="dc" data-id="'+esc(x.id)+'"><div class="m"><span class="u-'+esc(x.urg)+'">'+esc(x.urg.toUpperCase())+'</span> · '+esc(x.area)+' · '+esc(x.quien)+'</div><div class="t">'+esc(x.titulo)+'</div><div class="p">→ '+esc(x.propuesta)+'</div><div class="b"><button class="si" data-d="adelante">'+(/^Tú( \(|$)/.test(x.quien)?'Ya lo hice':'Adelante')+'</button><button data-d="despues">Después</button><button data-d="no">No</button></div><div class="r"></div></div>'}).join("")+(total>vivos.length?'<button class="dc-mas" onclick="this.remove()">Ver las '+total+'</button>':'');
+      var L=document.getElementById("decisL"), R={hoy:0,semana:1,despues:2};
+      var abiertas=items.filter(function(x){return !vigente(hechas[x.id],x)}).sort(function(a,b){return (R[a.urg]||0)-(R[b.urg]||0)});
+      var enCola=items.filter(function(x){var h=hechas[x.id];return vigente(h,x)&&h.d==="adelante"});
+      var total=abiertas.length, vivos=verTodas?abiertas:abiertas.slice(0,5);
+      document.getElementById("decisN").textContent="· "+total+" abiertas"+(ACT?" · lista al "+ACT:"");
+      var h=total?vivos.map(function(x){
+        var b=soloTuyo(x)
+          ?'<button class="si" data-d="hecho">Ya lo hice</button><button data-d="despues">Mañana</button>'
+          :'<button class="si" data-d="adelante">Encargar a Claude</button><button data-d="despues">Mañana</button><button data-d="no">No</button>';
+        return '<div class="dc" data-id="'+esc(x.id)+'"><div class="m"><span class="u-'+esc(x.urg)+'">'+esc(String(x.urg||"").toUpperCase())+'</span> · '+esc(x.area)+' · '+esc(x.quien)+'</div><div class="t">'+esc(x.titulo)+'</div><div class="p">→ '+esc(x.propuesta)+'</div><div class="b">'+b+'</div><div class="r"></div></div>';
+      }).join(""):'<p class="dc ok">No hay decisiones abiertas.</p>';
+      if(total>vivos.length) h+='<button class="dc-mas">Ver las '+total+'</button>';
+      if(enCola.length) h+='<div class="dc-cola"><b>Encargadas ('+enCola.length+')</b> · quedaron registradas en la Sala; Claude las toma en su próxima revisión, no es inmediato: '+enCola.map(function(x){return esc(x.titulo)}).join(" · ")+'</div>';
+      L.innerHTML=h;
     }
     async function decidir(card,d){
       var id=card.getAttribute("data-id"), x=items.filter(function(i){return i.id===id})[0], r=card.querySelector(".r");
-      var k=llave(); if(!k){r.innerHTML='<span class="er">No hay llave del YOD OS en este navegador: entra una vez al portal.</span>';return}
+      if(!x) return;
+      function fin(txt){hechas[id]={d:d,t:Date.now(),v:ACT};guardar();r.innerHTML='<span class="ok">✓ '+txt+'</span>';setTimeout(pintar,1400)}
+      if(d!=="adelante"){ fin(d==="hecho"?"Anotado como hecho (solo en este navegador)":d==="no"?"Descartado (solo en este navegador)":"Vuelve mañana"); return }
+      var k=llave(); if(!k){r.innerHTML='<span class="er">No hay llave del YOD OS en este navegador: entra una vez con tu liga del Portero.</span>';return}
       card.querySelectorAll("button").forEach(function(b){b.disabled=true}); r.textContent="mandando…";
-      var f=new Date(),p=function(n){return(n<10?"0":"")+n};
-      var env={accion:"produccion",clave:k,fecha:f.getFullYear()+"-"+p(f.getMonth()+1)+"-"+p(f.getDate()),pieza:"ENCARGO · chinche · despacho/"+id,estado:"pendiente",
-        detalle:JSON.stringify({id:"CHN-"+f.getFullYear()+p(f.getMonth()+1)+p(f.getDate())+"-"+p(f.getHours())+p(f.getMinutes())+"-"+Math.random().toString(16).slice(2,6),vista:"yod-despacho/decisiones",url:location.href,texto:"[despacho/"+id+"] DECISIÓN "+d.toUpperCase()+": "+x.titulo+" → "+x.propuesta,decision:d,repo:"yod-despacho",pantalla:"decisiones",tipo:"decision"}),enlace:location.href};
+      var f=hoyMX().replace(/-/g,""), cid="CHN-"+f+"-0000-"+h4(id);   /* mismo id el mismo día: reintentar no duplica */
+      var env={accion:"produccion",clave:k,fecha:hoyMX(),pieza:"ENCARGO · chinche · despacho/"+id,estado:"pendiente",
+        detalle:JSON.stringify({id:cid,vista:"yod-despacho/decisiones",url:location.href,repo:"yod-despacho",tipo:"decision",decision:"adelante",
+          texto:"[despacho/"+id+"] ENCARGAR: "+x.titulo}),enlace:location.href};
       try{
-        var rr=await fetch(GAS,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(env)}), j=null;
-        try{j=JSON.parse(await rr.text())}catch(e){}
-        if(!rr.ok||!j||j.error)throw new Error((j&&j.error)||("HTTP "+rr.status));
-        hechas[id]={d:d,t:Date.now()}; try{localStorage.setItem(K,JSON.stringify(hechas))}catch(e){}
-        r.innerHTML='<span class="ok">✓ '+(d==="adelante"?"Encargado a Claude":d==="no"?"Descartado":"Pospuesto")+'</span>'; setTimeout(pintar,1200);
-      }catch(e){r.innerHTML='<span class="er">No llegó a la Sala: '+esc(e.message)+'</span>';card.querySelectorAll("button").forEach(function(b){b.disabled=false})}
+        var ctl=new AbortController(), tt=setTimeout(function(){ctl.abort()},25000);
+        var rr=await fetch(GAS,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(env),signal:ctl.signal}); clearTimeout(tt);
+        var txt=await rr.text(), j=null; try{j=JSON.parse(txt)}catch(e){}
+        if(j&&!j.error&&rr.ok){ fin("Registrado en la Sala. Claude lo toma en su próxima revisión (no es inmediato)"); return }
+        if(rr.ok&&!j){ hechas[id]={d:"adelante",t:Date.now(),v:ACT};guardar(); r.innerHTML='<span class="er">Google contestó raro: puede que SÍ llegó. Lo dejé marcado como encargado; no lo repitas.</span>'; setTimeout(pintar,4000); return }
+        throw new Error((j&&j.error)||("HTTP "+rr.status));
+      }catch(e){
+        var m=e&&e.name==="AbortError"?"tardó demasiado (puede haber llegado; espera 1 min antes de reintentar)":(/failed to fetch|network/i.test(e&&e.message||"")?"sin conexión a internet":esc(e&&e.message));
+        r.innerHTML='<span class="er">No se confirmó: '+m+'</span>';
+        card.querySelectorAll("button").forEach(function(b){b.disabled=false});
+      }
     }
-    document.addEventListener("click",function(e){if(e.target.classList&&e.target.classList.contains("dc-mas")){verTodas=true;pintar();return}var b=e.target.closest&&e.target.closest(".dc button");if(b)decidir(b.closest(".dc"),b.getAttribute("data-d"))});
-    fetch("datos/pendientes.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){items=j.items||[];pintar()})
-      .catch(function(){document.getElementById("decisL").textContent="No pude leer la lista de pendientes."});
+    document.addEventListener("click",function(e){
+      var t=e.target; if(!t||!t.classList) return;
+      if(t.classList.contains("dc-mas")){verTodas=true;pintar();return}
+      var b=t.closest&&t.closest(".dc button"); if(b) decidir(b.closest(".dc"),b.getAttribute("data-d"));
+    });
+    fetch("datos/pendientes.json?"+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+      if(!Array.isArray(j.items)) throw new Error("sin lista"); items=j.items; ACT=j.actualizado||""; pintar()})
+      .catch(function(){document.getElementById("decisL").textContent="No pude leer la lista de decisiones."});
   })();
   </script>
 
@@ -1086,7 +1115,7 @@ async function cargarConfigMensajes(){
 
 var DICC = {"sujetos": {"Admin": "ADM", "Ayuda Social": "AYS", "Casa Alysa": "CAA", "Casa María": "CAM", "Decisiones": "DEC", "La Cercada": "CER", "RNM": "RNM", "Real de Miramar Guaymas": "RMG", "Torre Ruiseñor": "TOR"}, "personas": {"Alejandro": "ALE", "Alma": "ALM", "Claude": "CLA", "Fernando": "FER", "Franco": "FRA", "Genaro": "GEN", "Lupita": "LUP", "Mariana": "MAR", "PG Arquitectos": "PGA", "Rodolfo": "ROD", "Sayri": "SAY"}, "metas": {"Admin": "MC", "Admin ": "MC", "Ayuda Social": "MC", "Ayuda Social ": "MC", "Casa Alysa": "ME", "Casa Maria": "MB", "Casa María": "MB", "Decisiones": "MC", "Gastos": "MC", "La Cercada": "MD", "Nómina": "MC", "RNM": "MB", "Real de Miramar Guaymas": "MA", "Sin proyecto": "MC", "Torre Ruiseñor": "MD"}, "metas_nombre": {"MA": "Real de Miramar en Preventa III (31-mar-2027)", "MB": "Aurum: 3 contratos nuevos de Arquitectura de Autor (28-feb-2027)", "MC": "Dos meses de operación en bolsa y nada por cobrar a más de 60 días (31-dic-2026)", "MD": "Dos aportaciones de terreno en co-desarrollo firmadas (31-dic-2026)", "ME": "Casa Alysa entregada al 100% con sus estimaciones (30-nov-2026)"}};
 var MAPA = {"proyectos": ["Casa Alysa", "Casa María", "Real de Miramar Guaymas", "RNM", "Casa Maria"], "nuevos": ["La Cercada", "Torre Ruiseñor", "Gym ECOS", "Depas Guaymas"], "interno": ["Admin", "Admin ", "Ayuda Social", "Ayuda Social ", "Nómina", "Gastos"], "brokers_personas": ["Franco", "Lupita"], "alias_tema": {"la cercada": "La Cercada", "casa alysa": "Casa Alysa", "casa maria": "Casa María", "real de miramar": "Real de Miramar Guaymas", "rnm": "RNM", "torre ruiseñor": "Torre Ruiseñor", "nomina de mariana": "Nómina", "caja yod": "Gastos", "flujo yod": "Gastos", "rodriguez": "Gastos", "credito puente bbva": "Real de Miramar Guaymas", "manjarrez": "Gastos"}, "no_son_sujeto": ["Claude", "Claudet"], "decisiones_se_disuelven": true};
-var RIESGOS = [{"fecha": "2026-09-14", "titulo": "Respuesta de GoDaddy al caso 01919954", "que": "Dijeron que puede tardar una semana o más.", "cae": "sin esto el dominio no se puede recuperar", "nivel": "aviso"}, {"fecha": "2026-10-05", "titulo": "Tarjeta válida en el Workspace de Aurum", "que": "La Visa 1049 fue rechazada. Sin tarjeta buena ese día, Google suspende el Workspace.", "cae": "el correo de las cinco cuentas y TODOS los Apps Script — con ellos, los 15 tableros", "nivel": "grave"}, {"fecha": "2026-10-05", "titulo": "Se cierra la redención de aurumarquitectos.com", "que": "Venció el 25 de julio y entró en redención el 5 de septiembre. Dura unos treinta días.", "cae": "si se libera, el dominio se pierde para siempre", "nivel": "grave"}, {"fecha": "2026-11-17", "titulo": "Vence el registro de yodesarrollo.mx", "que": "Registrador Neubox.", "cae": "el sitio yodesarrollo.mx y su correo", "nivel": "aviso"}];
+var RIESGOS = [{"fecha": "2026-09-14", "titulo": "Respuesta de GoDaddy sobre el dominio", "que": "Dijeron que puede tardar una semana o más.", "cae": "sin esto el dominio no se puede recuperar", "nivel": "aviso"}, {"fecha": "2026-10-05", "titulo": "Tarjeta válida en el Workspace de Aurum", "que": "La tarjeta registrada fue rechazada. Sin tarjeta buena ese día, Google suspende el Workspace.", "cae": "el correo de las cinco cuentas y TODOS los Apps Script — con ellos, los 15 tableros", "nivel": "grave"}, {"fecha": "2026-10-05", "titulo": "Se cierra la redención de aurumarquitectos.com", "que": "Venció el 25 de julio y entró en redención el 5 de septiembre. Dura unos treinta días.", "cae": "si se libera, el dominio se pierde para siempre", "nivel": "grave"}, {"fecha": "2026-11-17", "titulo": "Vence el registro de yodesarrollo.mx", "que": "Registrador Neubox.", "cae": "el sitio yodesarrollo.mx y su correo", "nivel": "aviso"}];
 
 /* ══════════ EL CIERRE ══════════
    Proyectos congelados: siguen vivos en el Sheet pero NO cuentan como vencidos
@@ -1130,11 +1159,10 @@ var CARRILES = [
   ['interno','Interno','la casa']
 ];
 var MESES = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,setiembre:9,octubre:10,noviembre:11,diciembre:12};
-var HOY = new Date(); HOY.setHours(0,0,0,0);
+var HOY = (function(){ var p=new Date().toLocaleDateString('en-CA',{timeZone:'America/Hermosillo'}).split('-'); return new Date(+p[0],+p[1]-1,+p[2]); })();
 /* Fecha de HOY en la zona del que mira. new Date().toISOString() da UTC:
    despues de las 6 de la tarde en Mexico estampaba el dia siguiente. */
-function hoyLocal(){ var d=new Date(), z=function(n){return (n<10?'0':'')+n;};
-  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function hoyLocal(){ return new Date().toLocaleDateString('en-CA',{timeZone:'America/Hermosillo'}); }
 var ANIO = HOY.getFullYear();
 
 var $ = function(s){ return document.querySelector(s); };
@@ -1183,12 +1211,12 @@ function dinero(r){
      por ser la mas grande del texto. El dinero sale de lo que la tarjeta DICE
      que es, no de lo que alguna vez se comento. */
   var t=[r.actividad,r.observaciones,r.entregable].join(' ');
-  var re=/\$\s?(\d[\d,\.]*)\s?([kKmM]{1,2}|mil|millones)?/g, mx=0, txt='', m;
+  var re=/\$\s?(\d[\d,\.]*)(?:\s?(millones|mill[oó]n|mil|mm|k|m)(?![a-záéíóúñ]))?/gi, mx=0, txt='', m;
   while((m=re.exec(t))){
     var num=m[1].replace(/[.,]+$/,''), suf=(m[2]||'').toLowerCase();
     var v=parseFloat(num.replace(/,/g,'')); if(isNaN(v)) continue;
-    if(suf==='k'||suf==='mil') v*=1e3; else if(suf==='m'||suf==='mm'||suf==='millones') v*=1e6;
-    if(v>mx){ mx=v; txt='$'+num+(m[2]||''); }
+    if(suf==='k'||suf==='mil') v*=1e3; else if(suf==='m'||suf==='mm'||/^mill/.test(suf)) v*=1e6;
+    if(v>mx){ mx=v; txt='$'+num+(m[2]?(' '+m[2]):''); }
   }
   return [mx,txt];
 }
@@ -1275,7 +1303,7 @@ function construir(tasks){
   VIVAS=tasks.filter(function(r){
     return String(r.borrada||'').toUpperCase()!=='TRUE'
         && String(r.archivada||'').toUpperCase()!=='TRUE'
-        && r.estado!=='Terminado';
+        && r.estado!=='Terminado' && !/^(terminado|completado|hecho)$/i.test(String(r.estado||'').trim());
   });
   var viv=VIVAS;
   viv.forEach(function(r){
@@ -1400,9 +1428,9 @@ function construir(tasks){
    Se apaga con el interruptor y no vuelve a aparecer. */
 function diaDe(v){
   if(!v) return null;
-  var d=new Date(v); if(isNaN(d)) return null;
-  var z=function(n){ return (n<10?'0':'')+n; };
-  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+  var s0=String(v).trim(), m0=s0.match(/^(\d{4}-\d{2}-\d{2})$/); if(m0) return m0[1];   /* solo fecha: no pasar por Date (es UTC) */
+  var d=new Date(s0); if(isNaN(d)) return null;
+  return d.toLocaleDateString('en-CA',{timeZone:'America/Hermosillo'});
 }
 function historialDeCierres(){
   /* dia -> cuantas se cerraron ese dia, leido del Sheet */
@@ -1795,8 +1823,10 @@ function riesgoMasProximo(soloInminente){
      lista es un aviso viejo, no una alarma: se dice aparte. */
   var todos=(RIESGOS||[]).map(function(x){
     var p=String(x.fecha).split('-'); var f=new Date(+p[0],+p[1]-1,+p[2]);
-    return {t:x.titulo,d:Math.round((f-HOY)/86400000)};
+    return {t:x.titulo,d:Math.round((f-HOY)/86400000),g:x.nivel==='grave',ok:!!x.resuelto};
   }).sort(function(a,b){ return a.d-b.d; });
+  var pasado=todos.filter(function(x){ return x.d<0 && x.g && !x.ok; })[0];   /* un grave vencido sin marcar «resuelto» sigue a la vista */
+  if(pasado) return 'VENCIÓ hace '+(-pasado.d)+' d — ¿se resolvió?: '+pasado.t;
   var R=todos.filter(function(x){ return x.d>=0; })[0] || todos[todos.length-1];
   if(!R) return '';
   if(soloInminente && R.d>7) return '';
@@ -2608,7 +2638,8 @@ async function cargarSala(){
       fetch(base+'progreso.json', {cache:'no-store'}).then(function(x){return x.json();})
     ]);
     SALA = {piezas:(r[0]&&r[0].piezas)||[], progreso:(r[1]&&r[1].piezas)||[],
-            actualizado:(r[0]&&r[0].actualizado)||''};
+            actualizado:(r[0]&&r[0].actualizado)||'', progresoAct:(r[1]&&r[1].actualizado)||''};
+    if(!r[0]||!Array.isArray(r[0].piezas)) throw new Error('piezas.json sin lista');
   }catch(e){ SALA = {error: e.message||'no cargó'}; }
   pintarSala();
 }
@@ -2628,6 +2659,7 @@ function avanceDe(nombre){
   return {pct: Math.round(hechos*100/total), hechos:hechos, total:total,
           falta: faltan.length? faltan[0].que : null};
 }
+function edadDias(v){ var m=String(v||'').match(/(\d{4})-(\d{2})-(\d{2})/); return m?Math.round((HOY-new Date(+m[1],+m[2]-1,+m[3]))/864e5):null; }
 function pintarSala(){
   var cab=$('#salaCab'), q=$('#salaQ'), c=$('#salaPanel');
   if(!cab||!c) return;
@@ -2639,19 +2671,21 @@ function pintarSala(){
       +'No te pongo ceros: es que no cargó, no que no haya nada.</div>';
     return;
   }
-  var vivas = SALA.piezas.filter(function(p){ return String(p.estado||'')!=='publicada'; });
+  var eP=edadDias(SALA.actualizado), eG=edadDias(SALA.progresoAct), viejo=(eP===null||eP>2||eG===null||eG>2);
+  var aviso=viejo?'<div class="slAviso">Datos de la Sala de hace '+Math.max(eP||0,eG||0)+' días (piezas al '+esc(SALA.actualizado||'?')+', avance al '+esc(SALA.progresoAct||'?')+'). Puede haber piezas que no salen aquí.</div>':'';
+  var vivas = SALA.piezas.filter(function(p){ var e=String(p.estado||'').trim().toLowerCase(); return e!=='publicada' && e!=='descartada' && e!=='archivada'; });
   if(!vivas.length){
     q.textContent='';
-    c.innerHTML='<div class="slAviso">Nada en producción ahora mismo.</div>';
+    c.innerHTML=aviso+'<div class="slAviso">'+(viejo?'La Sala no trae piezas vivas, pero sus datos son viejos: no lo tomes como «nada».':'Nada en producción ahora mismo.')+'</div>';
     return;
   }
   var tuyas = vivas.filter(function(p){ return String(p.espera||'')==='yo'; }).length;
   q.textContent = vivas.length+' EN PRODUCCIÓN'
     + (tuyas? (' · '+tuyas+' TE ESPERAN') : '')
-    + (SALA.actualizado? (' · AL '+SALA.actualizado) : '');
-  c.innerHTML = vivas.map(function(p){
+    + (SALA.actualizado? (' · AL '+SALA.actualizado) : '') + (viejo?' · POSIBLEMENTE VIEJO':'');
+  c.innerHTML = aviso + vivas.map(function(p){
     var a = avanceDe(p.pieza);
-    var mia = String(p.espera||'')==='yo';
+    var mia = String(p.espera||'').trim().toLowerCase()==='yo';
     var pie = [];
     /* Se dice con las palabras de la SALA, no con las mías. `siguiente` es la
        frase que ella misma escribe («El video está armado y esperando tu
@@ -4122,17 +4156,15 @@ async function cargar(){
        Chrome: la pantalla dijo «Nada vencido. La mesa está limpia» con 149
        tarjetas en el Sheet). Un cero contra una copia que si tenia es mentira:
        se reintenta, y si insiste se usa la copia y se dice de cuando es. */
-    if(!llegaron.length){
-      var prevJ=null; try{ prevJ=JSON.parse(localStorage.getItem('cierre_ultima')||'null'); }catch(e){}
-      if(prevJ && prevJ.t && prevJ.t.length){
-        for(var iv=1; iv<=2 && !llegaron.length; iv++){
-          await new Promise(function(ok){ setTimeout(ok,1500*iv); });
-          var r2=await llamar('getAll',{});
-          if(r2 && r2.ok) llegaron=r2.tasks||[];
-        }
-        if(!llegaron.length) throw new Error('el tablero contestó cero tarjetas tres veces seguidas');
-      }
+    var prevJ=null; try{ prevJ=JSON.parse(localStorage.getItem('cierre_ultima')||'null'); }catch(e){}
+    var nPrev=(prevJ&&prevJ.t)?prevJ.t.length:0;
+    var pobre=function(n){ return n===0 || (nPrev>=20 && n<nPrev*0.6); };   /* vacío, o cayó más de 40 % */
+    for(var iv=1; iv<=2 && pobre(llegaron.length); iv++){
+      await new Promise(function(ok){ setTimeout(ok,1500*iv); });
+      var r2=await llamar('getAll',{});
+      if(r2 && r2.ok) llegaron=r2.tasks||[];
     }
+    if(pobre(llegaron.length)) throw new Error('el tablero contestó '+llegaron.length+' tarjetas y antes había '+nPrev);
     TAREAS=llegaron;
     /* Se guarda la ultima lectura buena. NO es una segunda bandeja: el Sheet
        sigue mandando y esto jamas se escribe. Es para que un parpadeo de Google
@@ -4301,9 +4333,11 @@ document.addEventListener('DOMContentLoaded',function(){
 cargar();
 /* Si el tablero se abrio en una pestaña de atras y Chrome le apago los relojes,
    al volver a verla se carga en ese momento en vez de esperar al siguiente tick. */
+var _leido=Date.now();
 document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible' && !TAREAS.length && !CAIDO){ _fallos=0; cargar(); }
+  if(document.visibilityState==='visible' && (!TAREAS.length || Date.now()-_leido>5*60000) && !CAIDO){ _fallos=0; _leido=Date.now(); cargar(); }
 });
+setInterval(function(){ if(document.visibilityState==='visible' && !CAIDO && Date.now()-_leido>10*60000){ _leido=Date.now(); cargar(); } },60000);
 </script>
 <script src="cabina.js?v=1"></script>
 <script src="https://yodesarrollomx.github.io/yod-portal/os/proyectos.js?v=1" onload="if(window.TAREAS&&TAREAS.length&&window.llenarSoltar)llenarSoltar()"></script>
