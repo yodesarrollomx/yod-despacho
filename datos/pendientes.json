@@ -11,10 +11,10 @@
 },
 {
 "id": "sala-modal",
-"urg": "semana",
+"urg": "despues",
 "area": "Sala",
-"titulo": "Modal: llaves puestas, el despliegue pide tarjeta para GPU L40S",
-"propuesta": "Agregar tarjeta en modal.com → Settings → Billing (el crédito mensual cubre el uso); Claude relanza sala-modal-deploy.",
+"titulo": "Modal rechazó la tarjeta; LTX queda en espera (código listo en GPU A10G)",
+"propuesta": "Reintentar con tarjeta de crédito o digital de límite bajo cuando quieras; mientras, la Sala anima con Wan (2/día) + parallax.",
 "quien": "Tú (2 min)"
 },
 {
