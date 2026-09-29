@@ -303,7 +303,7 @@ function demoDatos(){
     row('D-5','Acuse: factura de mantenimiento','Confirma recepción y fecha de pago habitual.\n—— BORRADOR ——\nRecibida, gracias. Se programa en la siguiente fecha de pago.\n\nAlejandro','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-demo5 · para=facturacion@… · prio=media · hora='+H(14)),
     row('D-6','Factura de proveedor: ¿cuándo se paga?','','Alta','Claude~'+D+'~BANDEJA LISTO · tipo=decision · falta=¿Se paga este viernes o el día 15? · prio=alta · chips=dinero · hora='+H(14)),
     row('D-7','Agenda de junta semanal','Enviado.','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-x · para=equipo · hora='+H(300)+'|||Alejandro~'+D+'~BANDEJA APROBADO · draft=r-x · hora='+H(250)+'|||Claude~'+D+'~BANDEJA ENVIADO · msg=m1 · hora='+H(200)),
-    row('D-8','Confirmación de evento','Enviado.','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-y · para=rally · hora='+H(400)+'|||Claude~'+D+'~BANDEJA ENVIADO · msg=m2 · por=alejandro · hora='+H(180)),
+    row('D-8','Confirmación de evento','Enviado.','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-y · para=organizadores · hora='+H(400)+'|||Claude~'+D+'~BANDEJA ENVIADO · msg=m2 · por=alejandro · hora='+H(180)),
     row('D-9','Propuesta comercial','—','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-z · para=ventas · hora='+H(500)+'|||Alejandro~'+D+'~BANDEJA DESCARTADO · hora='+H(160))
   ];
 }
