@@ -833,6 +833,31 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
     <h1 id="saludo">Buenos días, Alejandro</h1>
   </div>
 
+  <!-- 0 · LA BANDEJA: trabajo ya hecho que sólo espera tu sí (bandeja.js) -->
+  <section class="bandeja" id="bandeja">
+    <div class="k">LISTO PARA TU SÍ <span id="bandejaN"></span></div>
+    <div id="bandejaL"><p class="bjVacio">leyendo…</p></div>
+    <div id="bandejaH"></div>
+  </section>
+  <style>
+  .bandeja{margin:18px 0;padding:16px;border:1px solid var(--oro);border-radius:14px;background:var(--panel)}
+  .bandeja .k{font:600 11px var(--mono);letter-spacing:.12em;color:var(--oro);margin-bottom:10px}
+  .bjItem{padding:12px 0;border-top:1px solid var(--hair)} .bjItem:first-child{border-top:0}
+  .bjMeta{font:11px var(--mono);color:var(--faint)} .bjT{color:var(--ink);font:500 16px var(--sans);margin:3px 0}
+  .bjR{color:var(--ink2);font:14px var(--sans)} .bjLiga{display:inline-block;margin:6px 0;color:var(--oro2);font:13px var(--sans)}
+  .bjB{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+  .bjB button{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--hair2);background:var(--panel2);color:var(--ink);font:500 14px var(--sans);cursor:pointer}
+  .bjB button.bjSi{background:var(--oro);color:#1a1408;border-color:var(--oro)} .bjB button:disabled{opacity:.5}
+  .bjConf{width:100%;color:var(--ink2);font:13px var(--sans)} .bjTxt{width:100%;min-height:70px;border-radius:10px;background:var(--panel2);color:var(--ink);border:1px solid var(--hair2);padding:10px;font:14px var(--sans)}
+  .bjEst{margin-top:6px;color:var(--verde);font:13px var(--sans)} .bjEst.mal,.bjMsg.mal{color:var(--rojo)}
+  .bjMsg{font:13px var(--sans);color:var(--dim);margin-top:6px;min-height:1em}
+  .bjAviso{padding:10px;border-radius:10px;background:var(--rojoS);color:var(--rojo);font:13px var(--sans);margin-bottom:10px}
+  .bjVacio{color:var(--dim);font:14px var(--sans)}
+  .bjHechoT{margin-top:14px;font:600 10px var(--mono);letter-spacing:.12em;color:var(--faint)}
+  .bjHecho{font:13px var(--sans);color:var(--dim);padding:4px 0} .bjHecho span{color:var(--faint)}
+  @media(max-width:600px){.bjB{padding-right:58px}}
+  </style>
+
   <!-- 1 · EL ACUERDO DEL DÍA: lo único que importa hoy -->
   <section class="acuerdo" id="acuerdo">
     <div class="k">EL ACUERDO DEL DÍA</div>
@@ -843,94 +868,6 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
     <div class="hist" id="acuerdoHist" hidden></div>
   </section>
 
-  <!-- DECISIONES: el recorrido de la empresa. Cada clic manda un ENCARGO a la Sala
-       (misma vía que la chinche) y Claude lo ejecuta en la siguiente revisión. -->
-  <section class="decis" id="decis">
-    <div class="k">DECISIONES · DALE SIGUIENTE PASO <span id="decisN"></span></div>
-    <div id="decisL">leyendo pendientes…</div>
-  </section>
-  <style>
-  .decis{margin:18px 0;padding:16px;border:1px solid var(--hair2);border-radius:14px;background:var(--panel)}
-  .decis .k{font:600 11px var(--mono);letter-spacing:.12em;color:var(--oro);margin-bottom:10px}
-  .dc{padding:12px 0;border-top:1px solid var(--hair)}
-  .dc:first-child{border-top:0}
-  .dc .t{color:var(--ink);font:500 15px var(--sans)}
-  .dc .p{color:var(--ink2);font:14px var(--sans);margin:4px 0}
-  .dc .m{color:var(--faint);font:11px var(--mono)}
-  .dc .u-hoy{color:var(--rojo)} .dc .u-semana{color:var(--ambar)} .dc .u-despues{color:var(--dim)}
-  .dc .b{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-  .dc button{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--hair2);background:var(--panel2);color:var(--ink);font:500 14px var(--sans);cursor:pointer}
-  .dc button.si{background:var(--oro);color:#1a1408;border-color:var(--oro)}
-  .dc-mas{margin-top:10px;min-height:40px;width:100%;border-radius:10px;border:1px dashed var(--hair2);background:none;color:var(--oro2);font:500 14px var(--sans);cursor:pointer}
-  .decis{margin-bottom:90px}
-  .dc button{min-height:44px}
-  @media(max-width:600px){.dc .b{padding-right:58px}}
-  #cabina{overflow-wrap:anywhere} #cabina .cbFila>*{min-width:0}
-  .dc-cola{margin-top:12px;padding:10px;border:1px dashed var(--hair2);border-radius:10px;color:var(--dim);font:12px var(--sans)}
-  .dc .ok{color:var(--verde);font:13px var(--sans)} .dc .er{color:var(--rojo);font:13px var(--sans)}
-  </style>
-  <script>
-  (function(){
-    var GAS="https://script.google.com/macros/s/AKfycbx61UWsEYCL_dHzi0JrUv3GuAUFSDWW4iCmlNmbDDvWBIYY4Hhqkf6sYmt4d8UGIlk7MA/exec";
-    var K="despacho_decisiones_v2", hechas={}, verTodas=false, ACT="", items=[];
-    try{hechas=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
-    function guardar(){try{localStorage.setItem(K,JSON.stringify(hechas))}catch(e){}}
-    function llave(){try{return localStorage.getItem("pyod_clave_v1")||localStorage.getItem("sala_clave")||""}catch(e){return ""}}
-    function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-    function soloTuyo(x){return /^Tú( \(|$)/.test(x.quien||"")}
-    function h4(s){var n=0;for(var i=0;i<s.length;i++)n=(n*31+s.charCodeAt(i))>>>0;return ("0000"+(n&65535).toString(16)).slice(-4)}
-    function hoyMX(){return new Date().toLocaleDateString("en-CA",{timeZone:"America/Hermosillo"})}
-    function vigente(h,x){ if(!h||h.v!==ACT) return false; if(h.d==="despues") return Date.now()-h.t<864e5; return true }
-    function pintar(){
-      var L=document.getElementById("decisL"), R={hoy:0,semana:1,despues:2};
-      var abiertas=items.filter(function(x){return !vigente(hechas[x.id],x)}).sort(function(a,b){return (R[a.urg]||0)-(R[b.urg]||0)});
-      var enCola=items.filter(function(x){var h=hechas[x.id];return vigente(h,x)&&h.d==="adelante"});
-      var total=abiertas.length, vivos=verTodas?abiertas:abiertas.slice(0,5);
-      document.getElementById("decisN").textContent="· "+total+" abiertas"+(ACT?" · lista al "+ACT:"");
-      var h=total?vivos.map(function(x){
-        var b=soloTuyo(x)
-          ?'<button class="si" data-d="hecho">Ya lo hice</button><button data-d="despues">Mañana</button>'
-          :'<button class="si" data-d="adelante">Encargar a Claude</button><button data-d="despues">Mañana</button><button data-d="no">No</button>';
-        return '<div class="dc" data-id="'+esc(x.id)+'"><div class="m"><span class="u-'+esc(x.urg)+'">'+esc(String(x.urg||"").toUpperCase())+'</span> · '+esc(x.area)+' · '+esc(x.quien)+'</div><div class="t">'+esc(x.titulo)+'</div><div class="p">→ '+esc(x.propuesta)+'</div><div class="b">'+b+'</div><div class="r"></div></div>';
-      }).join(""):'<p class="dc ok">No hay decisiones abiertas.</p>';
-      if(total>vivos.length) h+='<button class="dc-mas">Ver las '+total+'</button>';
-      if(enCola.length) h+='<div class="dc-cola"><b>Encargadas ('+enCola.length+')</b> · quedaron registradas en la Sala; Claude las toma en su próxima revisión, no es inmediato: '+enCola.map(function(x){return esc(x.titulo)}).join(" · ")+'</div>';
-      L.innerHTML=h;
-    }
-    async function decidir(card,d){
-      var id=card.getAttribute("data-id"), x=items.filter(function(i){return i.id===id})[0], r=card.querySelector(".r");
-      if(!x) return;
-      function fin(txt){hechas[id]={d:d,t:Date.now(),v:ACT};guardar();r.innerHTML='<span class="ok">✓ '+txt+'</span>';setTimeout(pintar,1400)}
-      if(d!=="adelante"){ fin(d==="hecho"?"Anotado como hecho (solo en este navegador)":d==="no"?"Descartado (solo en este navegador)":"Vuelve mañana"); return }
-      var k=llave(); if(!k){r.innerHTML='<span class="er">No hay llave del YOD OS en este navegador: entra una vez con tu liga del Portero.</span>';return}
-      card.querySelectorAll("button").forEach(function(b){b.disabled=true}); r.textContent="mandando…";
-      var f=hoyMX().replace(/-/g,""), cid="CHN-"+f+"-0000-"+h4(id);   /* mismo id el mismo día: reintentar no duplica */
-      var env={accion:"produccion",clave:k,fecha:hoyMX(),pieza:"ENCARGO · chinche · despacho/"+id,estado:"pendiente",
-        detalle:JSON.stringify({id:cid,vista:"yod-despacho/decisiones",url:location.href,repo:"yod-despacho",tipo:"decision",decision:"adelante",
-          texto:"[despacho/"+id+"] ENCARGAR: "+x.titulo}),enlace:location.href};
-      try{
-        var ctl=new AbortController(), tt=setTimeout(function(){ctl.abort()},25000);
-        var rr=await fetch(GAS,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(env),signal:ctl.signal}); clearTimeout(tt);
-        var txt=await rr.text(), j=null; try{j=JSON.parse(txt)}catch(e){}
-        if(j&&!j.error&&rr.ok){ fin("Registrado en la Sala. Claude lo toma en su próxima revisión (no es inmediato)"); return }
-        if(rr.ok&&!j){ hechas[id]={d:"adelante",t:Date.now(),v:ACT};guardar(); r.innerHTML='<span class="er">Google contestó raro: puede que SÍ llegó. Lo dejé marcado como encargado; no lo repitas.</span>'; setTimeout(pintar,4000); return }
-        throw new Error((j&&j.error)||("HTTP "+rr.status));
-      }catch(e){
-        var m=e&&e.name==="AbortError"?"tardó demasiado (puede haber llegado; espera 1 min antes de reintentar)":(/failed to fetch|network/i.test(e&&e.message||"")?"sin conexión a internet":esc(e&&e.message));
-        r.innerHTML='<span class="er">No se confirmó: '+m+'</span>';
-        card.querySelectorAll("button").forEach(function(b){b.disabled=false});
-      }
-    }
-    document.addEventListener("click",function(e){
-      var t=e.target; if(!t||!t.classList) return;
-      if(t.classList.contains("dc-mas")){verTodas=true;pintar();return}
-      var b=t.closest&&t.closest(".dc button"); if(b) decidir(b.closest(".dc"),b.getAttribute("data-d"));
-    });
-    fetch("datos/pendientes.json?"+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
-      if(!Array.isArray(j.items)) throw new Error("sin lista"); items=j.items; ACT=j.actualizado||""; pintar()})
-      .catch(function(){document.getElementById("decisL").textContent="No pude leer la lista de decisiones."});
-  })();
-  </script>
 
   <!-- El aviso de arriba: caída de Google, esperando el acceso, tablero viejo.
        Se perdió al reordenar la pantalla en pestañas y su ausencia tiraba TODO
@@ -3654,6 +3591,7 @@ function pintar(){
   acuerdo(); pintarPlanta(); pintarCinta(); pintarPila(); pintarEntrada(); pintarMarcador();
   try{ pintarLibro(); pintarBitacora(); }catch(e){ console.error('libro/bitacora',e); }
   pintarConstancias();
+  try{ if(window.pintarBandeja) pintarBandeja(); }catch(e){ console.error('bandeja',e); }
   var f=new Date();
   $('#hoy').textContent = f.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
   var h=f.getHours();
@@ -4213,7 +4151,7 @@ async function cargar(){
        y el acuerdo decía «leyendo tu tablero…» para siempre. Una sección vacía
        se lee como «no tienes nada que hacer», y esa es la mentira por omisión
        que más duele aquí. Los pintores ya saben decirlo: sólo faltaba llamarlos. */
-    try{ pintarCinta(); pintarPila(); }catch(_e){}
+    try{ pintarCinta(); pintarPila(); if(window.pintarBandeja) pintarBandeja(); }catch(_e){}
     if(!TAREAS.length){
       var sinClave=!credencial();
       var an=$('#acuerdoN'); if(an) an.textContent=sinClave?'Entra para ver tu tablero':'No pude leer tu tablero';
@@ -4355,6 +4293,7 @@ document.addEventListener('visibilitychange',function(){
 setInterval(function(){ if(document.visibilityState==='visible' && !CAIDO && Date.now()-_leido>10*60000){ _leido=Date.now(); cargar(); } },60000);
 </script>
 <script src="cabina.js?v=1"></script>
+<script src="bandeja.js?v=1"></script>
 <script src="https://yodesarrollomx.github.io/yod-portal/os/proyectos.js?v=1" onload="if(window.TAREAS&&TAREAS.length&&window.llenarSoltar)llenarSoltar()"></script>
 <script src="https://yodesarrollomx.github.io/potenciales-yod/portero.js"></script>
 <!-- La Chinche, la misma que traen tablero.html, obra.html y os/index.html.
