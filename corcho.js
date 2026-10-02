@@ -13,11 +13,17 @@ async function call(action,p){
   if(!demoState)demoState={ok:true,version:0,data:{axes:{ejeX:'Personas',ejeY:'Pendientes'},notes:[{id:'N-demo',titulo:'Revisar el entregable',cuerpo:'Una nota de ejemplo. Puedes moverla, editarla y archivarla.',ejeX:'Equipo',ejeY:'Esta semana',x:20,y:18,color:'arena',estado:'activo',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}]}};
   if(action==='corchoGet')return JSON.parse(JSON.stringify(demoState));
   if(p.version!==demoState.version)return {ok:false,error:'conflicto',version:demoState.version};
-  demoState={ok:true,version:p.version+1,data:JSON.parse(JSON.stringify(p.data))};
+  var demoData=JSON.parse(JSON.stringify(p.data)),now=new Date().toISOString();demoData.notes.forEach(function(n){var old=demoState.data.notes.find(function(x){return x.id===n.id;});n.createdAt=old?old.createdAt:now;n.updatedAt=now;});
+  demoState={ok:true,version:p.version+1,data:demoData};
   return JSON.parse(JSON.stringify(demoState));
 }
+function validData(d){
+  function text(s,max,required){return typeof s==='string'&&s.length<=max&&(!required||!!s.trim());}
+  if(!d||!d.axes||!text(d.axes.ejeX,100,true)||!text(d.axes.ejeY,100,true)||!Array.isArray(d.notes)||d.notes.length>500)return false;
+  var seen={};return d.notes.every(function(n){if(!n||typeof n.id!=='string'||!/^N-[A-Za-z0-9-]{1,96}$/.test(n.id)||seen[n.id])return false;seen[n.id]=true;return text(n.titulo,160,true)&&text(n.cuerpo,12000,false)&&text(n.ejeX,100,false)&&text(n.ejeY,100,false)&&typeof n.x==='number'&&isFinite(n.x)&&n.x>=0&&n.x<=88&&typeof n.y==='number'&&isFinite(n.y)&&n.y>=0&&n.y<=88&&['arena','rosa','verde','azul','lila'].includes(n.color)&&['activo','archivado'].includes(n.estado)&&typeof n.createdAt==='string'&&!isNaN(Date.parse(n.createdAt))&&typeof n.updatedAt==='string'&&!isNaN(Date.parse(n.updatedAt));});
+}
 function adopt(j){
-  if(!j||!Number.isInteger(j.version)||j.version<0||!j.data||!j.data.axes||!Array.isArray(j.data.notes))throw new Error('El corcho todavía no está disponible. Puedes seguir usando Mi trabajo.');
+  if(!j||!Number.isSafeInteger(j.version)||j.version<0||!validData(j.data))throw new Error('El corcho todavía no está disponible. Puedes seguir usando Mi trabajo.');
   version=j.version;data=JSON.parse(JSON.stringify(j.data));
   config={id:'@config',version:version,payload:{ejeX:data.axes.ejeX,ejeY:data.axes.ejeY}};
   notes=data.notes.map(function(p){return {id:p.id,version:version,payload:p};});
@@ -72,7 +78,7 @@ async function save(record,payload){
     else{var index=candidate.notes.findIndex(function(n){return n.id===record.id;}),newNote=Object.assign({},payload,{id:record.id});if(index<0)candidate.notes.push(newNote);else candidate.notes[index]=newNote;}
     var expected=version,j=await call('corchoSave',{version:expected,data:candidate});
     if(!j||j.ok!==true){if(j&&j.error==='conflicto')throw new Error('Esta nota cambió en otro equipo. Tu texto sigue aquí: cópialo antes de cerrar y actualizar el corcho.');throw new Error('No se confirmó el guardado. Conservé tu texto; puedes reintentar.');}
-    if(!Number.isInteger(j.version)||j.version<=expected||!j.data||!j.data.axes||typeof j.data.axes.ejeX!=='string'||typeof j.data.axes.ejeY!=='string'||!Array.isArray(j.data.notes))throw new Error('Guardado por conciliar: falta una versión y datos válidos del servidor. Conservé tu texto; actualiza el corcho antes de reintentar.');
+    if(!Number.isSafeInteger(j.version)||j.version<=expected||!validData(j.data))throw new Error('Guardado por conciliar: falta una versión y datos válidos del servidor. Conservé tu texto; actualiza el corcho antes de reintentar.');
     // Solo el snapshot confirmado del servidor puede sustituir los datos leídos.
     adopt(j);
     paint();message(DEMO?'Cambio aplicado al ejemplo; no se guardó.':'Guardado y confirmado.');return true;

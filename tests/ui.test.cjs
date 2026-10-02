@@ -34,8 +34,9 @@ test('Despacho recupera carga y conserva notas con CAS global, archivo y chinche
    if(p.action==='corchoSave'){
     saves++;assert.ok(!('id' in p)&&!('payload' in p));assert.deepEqual(Object.keys(p.data.axes).sort(),['ejeX','ejeY']);
     if(conflict)return route.fulfill({json:{ok:false,error:'conflicto',version:state.version+1}});
-    if(noAck)return route.fulfill({json:{ok:true,version:state.version+1}});
-    assert.equal(p.version,state.version);state.version++;state.data=copy(p.data);
+    if(noAck==='missing')return route.fulfill({json:{ok:true,version:state.version+1}});
+    if(noAck==='malformed')return route.fulfill({json:{ok:true,version:state.version+1,data:{axes:p.data.axes,notes:[{}]}}});
+    assert.equal(p.version,state.version);state.version++;const next=copy(p.data),now=new Date().toISOString();next.notes.forEach(n=>{const old=state.data.notes.find(x=>x.id===n.id);n.createdAt=old?old.createdAt:now;n.updatedAt=now;});state.data=next;
     return route.fulfill({json:{ok:true,...copy(state)}});
    }
    throw new Error('No se permiten otras escrituras en esta prueba: '+p.action);
@@ -90,7 +91,7 @@ test('Despacho recupera carga y conserva notas con CAS global, archivo y chinche
  });
  await t.test('conflicto y ACK incompleto conservan texto y no anuncian guardado',async()=>{
   await page.locator('.postit-open').click();await page.locator('[name="cuerpo"]').fill('Cambio sin guardar');const original=state.data.notes[0].cuerpo;conflict=true;await page.locator('#corchoSave').click();await page.waitForFunction(()=>document.querySelector('#corchoEditMsg').textContent.includes('otro equipo'));assert.equal(await page.locator('[name="cuerpo"]').inputValue(),'Cambio sin guardar');assert.equal(state.data.notes[0].cuerpo,original);
-  conflict=false;noAck=true;await page.locator('#corchoSave').click();await page.waitForFunction(()=>document.querySelector('#corchoEditMsg').textContent.includes('por conciliar'));assert.equal(await page.locator('#corchoDialog').isVisible(),true);assert.equal(await page.locator('[name="cuerpo"]').inputValue(),'Cambio sin guardar');assert.equal(state.data.notes[0].cuerpo,original);noAck=false;await page.locator('#corchoClose').click();
+  conflict=false;for(const variant of ['missing','malformed']){noAck=variant;await page.locator('#corchoSave').click();await page.waitForFunction(()=>document.querySelector('#corchoEditMsg').textContent.includes('por conciliar'));assert.equal(await page.locator('#corchoDialog').isVisible(),true);assert.equal(await page.locator('[name="cuerpo"]').inputValue(),'Cambio sin guardar');assert.equal(state.data.notes[0].cuerpo,original);}noAck=false;await page.locator('#corchoClose').click();
  });
  await t.test('no propietario recibe un estado claro, sin notas ni escritura',async()=>{
   denied=true;const before=saves;await page.locator('#corchoRead').click();await page.waitForFunction(()=>document.querySelector('#corchoMsg').textContent.includes('propietario'));assert.equal(await page.locator('.postit,.archivo-nota').count(),0);assert.equal(await page.locator('#corchoNew').isDisabled(),true);assert.equal(saves,before);
