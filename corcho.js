@@ -72,9 +72,9 @@ async function save(record,payload){
     else{var index=candidate.notes.findIndex(function(n){return n.id===record.id;}),newNote=Object.assign({},payload,{id:record.id});if(index<0)candidate.notes.push(newNote);else candidate.notes[index]=newNote;}
     var expected=version,j=await call('corchoSave',{version:expected,data:candidate});
     if(!j||j.ok!==true){if(j&&j.error==='conflicto')throw new Error('Esta nota cambió en otro equipo. Tu texto sigue aquí: cópialo antes de cerrar y actualizar el corcho.');throw new Error('No se confirmó el guardado. Conservé tu texto; puedes reintentar.');}
-    if(!Number.isInteger(j.version)||j.version<=expected)throw new Error('No se confirmó la versión guardada. Conservé tu texto.');
-    // El ACK confirma la versión global. Si devuelve datos, manda la copia del servidor.
-    adopt({version:j.version,data:j.data||candidate});
+    if(!Number.isInteger(j.version)||j.version<=expected||!j.data||!j.data.axes||typeof j.data.axes.ejeX!=='string'||typeof j.data.axes.ejeY!=='string'||!Array.isArray(j.data.notes))throw new Error('Guardado por conciliar: falta una versión y datos válidos del servidor. Conservé tu texto; actualiza el corcho antes de reintentar.');
+    // Solo el snapshot confirmado del servidor puede sustituir los datos leídos.
+    adopt(j);
     paint();message(DEMO?'Cambio aplicado al ejemplo; no se guardó.':'Guardado y confirmado.');return true;
   }catch(e){if(msg)msg.textContent=e.message;else message(e.message,true);paint();return false;}
   finally{busy=false;buttons.forEach(function(b){b.disabled=false;});enable();}
