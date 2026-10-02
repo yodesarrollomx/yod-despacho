@@ -1,13 +1,13 @@
 {
-  "model_revision": "2026-09-30.1",
-  "proposal_id": "CHG-ATLAS-001",
-  "summary": "Incorporar este repositorio al atlas de YOD OS: instrucciones para agentes, declaración de impacto y verificación de propuestas versionadas antes de integrar cambios.",
-  "components": [
-    "SYS-DESPACHO"
-  ],
+  "model_revision": "2026-10-01.25-despacho-corcho",
+  "proposal_id": "CHG-DESPACHO-CHINCHES-001",
+  "summary": "Recuperar la lectura de tareas ordinarias y carga del Despacho; añadir frontend de Corcho privado conforme CTR-DESPACHO-CORCHO, CAS global y archivo sin borrar. El despliegue del backend se acredita por separado.",
+  "components": ["SYS-DESPACHO", "GAS-OPERACION", "SHEET-OPERACION", "GAS-PORTERO"],
   "tests": [
-    "git diff --check",
-    "Revisión sintáctica local de JavaScript/HTML y, cuando corresponde, AST de Python, sin ejecutar integraciones."
+    "git diff --check; node --check app.js operacion.js corcho.js",
+    "node --test tests/operacion.test.cjs: flags TRUE/FALSE, fechas imposibles/ambiguas y vencidas sin inventar fechas",
+    "node --test tests/ui.test.cjs con red interceptada: lectura/carga/reintento, Corcho global CAS, conflicto y ACK inválido, archivo/restauración, chinche sobre detalle privado y acceso denegado",
+    "14 pruebas locales aprobadas; revisión visual móvil y escritorio. CI del commit exacto antes de integrar. Publicación frontend y backend contrastadas de forma independiente."
   ],
-  "rollback": "Revertir el commit de este cambio mediante revisión y repetir las verificaciones locales. No borrar ni restaurar registros de negocio, Sheets o archivos de clientes como parte del rollback."
+  "rollback": "Revertir PR del frontend y repetir verificaciones; conservar notas, IDs y registros de negocio. Backend a versión previa en su deployment existente, sin borrar Corcho ni modificar ACL."
 }

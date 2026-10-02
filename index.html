@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="corcho.css?v=3">
 <style>
 /* El Despacho v2: una columna de celular (máx. 560px), cuatro carriles y una hoja que sube desde abajo.
    Oscuro a propósito (es la cara de la casa); tokens abajo. */
@@ -21,6 +22,8 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
+/* El shell compartido conserva su menú; el lienzo de este tablero usa sus tokens. */
+.yod-shell .yod-canvas{background:var(--bg);color:var(--ink)}
 body{font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
 .w{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:18px 110px}
 .fecha{font:600 11px var(--mono);letter-spacing:.12em;color:var(--dim)}
@@ -60,6 +63,10 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid va
 .vacio{margin-top:26px;padding:18px;border:1px dashed var(--hair);border-radius:18px;color:var(--dim);font:14px var(--sans)}
 .pie{margin-top:36px;display:flex;gap:10px;flex-wrap:wrap}
 .pie a{font:13px var(--sans);color:var(--dim);border:1px solid var(--hair);border-radius:12px;padding:10px 12px;text-decoration:none}
+.seccion{font:400 27px var(--serif);margin:30px 0 4px}.ayuda{font-size:13px;color:var(--dim);margin:6px 0 12px}
+.pulso{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.pulso-item{padding:10px 7px;border:1px solid var(--hair);border-radius:14px;background:var(--panel);color:var(--ink2);display:flex;flex-direction:column;gap:5px;font:12px var(--sans);text-align:left;cursor:pointer}.pulso-item b{font:30px var(--serif)}.pulso-item.vencidas,.op-card.vencidas{border-left:3px solid var(--rojo)}
+.tabs{display:flex;gap:8px;margin:18px 0}.tabs button,.refrescar{min-height:44px;padding:8px 14px;border:1px solid var(--hair);border-radius:12px;background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}.tabs button[aria-pressed=true]{background:var(--oro);color:#1a1408}.refrescar{font-size:13px;margin-top:10px}
+[hidden]{display:none!important}
 /* hoja */
 #velo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000}
 #hoja{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow-y:auto;z-index:3001;background:#120F0B;border-top:1px solid var(--hair);border-radius:24px 24px 0 0;padding:10px 16px calc(24px + env(safe-area-inset-bottom,0px));max-width:600px;margin:0 auto}
@@ -83,13 +90,21 @@ body.caido .acc button.si{opacity:.5}
 <main class="w">
   <div class="fecha" id="fecha">&nbsp;</div>
   <h1 id="saludo">El Despacho</h1>
-  <div class="lat esp" id="latido"><i></i>leyendo…</div>
+  <div class="lat esp" id="latido" role="status" aria-live="polite"><i></i>Leyendo tus pendientes…</div>
+  <button type="button" class="refrescar" id="refrescar">Actualizar pendientes</button>
+  <noscript><p>Activa JavaScript para leer tus pendientes.</p></noscript>
+  <div id="arranqueError" class="msg mal" role="alert" hidden></div>
+  <nav class="tabs" aria-label="Vistas del Despacho"><button type="button" id="verTrabajo" aria-pressed="true">Mi trabajo</button><button type="button" id="verCorcho" aria-pressed="false">Mi corcho</button></nav>
+  <div id="trabajo">
 
   <section id="cSi" aria-label="Tu sí"></section>
   <section id="cEsp" aria-label="Puede esperar"></section>
   <section id="cSolo" aria-label="Solo tú"></section>
   <div class="vacio" id="vacio" hidden></div>
   <section id="cHecho" aria-label="Lo que hice solo"></section>
+  <section id="operacion" aria-label="Operación completa"></section>
+  </div>
+  <section id="corcho" hidden aria-label="Mi corcho"></section>
 
   <nav class="pie">
     <a href="clasico.html">Tablero completo</a>
@@ -100,7 +115,10 @@ body.caido .acc button.si{opacity:.5}
 <div id="velo" hidden></div>
 <div id="hoja" hidden role="dialog" aria-modal="true"></div>
 
-<script src="app.js?v=2"></script>
+<script>window.addEventListener('error',function(e){if(!/\/(?:app|operacion|corcho)\.js(?:\?|$)/.test(e.filename||e.target&&e.target.src||''))return;var a=document.getElementById('arranqueError');a.hidden=false;a.textContent='No se pudo iniciar una parte del Despacho. Recarga la página para volver a intentar.';},true);</script>
+<script src="operacion.js?v=3"></script>
+<script src="app.js?v=3"></script>
+<script src="corcho.js?v=3"></script>
 <script>if(location.hash!=="#demo"){var sp=document.createElement("script");sp.src="https://yodesarrollomx.github.io/potenciales-yod/portero.js";document.body.appendChild(sp);}</script>
 <script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=ch9"></script>
 <script>if(window.YODChinche) YODChinche.init({pantalla:"despacho"});</script>

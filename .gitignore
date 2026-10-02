@@ -1,3 +1,4 @@
 _auditoria.json
 *.local.json
 index.html.bak-*
+node_modules/

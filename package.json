@@ -1,0 +1,6 @@
+{
+  "name": "yod-despacho",
+  "private": true,
+  "scripts": {"test": "node --test tests/*.test.cjs", "test:unit": "node --test tests/operacion.test.cjs"},
+  "devDependencies": {"playwright": "1.63.0"}
+}
