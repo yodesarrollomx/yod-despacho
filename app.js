@@ -74,12 +74,13 @@ function latido(items){
 async function llamar(action,payload,vuelta){
   if(DEMO) return demoLlamar(action,payload);
   vuelta=vuelta||0;
-  var ctl=new AbortController(), tope=setTimeout(function(){ ctl.abort(); },60000), r;
+  var ctl=new AbortController(), tope=setTimeout(function(){ ctl.abort(); },30000), r,t;
   try{ r=await fetch(EXEC,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',headers:{'Content-Type':'text/plain;charset=utf-8'},
-         body:JSON.stringify(Object.assign({action:action,k:clave()},payload||{})),signal:ctl.signal}); }
-  catch(e){ clearTimeout(tope); throw new Error(e&&e.name==='AbortError'?'Google tardó más de un minuto':'no hay conexión ahorita'); }
-  clearTimeout(tope);
-  var t=await r.text(), j=null; try{ j=JSON.parse(t); }catch(e){}
+         body:JSON.stringify(Object.assign({action:action,k:clave()},payload||{})),signal:ctl.signal});
+       t=await r.text();if(!r.ok)throw new Error('HTTP'); }
+  catch(e){ throw new Error(e&&e.name==='AbortError'?'Google tardó más de 30 segundos':'no hay conexión ahorita'); }
+  finally{clearTimeout(tope);}
+  var j=null; try{ j=JSON.parse(t); }catch(e){}
   if(!j){ if(action==='getAll'&&vuelta<2){ await new Promise(function(ok){setTimeout(ok,1200*(vuelta+1));}); return llamar(action,payload,vuelta+1); }
           throw new Error(action==='getAll'?'Google contestó con una página en vez de datos':'el tablero contestó algo raro'); }
   if(j.ok===false && j.error==='liga' && action==='getAll' && vuelta<2){ await new Promise(function(ok){setTimeout(ok,1200*(vuelta+1));}); return llamar(action,payload,vuelta+1); }
@@ -87,13 +88,16 @@ async function llamar(action,payload,vuelta){
 }
 async function cargar(){
   if(CARGANDO) return; CARGANDO=true;
+  var lat=$('#latido'); lat.className='lat esp';lat.innerHTML='<i></i>Leyendo tus pendientes…';
+  document.body.setAttribute('aria-busy','true');
   try{
     if(!DEMO && !clave()){ CAIDO=true; pintar('sinClave'); return; }
     var j=await llamar('getAll',{});
     if(!j||j.ok===false) throw new Error(j&&j.error||'sin respuesta');
-    TAREAS=j.tasks||[]; CAIDO=false; LEIDO=Date.now(); pintar();
+    if(!Array.isArray(j.tasks))throw new Error('el tablero no devolvió una lista de tareas');
+    TAREAS=j.tasks; CAIDO=false; LEIDO=Date.now(); pintar();
   }catch(e){ CAIDO=true; pintar('caido',enCristiano(e.message)); }
-  finally{ CARGANDO=false; }
+  finally{ CARGANDO=false; document.body.setAttribute('aria-busy','false'); }
 }
 /* Escribir UNA línea: releer, comprobar que nadie movió la tarjeta, escribir, releer para confirmar. */
 async function escribir(s, linea, estado){
@@ -146,6 +150,7 @@ function pintar(modo,det){
   else if(m>130){ lat.className='lat mal'; lat.innerHTML='<i></i>El Ejecutor no ha pasado '+esc(hace(m))+' · lo urgente, mándalo tú desde Gmail'; }
   else { lat.className='lat'; lat.innerHTML='<i></i>Ejecutor pasó '+esc(hace(m)); }
   document.body.classList.toggle('caido',!!CAIDO);
+  pintarOperacion(modo);
 
   if(modo){ ['#cSi','#cEsp','#cSolo','#cHecho'].forEach(function(k){ $(k).innerHTML=''; }); $('#vacio').hidden=false;
     $('#vacio').textContent= modo==='sinClave' ? 'Abre tu liga de entrada una vez en este celular y aquí aparece tu trabajo listo.' : 'No te enseño una bandeja vacía cuando en realidad no pude leerla. En cuanto Google conteste, aparece.'; return; }
@@ -172,6 +177,26 @@ function pintar(modo,det){
       return '<div class="hecho"><div><b class="'+(s.est==='descartado'?'x':'')+'">'+q+'</b> · '+esc(s.titulo)+'</div><span>'+esc(horaDe(s.hora))+'</span></div>'; }).join('') : '';
 
   if(ABIERTO){ var s=todo.filter(function(x){ return x.id===ABIERTO; })[0]; if(s && /^(listo|aprobado|trabajando|error)$/.test(s.est)) abrir(s,true); else cerrar(); }
+}
+
+function pintarOperacion(modo){
+  var el=$('#operacion');if(!el)return;
+  if(modo){el.innerHTML='';return;}
+  var rows=window.DespachoOperacion.abiertas(TAREAS,hoy()),g={vencidas:[],hoy:[],proximas:[],sinfecha:[]},n={vencidas:'Vencidas',hoy:'Hoy',proximas:'Próximas',sinfecha:'Sin fecha confirmada'};
+  rows.forEach(function(x){g[x.grupo].push(x);});
+  el.innerHTML='<h2 class="seccion">Tu operación · '+rows.length+' pendientes</h2><p class="ayuda">Las tareas del tablero, con o sin borrador listo. Toca una para ver su contexto.</p>'
+    +'<div class="pulso">'+Object.keys(g).map(function(k){return '<button type="button" data-op-grupo="'+k+'" class="pulso-item '+k+'"><b>'+g[k].length+'</b><span>'+n[k]+'</span></button>';}).join('')+'</div>'
+    +Object.keys(g).map(function(k){return '<section id="op-'+k+'"><h3 class="carril">'+n[k]+'</h3>'+(g[k].length?g[k].map(function(x){
+      var r=x.r,tiempo=x.dias===null?x.fecha.origen:x.dias>0?x.dias+' días tarde':x.dias===0?'Vence hoy':'En '+(-x.dias)+' días';
+      return '<button class="card op-card '+k+'" data-tarea="'+esc(r.id)+'"><span class="meta">'+esc([r.id,r.proyecto,r.responsable].filter(Boolean).join(' · '))+'</span><span class="t">'+esc(r.actividad||'Sin título')+'</span><span class="r">'+esc(tiempo)+' · '+esc(r.estado||'Sin estado')+'</span></button>';
+    }).join(''):'<p class="ayuda">Sin pendientes en este grupo.</p>')+'</section>';}).join('');
+}
+function abrirTarea(r){
+  var f=window.DespachoOperacion.fecha(r,hoy()),s=leer(r);
+  if(s&&/^(listo|aprobado|trabajando|error)$/.test(s.est)){abrir(s);return;}
+  ABIERTO=null;
+  $('#hoja').innerHTML='<div class="asa"></div><button class="cerrar" data-a="cerrar" aria-label="Cerrar">✕</button><div class="hm">'+esc(r.id)+' · '+esc(r.proyecto||'Sin proyecto')+'</div><h2>'+esc(r.actividad||'Sin título')+'</h2><div class="para">'+esc(r.responsable||'Sin responsable')+' · '+esc(r.estado||'Sin estado')+'</div><p>'+esc(f.dia||f.origen)+(f.dia?' · '+esc(f.origen):'')+'</p>'+(r.entregable?'<h3>Entregable</h3><div class="cuerpo">'+esc(r.entregable)+'</div>':'')+(r.observaciones?'<h3>Contexto</h3><div class="cuerpo">'+esc(r.observaciones)+'</div>':'')+'<div class="acc"><a class="btn" href="https://yodesarrollomx.github.io/board-aurum/" target="_blank" rel="noopener">Abrir tablero de tareas</a></div>';
+  $('#hoja').hidden=false;$('#velo').hidden=false;document.body.classList.add('hojaAbierta');$('#hoja .cerrar').focus();
 }
 
 /* ───────── hoja de detalle ───────── */
@@ -218,6 +243,9 @@ async function accion(s, linea, estado, msg, okTxt){
 document.addEventListener('click', async function(ev){
   var t=ev.target; if(!t||!t.closest) return;
   if(t.closest('#reint')){ cargar(); return; }
+  if(t.closest('#refrescar')){ cargar(); return; }
+  var grupo=t.closest('[data-op-grupo]');if(grupo){var destino=$('#op-'+grupo.dataset.opGrupo);if(destino)destino.scrollIntoView({block:'start'});return;}
+  var tr=t.closest('[data-tarea]');if(tr){var row=TAREAS.filter(function(r){return r.id===tr.dataset.tarea;})[0];if(row)abrirTarea(row);return;}
   if(t.closest('#velo')){ cerrar(); return; }
   var ab=t.closest('[data-abrir]'); if(ab){ var s0=items().filter(function(x){ return x.id===ab.dataset.abrir; })[0]; if(s0) abrir(s0); return; }
   var b=t.closest('[data-a]');
@@ -274,7 +302,7 @@ document.addEventListener('click', async function(ev){
     }
   }
 });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape' && ABIERTO) cerrar(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !$('#hoja').hidden) cerrar(); });
 
 /* ───────── dictado (con motivo si falla) ───────── */
 document.addEventListener('click',function(e){
@@ -304,7 +332,9 @@ function demoDatos(){
     row('D-6','Factura de proveedor: ¿cuándo se paga?','','Alta','Claude~'+D+'~BANDEJA LISTO · tipo=decision · falta=¿Se paga este viernes o el día 15? · prio=alta · chips=dinero · hora='+H(14)),
     row('D-7','Agenda de junta semanal','Enviado.','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-x · para=equipo · hora='+H(300)+'|||Alejandro~'+D+'~BANDEJA APROBADO · draft=r-x · hora='+H(250)+'|||Claude~'+D+'~BANDEJA ENVIADO · msg=m1 · hora='+H(200)),
     row('D-8','Confirmación de evento','Enviado.','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-y · para=organizadores · hora='+H(400)+'|||Claude~'+D+'~BANDEJA ENVIADO · msg=m2 · por=alejandro · hora='+H(180)),
-    row('D-9','Propuesta comercial','—','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-z · para=ventas · hora='+H(500)+'|||Alejandro~'+D+'~BANDEJA DESCARTADO · hora='+H(160))
+    row('D-9','Propuesta comercial','—','Media','Claude~'+D+'~BANDEJA LISTO · tipo=correo · draft=r-z · para=ventas · hora='+H(500)+'|||Alejandro~'+D+'~BANDEJA DESCARTADO · hora='+H(160)),
+    row('D-10','Revisar entregable del proyecto','Tarea del tablero sin protocolo Bandeja.','Alta','',{fecha:new Date(Date.parse(D+'T00:00:00Z')-86400000*3).toISOString().slice(0,10),proyecto:'Proyecto de ejemplo'}),
+    row('D-11','Acordar fecha con responsable','La fecha todavía no está confirmada.','Media','',{fecha:'',proyecto:'Operación de ejemplo'})
   ];
 }
 var DEMO_T=null;
@@ -324,5 +354,5 @@ setInterval(function(){ if(document.visibilityState==='visible' && !ABIERTO && D
 document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible' && !ABIERTO && Date.now()-LEIDO>2*60000) cargar(); });
 /* el Portero termina de canjear la liga después de que esto arranca: en cuanto aparece la llave, se lee */
 if(!DEMO && !clave()){ var espera=setInterval(function(){ if(clave()){ clearInterval(espera); cargar(); } },1000); setTimeout(function(){ clearInterval(espera); },30000); }
-window.DESPACHO={cargar:cargar, _leer:leer};
+window.DESPACHO={cargar:cargar, _leer:leer, llamar:llamar};
 })();

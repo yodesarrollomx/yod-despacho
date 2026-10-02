@@ -1,8 +1,9 @@
 # El Despacho · YOD OS
 
-La pantalla de trabajo de Dirección: por cada frente del negocio, quién está esperando más.
-Cinco carriles × tres casillas + la cola. Se toca una casilla, se ven sus tarjetas y se firman
-ahí mismo.
+La pantalla de trabajo de Dirección reúne la Bandeja del Ejecutor, las tareas abiertas de
+la operación y un Corcho privado. Las tareas ordinarias se ven aunque no tengan un borrador
+BANDEJA; se agrupan en vencidas, hoy, próximas y sin fecha confirmada. El tablero previo
+sigue disponible en `clasico.html`.
 
 **Mecánica: la misma que los demás tableros.**
 
@@ -12,8 +13,9 @@ ahí mismo.
 | `shell.js` | pinta el menú lateral de YOD OS |
 | Apps Script del board-aurum | lee (`getAll`) y escribe (`update`) el Sheet de tareas |
 | Sheet del board-aurum | **el único almacén.** Aquí no se guarda nada aparte |
+| Corcho del mismo backend | ejes y notas privadas del propietario; versión global para evitar sobrescribir desde otro equipo |
 
-No hay base propia, no hay copia, no hay artifact. Lo que se firma se escribe en la misma
+No hay base propia ni copia local persistente. Lo que se firma se escribe en la misma
 tarjeta del tablero de siempre, con la sesión del Portero del propio usuario — igual que
 cuando él edita desde el board.
 
@@ -25,6 +27,27 @@ cuando él edita desde el board.
 - **El carril** de cada tarjeta y la disolución del proyecto «Decisiones» hacia su tema real.
 - **La matrícula** `EMPRESA-SUJETO-TIPO+NÚMERO-META-QUIÉN` (ver `CODIGOS-BOARDS.md` de yod-portal).
 - **Los ocho focos** de revisión, al pie.
+
+## Corcho privado
+
+`corchoGet` devuelve `{ok,version,data:{axes:{ejeX,ejeY},notes}}` y `corchoSave` recibe
+`{k,version,data}`. La versión es global, nunca una versión por nota. El backend valida la
+identidad real del propietario y el permiso DP; el navegador no decide quién puede entrar.
+Las notas no se incluyen en `getAll`. El Corcho permite mover notas, editar su detalle,
+cambiar ejes y archivar/restaurar sin borrar. Los conflictos conservan el texto del editor.
+La chinche del detalle recibe contexto técnico mínimo, sin adjuntar el contenido privado.
+
+La pantalla funciona con el backend de tareas existente. El Corcho requiere publicar sus
+acciones en ese mismo backend: integrar el frontend no demuestra despliegue ni persistencia.
+Si falta el servicio, la interfaz lo informa y permite seguir en Mi trabajo. `#demo` nunca
+guarda en el Sheet y sus cambios se pierden al salir.
+
+## Verificación
+
+`npm ci` y `npm run test:unit` verifican fechas, flags y clasificación. Para regresiones de
+interfaz: `npx playwright install chromium` y `npm test`. `CHINCHE_SOURCE` permite probar
+el script compartido del atlas fijado; sin esa variable se usa un doble local. Las pruebas
+interceptan la red y usan datos sintéticos: no escriben en endpoints de negocio.
 
 ## Cuidado
 
