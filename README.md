@@ -37,10 +37,20 @@ Las notas no se incluyen en `getAll`. El Corcho permite mover notas, editar su d
 cambiar ejes y archivar/restaurar sin borrar. Los conflictos conservan el texto del editor.
 La chinche del detalle recibe contexto técnico mínimo, sin adjuntar el contenido privado.
 
-La pantalla funciona con el backend de tareas existente. El Corcho requiere publicar sus
-acciones en ese mismo backend: integrar el frontend no demuestra despliegue ni persistencia.
+Las tareas usan el backend de Operación existente. Provisionalmente, únicamente
+`corchoGet` y `corchoSave` usan la implementación existente del Portero. Allí se valida
+la sesión directamente, sin renovar sesiones ni utilizar una caché para autorizar.
+La configuración de propietario y almacén se instala de forma privada y falla cerrada
+si falta. No se añaden scopes ni permisos; el libro y todos sus ancestros deben ser
+privados del propietario efectivo. La integración en Git no demuestra despliegue ni persistencia.
 Si falta el servicio, la interfaz lo informa y permite seguir en Mi trabajo. `#demo` nunca
 guarda en el Sheet y sus cambios se pierden al salir.
+
+Cuando se identifique el proyecto editable de Operación, se podrá trasladar el handler
+y cambiar `CORCHO_EXEC` conservando el mismo libro, contrato y versiones. La migración
+no requiere copiar o borrar notas. Registro: `CHG-DESPACHO-CORCHO-PROVISIONAL-035` en
+el atlas de YOD. Para rollback, restaurar frontend y versión previa de código sin
+borrar el libro ni cambiar su ACL.
 
 ## Verificación
 
