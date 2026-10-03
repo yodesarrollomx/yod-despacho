@@ -14,6 +14,8 @@
 (function(){
 'use strict';
 var EXEC='https://script.google.com/macros/s/AKfycbyZ1p7rGHuU01vWBbynGdmlKTnlyH9CIXyhKivqLHa4rLxcHNneJKsZHv7smnjLsfH1/exec';
+// Corcho provisional en el Portero existente; las tareas conservan su backend.
+var CORCHO_EXEC='https://script.google.com/macros/s/AKfycbwlDDCWWzOWYZsUpBU9uqsQ7aenQ469PF6s6FkNlBFS1_cJSU5njG9oQmuyELy5zlqzFg/exec';
 var LSK='pyod_clave_v1', SEP='|||', TZ='America/Hermosillo';
 var DEMO=/^#demo$/.test(location.hash);
 var TAREAS=[], CAIDO=false, LEIDO=0, CARGANDO=false, ABIERTO=null;
@@ -75,7 +77,8 @@ async function llamar(action,payload,vuelta){
   if(DEMO) return demoLlamar(action,payload);
   vuelta=vuelta||0;
   var ctl=new AbortController(), tope=setTimeout(function(){ ctl.abort(); },30000), r,t;
-  try{ r=await fetch(EXEC,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',headers:{'Content-Type':'text/plain;charset=utf-8'},
+  var endpoint=/^corcho(Get|Save)$/.test(action)?CORCHO_EXEC:EXEC;
+  try{ r=await fetch(endpoint,{method:'POST',credentials:'omit',redirect:'follow',cache:'no-store',headers:{'Content-Type':'text/plain;charset=utf-8'},
          body:JSON.stringify(Object.assign({action:action,k:clave()},payload||{})),signal:ctl.signal});
        t=await r.text();if(!r.ok)throw new Error('HTTP'); }
   catch(e){ throw new Error(e&&e.name==='AbortError'?'Google tardó más de 30 segundos':'no hay conexión ahorita'); }

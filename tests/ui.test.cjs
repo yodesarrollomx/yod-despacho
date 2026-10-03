@@ -28,6 +28,8 @@ test('Despacho recupera carga y conserva notas con CAS global, archivo y chinche
   if(url.startsWith('http://127.0.0.1:'))return route.continue();
   if(url.includes('/macros/s/')&&req.method()==='POST'){
    const p=req.postDataJSON();requests.push(copy(p));
+   const expectedDeployment=/^corcho(Get|Save)$/.test(p.action)?'AKfycbwlDDCWWzOWYZsUpBU9uqsQ7aenQ469PF6s6FkNlBFS1_cJSU5njG9oQmuyELy5zlqzFg':'AKfycbyZ1p7rGHuU01vWBbynGdmlKTnlyH9CIXyhKivqLHa4rLxcHNneJKsZHv7smnjLsfH1';
+   assert.equal(new URL(url).pathname,'/macros/s/'+expectedDeployment+'/exec');
    assert.equal(p.k,'SYNTHETIC-KEY-NOT-A-CREDENTIAL');
    if(p.action==='getAll'){reads++;if(fail)return route.abort();if(delay)await new Promise(ok=>setTimeout(ok,600));return route.fulfill({json:{ok:true,tasks}});}
    if(p.action==='corchoGet')return route.fulfill({json:denied?{ok:false,error:'acceso'}:{ok:true,...copy(state)}});
