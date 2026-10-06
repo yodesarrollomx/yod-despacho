@@ -818,9 +818,11 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 .estadoPill.pausa{color:var(--azul);border-color:#25384A;background:#121A22}
 .estadoPill.vencida{color:var(--rojo);border-color:#4A2A24;background:var(--rojoS)}
 
+body .chn-velo{z-index:3000}body .chn-hoja{z-index:3001}body .chn-marco,body .chn-pista{z-index:3002}
+.foco>[data-chinche-abrir]{grid-column:2}.pFila>[data-chinche-abrir]{grid-column:2/-1}
 </style>
 </head>
-<body>
+<body data-chinche-privado="true" data-chinche-surface="despacho-trabajo">
 <div class="top"><div class="topin">
   <span class="marca">El Despacho</span>
   <span class="viva" id="viva"><span class="p"></span><span id="estado">conectando…</span></span>
@@ -1032,6 +1034,15 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
    leer y escribir · el Sheet del board-aurum es el único almacén.
    ───────────────────────────────────────────────────────────── */
 var EXEC = "https://script.google.com/macros/s/AKfycbyZ1p7rGHuU01vWBbynGdmlKTnlyH9CIXyhKivqLHa4rLxcHNneJKsZHv7smnjLsfH1/exec";
+// Opt-in técnico: no se pasan al compartido textos ni identificadores de negocio.
+function chincheClasico(root){
+  root=root||document;
+  var cards=root.querySelectorAll('.firma,.pl-card,.pFila,.bjItem,.bjHecho,.foco,.aurFila,.sal,.at,.slFila,.sal-msg');
+  Array.prototype.forEach.call(cards,function(card,i){
+    card.setAttribute('data-chinche-card','');card.setAttribute('data-chinche-privado','true');card.setAttribute('data-chinche-surface','despacho-trabajo');card.setAttribute('data-chinche-item',String(Math.min(i,9999)));
+    if(!card.querySelector('[data-chinche-abrir]'))card.insertAdjacentHTML('beforeend','<button type="button" class="yod-pin-card" data-chinche-abrir>📌 Pedir cambio</button>');
+  });
+}
 var PORTERO_LSK = "pyod_clave_v1";
 function credencial(){ try{ return localStorage.getItem(PORTERO_LSK) || ""; }catch(e){ return ""; } }
 
@@ -2251,6 +2262,7 @@ function pintarSalientes(){
       +'</div>'
     +'</div>';
   }).join('');
+  chincheClasico(c);
   Array.prototype.forEach.call(c.querySelectorAll('[data-enviar]'),function(b){
     b.onclick=function(){ enviarSaliente(b.dataset.enviar, b.dataset.faltaFirma==='1', b); };
   });
@@ -2550,10 +2562,10 @@ function renglonPila(r){
      para ordenarlos (un dictado largo no es una tarea: es la materia prima de varias). */
   if(String(r.actividad||'').length>220 && !String(r.entregable||'').trim())
     pill+=' <span class="estadoPill pausa" title="Es un dictado completo: hay que partirlo en tareas con entregable">✎ dictado sin ordenar</span>';
-  return '<button class="plFila'+cl+'" type="button" data-abrir="'+esc(r.id)+'">'
+  return '<article class="pl-card"><button class="plFila'+cl+'" type="button" data-abrir="'+esc(r.id)+'">'
     +'<span class="d"><b>'+esc(String(big))+'</b>'+esc(chico)+'</span>'
     +'<span class="c"><b>'+esc(String(r.actividad||'sin texto').slice(0,120))+'</b>'
-    +'<span>'+esc(pie.join(' · '))+(pill?(' '+pill):'')+'</span></span></button>';
+    +'<span>'+esc(pie.join(' · '))+(pill?(' '+pill):'')+'</span></span></button></article>';
 }
 /* ══════════════════ LA SALA, EN VIVO ══════════════════
    Lee los dos archivos que la Sala publica cada vez que corre:
@@ -2647,6 +2659,7 @@ function pintarSala(){
       +(a? ('<span class="slPct">'+a.pct+'%</span>') : '')
       +'</div>';
   }).join('');
+  chincheClasico(c);
 }
 function pintarPila(){
   var c=$('#pila'); if(!c) return;
@@ -2678,8 +2691,9 @@ function pintarPila(){
     : '<div class="nada"><b>0</b>'+(VER_SOLO_VENCIDAS?'Nada vencido.'
         :(FILTRO?'Nada abierto en esta área.':'Nada abierto: todo lo vivo está en pausa.'))+'</div>';
   Array.prototype.forEach.call(c.querySelectorAll('[data-abrir]'),function(b){
-    b.onclick=function(){ abrirPendiente(b.dataset.abrir); };
+    b.onclick=function(e){ if(e.target.closest("[data-chinche-abrir]"))return; abrirPendiente(b.dataset.abrir); };
   });
+  chincheClasico(c);
   pintarPausa();
 }
 /* Lo pausado no merece un pixel del flujo: una linea, y ahi entras si quieres. */
@@ -3373,11 +3387,13 @@ function cabPanel(ruta, titulo, sub){
 function mostrarPanel(cual, html){
   var p=document.getElementById(cual); if(!p) return;
   p.querySelector('.panelCaja').innerHTML=html; p.hidden=false;
+  chincheClasico(p);
+  if(cual==='panelPend'){var caja=p.querySelector('.panelCaja');caja.setAttribute('data-chinche-card','');caja.setAttribute('data-chinche-privado','true');caja.setAttribute('data-chinche-surface','despacho-trabajo');caja.setAttribute('data-chinche-item','0');caja.insertAdjacentHTML('beforeend','<button type="button" class="yod-pin-card" data-chinche-abrir>📌 Pedir cambio</button>');}
   document.body.style.overflow='hidden';
   if(PILA_P.indexOf(cual)<0) PILA_P.push(cual);
   Array.prototype.forEach.call(p.querySelectorAll('[data-cerrar]'),function(b){ b.onclick=function(){ cerrarPanel(b.dataset.cerrar); }; });
   Array.prototype.forEach.call(p.querySelectorAll('[data-atras]'),function(b){ b.onclick=function(){ atras(); }; });
-  Array.prototype.forEach.call(p.querySelectorAll('[data-abrir]'),function(b){ b.onclick=function(){ abrirPendiente(b.dataset.abrir); }; });
+  Array.prototype.forEach.call(p.querySelectorAll('[data-abrir]'),function(b){ b.onclick=function(e){ if(e.target.closest("[data-chinche-abrir]"))return; abrirPendiente(b.dataset.abrir); }; });
   p.onclick=function(e){ if(e.target===p) atras(); };
   try{ p.querySelector('.panelCaja').scrollTop=0; }catch(e){}
 }
@@ -3390,7 +3406,7 @@ function cerrarPanel(cual){
 }
 /* Escape sube UN nivel, no te avienta hasta el inicio. Lo mismo hace el
    botón físico de atrás del teléfono. */
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') atras(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!document.body.classList.contains('chn-abierto')) atras(); });
 window.addEventListener('popstate',function(){
   if(PILA_P.length || document.querySelector('.hoja:not([hidden])')){ atras(); history.pushState({d:1},''); }
 });
@@ -3599,6 +3615,7 @@ function pintar(){
   $('#focos').innerHTML=FOCOS.map(function(x){
     return '<div class="foco"><i class="'+(x.ok?'ok':'no')+'"></i><div><b>'+esc(x.t)+'</b><span>'+esc(x.d)+'</span></div></div>';
   }).join('');
+  chincheClasico();
 }
 
 /* ══════════ EL BOTÓN GRANDE: dictado del navegador ══════════
@@ -4294,13 +4311,16 @@ setInterval(function(){ if(document.visibilityState==='visible' && !CAIDO && Dat
 </script>
 <script src="cabina.js?v=1"></script>
 <script src="bandeja.js?v=1"></script>
+<script>// Bandeja conserva su protocolo; aquí sólo se añaden controles técnicos.
+if(window.pintarBandeja){var pintarBandejaBase=window.pintarBandeja;window.pintarBandeja=function(){pintarBandejaBase();chincheClasico(document.getElementById('bandeja'));};}
+</script>
 <script src="https://yodesarrollomx.github.io/yod-portal/os/proyectos.js?v=1" onload="if(window.TAREAS&&TAREAS.length&&window.llenarSoltar)llenarSoltar()"></script>
 <script src="https://yodesarrollomx.github.io/potenciales-yod/portero.js"></script>
 <!-- La Chinche, la misma que traen tablero.html, obra.html y os/index.html.
      El Despacho no la tenía y por eso era el único tablero donde Alejandro no
      podía clavar una falla señalándola: «ni chinches ni nada… es algo sui
      generis cuando no debe ser así» (15-sep). -->
-<script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=ch9"></script>
+<script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=ch10-contexto"></script>
 <!-- Cargar el archivo NO la prende: hay que llamar a init, igual que
      os/index.html. El commit de esta mañana pegó la etiqueta y se quedó
      a medias — el script se descargaba y no hacía nada. -->

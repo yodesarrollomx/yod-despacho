@@ -23,6 +23,10 @@ var TAREAS=[], CAIDO=false, LEIDO=0, CARGANDO=false, ABIERTO=null;
 /* ───────── utilidades ───────── */
 function $(s,c){ return (c||document).querySelector(s); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+// Sólo referencias técnicas; el compartido resuelve el contenedor privado.
+var chincheOrdinal=0;
+function chincheAttrs(){ return ' data-chinche-card data-chinche-privado="true" data-chinche-surface="despacho-trabajo" data-chinche-item="'+Math.min(chincheOrdinal++,9999)+'"'; }
+function chincheBoton(){ return '<button type="button" class="yod-pin-card" data-chinche-abrir>📌 Pedir cambio</button>'; }
 function hoy(){ return new Date().toLocaleDateString('en-CA',{timeZone:TZ}); }
 function clave(){ try{ return localStorage.getItem(LSK)||''; }catch(e){ return ''; } }
 function edadMin(iso){ var t=Date.parse(iso||''); return isNaN(t)?null:Math.max(0,Math.round((Date.now()-t)/60000)); }
@@ -128,12 +132,13 @@ function estadoHtml(s){
 }
 function tarjeta(s){
   var para = s.tipo==='decision' ? 'Te falta decidir' : ('✉ para '+(s.para||'—'));
-  return '<button class="card" data-abrir="'+esc(s.id)+'"><span class="meta">'+chipsHtml(s)+'<span>'+esc(para)+'</span></span>'
+  return '<article class="card"'+chincheAttrs()+'><button type="button" class="card-open" data-abrir="'+esc(s.id)+'"><span class="meta">'+chipsHtml(s)+'<span>'+esc(para)+'</span></span>'
     +'<span class="t">'+esc(s.titulo)+'</span>'
     +(s.tipo==='decision'&&s.falta?'<span class="r">'+esc(s.falta)+'</span>':(s.resumen?'<span class="r">'+esc(s.resumen)+'</span>':''))
-    +estadoHtml(s)+'</button>';
+    +estadoHtml(s)+'</button>'+chincheBoton()+'</article>';
 }
 function pintar(modo,det){
+  chincheOrdinal=0;
   var abiertos=[], hechosHoy=[], todo=items();
   todo.forEach(function(s){
     if(/^(listo|aprobado|trabajando|error)$/.test(s.est)) abiertos.push(s);
@@ -166,7 +171,7 @@ function pintar(modo,det){
   var espListos=esp.filter(function(s){ return s.est==='listo'; });
   $('#cEsp').innerHTML = esp.length ? '<div class="carril">PUEDE ESPERAR · '+esp.length+'</div>'
     +'<div class="lote"><div class="lt">'+esp.length+(esp.length===1?' correo sin riesgo':' correos sin riesgo')+'</div>'
-    +'<div class="lr">'+esp.map(function(s){ return '<button class="li" data-abrir="'+esc(s.id)+'"><span>'+esc(s.titulo)+'</span>'+(s.est!=='listo'?'<em>'+esc(s.est==='aprobado'?'aprobado':s.est==='error'?'no salió':'rehaciendo')+'</em>':'<em>›</em>')+'</button>'; }).join('')+'</div>'
+    +'<div class="lr">'+esp.map(function(s){ return '<article'+chincheAttrs()+'><button type="button" class="li" data-abrir="'+esc(s.id)+'"><span>'+esc(s.titulo)+'</span>'+(s.est!=='listo'?'<em>'+esc(s.est==='aprobado'?'aprobado':s.est==='error'?'no salió':'rehaciendo')+'</em>':'<em>›</em>')+'</button>'+chincheBoton()+'</article>'; }).join('')+'</div>'
     +(espListos.length?'<div class="acc" id="loteAcc"><button class="si" data-lote="pre">Aprobar '+(espListos.length===1?'este':'los '+espListos.length)+'</button></div>':'')
     +'<div class="msg" id="loteMsg"></div></div>' : '';
 
@@ -177,7 +182,7 @@ function pintar(modo,det){
     +'<div class="min"><b>'+(env*6)+'</b><span>min que no tuviste que escribir hoy<br><small>estimado: 6 min por correo enviado</small></span></div>'
     +hechosHoy.sort(function(a,b){ return Date.parse(b.hora)-Date.parse(a.hora); }).map(function(s){
       var q = s.est==='descartado' ? '✕ Descartado' : (s.k==='RESUELTO' ? '✓ Resuelto' : (s.por==='alejandro' ? '✓ Lo mandaste tú' : '✓ Enviado'));
-      return '<div class="hecho"><div><b class="'+(s.est==='descartado'?'x':'')+'">'+q+'</b> · '+esc(s.titulo)+'</div><span>'+esc(horaDe(s.hora))+'</span></div>'; }).join('') : '';
+      return '<article class="hecho"'+chincheAttrs()+'><div><b class="'+(s.est==='descartado'?'x':'')+'">'+q+'</b> · '+esc(s.titulo)+'</div><span>'+esc(horaDe(s.hora))+'</span>'+chincheBoton()+'</article>'; }).join('') : '';
 
   if(ABIERTO){ var s=todo.filter(function(x){ return x.id===ABIERTO; })[0]; if(s && /^(listo|aprobado|trabajando|error)$/.test(s.est)) abrir(s,true); else cerrar(); }
 }
@@ -188,10 +193,10 @@ function pintarOperacion(modo){
   var rows=window.DespachoOperacion.abiertas(TAREAS,hoy()),g={vencidas:[],hoy:[],proximas:[],sinfecha:[]},n={vencidas:'Vencidas',hoy:'Hoy',proximas:'Próximas',sinfecha:'Sin fecha confirmada'};
   rows.forEach(function(x){g[x.grupo].push(x);});
   el.innerHTML='<h2 class="seccion">Tu operación · '+rows.length+' pendientes</h2><p class="ayuda">Las tareas del tablero, con o sin borrador listo. Toca una para ver su contexto.</p>'
-    +'<div class="pulso">'+Object.keys(g).map(function(k){return '<button type="button" data-op-grupo="'+k+'" class="pulso-item '+k+'"><b>'+g[k].length+'</b><span>'+n[k]+'</span></button>';}).join('')+'</div>'
+    +'<div class="pulso">'+Object.keys(g).map(function(k){return '<article class="pulso-item '+k+'"'+chincheAttrs()+'><button type="button" data-op-grupo="'+k+'" class="pulso-open"><b>'+g[k].length+'</b><span>'+n[k]+'</span></button>'+chincheBoton()+'</article>';}).join('')+'</div>'
     +Object.keys(g).map(function(k){return '<section id="op-'+k+'"><h3 class="carril">'+n[k]+'</h3>'+(g[k].length?g[k].map(function(x){
       var r=x.r,tiempo=x.dias===null?x.fecha.origen:x.dias>0?x.dias+' días tarde':x.dias===0?'Vence hoy':'En '+(-x.dias)+' días';
-      return '<button class="card op-card '+k+'" data-tarea="'+esc(r.id)+'"><span class="meta">'+esc([r.id,r.proyecto,r.responsable].filter(Boolean).join(' · '))+'</span><span class="t">'+esc(r.actividad||'Sin título')+'</span><span class="r">'+esc(tiempo)+' · '+esc(r.estado||'Sin estado')+'</span></button>';
+      return '<article class="card op-card '+k+'"'+chincheAttrs()+'><button type="button" class="card-open" data-tarea="'+esc(r.id)+'"><span class="meta">'+esc([r.id,r.proyecto,r.responsable].filter(Boolean).join(' · '))+'</span><span class="t">'+esc(r.actividad||'Sin título')+'</span><span class="r">'+esc(tiempo)+' · '+esc(r.estado||'Sin estado')+'</span></button>'+chincheBoton()+'</article>';
     }).join(''):'<p class="ayuda">Sin pendientes en este grupo.</p>')+'</section>';}).join('');
 }
 function abrirTarea(r){
@@ -199,10 +204,16 @@ function abrirTarea(r){
   if(s&&/^(listo|aprobado|trabajando|error)$/.test(s.est)){abrir(s);return;}
   ABIERTO=null;
   $('#hoja').innerHTML='<div class="asa"></div><button class="cerrar" data-a="cerrar" aria-label="Cerrar">✕</button><div class="hm">'+esc(r.id)+' · '+esc(r.proyecto||'Sin proyecto')+'</div><h2>'+esc(r.actividad||'Sin título')+'</h2><div class="para">'+esc(r.responsable||'Sin responsable')+' · '+esc(r.estado||'Sin estado')+'</div><p>'+esc(f.dia||f.origen)+(f.dia?' · '+esc(f.origen):'')+'</p>'+(r.entregable?'<h3>Entregable</h3><div class="cuerpo">'+esc(r.entregable)+'</div>':'')+(r.observaciones?'<h3>Contexto</h3><div class="cuerpo">'+esc(r.observaciones)+'</div>':'')+'<div class="acc"><a class="btn" href="https://yodesarrollomx.github.io/board-aurum/" target="_blank" rel="noopener">Abrir tablero de tareas</a></div>';
+  chincheDetalle(r.id);
   $('#hoja').hidden=false;$('#velo').hidden=false;document.body.classList.add('hojaAbierta');$('#hoja .cerrar').focus();
 }
 
 /* ───────── hoja de detalle ───────── */
+function chincheDetalle(id){
+  var source=Array.from(document.querySelectorAll('#trabajo [data-tarea], #trabajo [data-abrir]')).find(function(el){return el.dataset.tarea===id||el.dataset.abrir===id;});
+  $('#hoja').setAttribute('data-chinche-item',source?source.closest('[data-chinche-card]').dataset.chincheItem:'0');
+  $('#hoja').insertAdjacentHTML('beforeend',chincheBoton());
+}
 function cuerpoHtml(t){ return esc(t).replace(/⟦([^⟧]*)⟧/g,'<mark>$1</mark>'); }
 function abrir(s,refresco){
   ABIERTO=s.id; var hj=$('#hoja'), acc='';
@@ -227,6 +238,7 @@ function abrir(s,refresco){
     +estadoHtml(s)
     +(s.cuerpo?'<div class="cuerpo">'+cuerpoHtml(s.cuerpo)+'</div>'+(s.cuerpo.indexOf('⟦')>=0?'<div class="nota">Lo marcado es lo que el Ejecutor agregó o corrigió.</div>':''):(s.resumen?'<div class="cuerpo">'+esc(s.resumen)+'</div>':''))
     +'<div class="acciones" data-id="'+esc(s.id)+'">'+acc+'</div><div class="msg" id="hojaMsg"></div>';
+  chincheDetalle(s.id);
   hj.hidden=false; $('#velo').hidden=false; document.body.classList.add('hojaAbierta');
   if(!refresco){ hj.scrollTop=0; var f=hj.querySelector('button.si,button,a'); if(f) f.focus({preventScroll:true}); }
 }
@@ -245,6 +257,7 @@ async function accion(s, linea, estado, msg, okTxt){
 
 document.addEventListener('click', async function(ev){
   var t=ev.target; if(!t||!t.closest) return;
+  if(t.closest('[data-chinche-abrir]')) return;
   if(t.closest('#reint')){ cargar(); return; }
   if(t.closest('#refrescar')){ cargar(); return; }
   var grupo=t.closest('[data-op-grupo]');if(grupo){var destino=$('#op-'+grupo.dataset.opGrupo);if(destino)destino.scrollIntoView({block:'start'});return;}
@@ -305,7 +318,7 @@ document.addEventListener('click', async function(ev){
     }
   }
 });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !$('#hoja').hidden) cerrar(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !document.body.classList.contains('chn-abierto') && !$('#hoja').hidden) cerrar(); });
 
 /* ───────── dictado (con motivo si falla) ───────── */
 document.addEventListener('click',function(e){

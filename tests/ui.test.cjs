@@ -15,8 +15,9 @@ const tasks=[{id:'S-1',actividad:'Entregable sintético vencido',responsable:'Pe
 test('Despacho recupera carga y conserva notas con CAS global, archivo y chinche',async t=>{
  const server=http.createServer((req,res)=>{let file=path.join(root,decodeURIComponent(req.url.split('?')[0]));if(req.url==='/')file=path.join(root,'index.html');if(!file.startsWith(root+path.sep)){res.writeHead(403);return res.end();}try{res.setHeader('Content-Type',file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'application/javascript');res.end(fs.readFileSync(file));}catch{res.writeHead(404);res.end();}});
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
- const browser=await chromium.launch({headless:true});
- t.after(async()=>{await browser.close();await new Promise(ok=>server.close(ok));});
+ let browser;
+ t.after(async()=>{if(browser)await browser.close();await new Promise(ok=>server.close(ok));});
+ browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{})});
  const page=await browser.newPage({viewport:{width:390,height:844}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const state={version:0,data:{axes:{ejeX:'Personas',ejeY:'Pendientes'},notes:[]}};
@@ -87,7 +88,7 @@ test('Despacho recupera carga y conserva notas con CAS global, archivo y chinche
  await t.test('la chinche abre sobre el detalle y no adjunta el texto privado de la nota',async()=>{
   await page.locator('.postit-open').click();await page.locator('#corchoPin').click();await page.locator('.chn-hoja textarea').waitFor();
   const point=await page.locator('.chn-hoja textarea').boundingBox();const hit=await page.evaluate(({x,y})=>document.elementFromPoint(x,y).closest('.chn-hoja')!==null,{x:point.x+5,y:point.y+5});assert.equal(hit,true);
-  if(!process.env.CHINCHE_SOURCE){const p=await page.evaluate(()=>window.PIN_CONTEXT);assert.ok(!JSON.stringify(p).includes('Segundo párrafo'));assert.equal(p.seccion,'Mi corcho · detalle');await page.locator('#cancelPin').click();}
+  if(!process.env.CHINCHE_SOURCE){const p=await page.evaluate(()=>window.PIN_CONTEXT);assert.ok(!JSON.stringify(p).includes('Segundo párrafo'));assert.equal(p.seccion,'Mi corcho · detalle');assert.ok(!('notaId' in p.valores));await page.locator('#cancelPin').click();}
   else await page.locator('.chn-hoja [data-x]').click();
   assert.equal(await page.locator('#corchoDialog').isVisible(),true);await page.locator('#corchoClose').click();
  });
