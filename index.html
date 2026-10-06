@@ -35,7 +35,9 @@ h1{font:400 34px/1.1 var(--serif);margin:4px 0 10px;text-wrap:balance}
 .lat button{font:inherit;color:inherit;background:none;border:1px solid currentColor;border-radius:8px;padding:2px 8px;cursor:pointer}
 .carril{font:600 11px var(--mono);letter-spacing:.14em;color:var(--oro);margin:26px 0 8px}
 .card{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--hair);border-radius:18px;padding:14px;margin-bottom:10px;color:inherit;font:inherit;cursor:pointer}
-.card:active{transform:scale(.99)}
+.card-open:active{transform:scale(.99)}
+.card-open,.pulso-open{display:block;width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:0;cursor:pointer}
+.card-open{padding-bottom:8px}.pulso-open{display:flex;flex-direction:column;gap:5px}
 .card .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:11px var(--mono);color:var(--dim)}
 .card .t{display:block;font:500 17px/1.3 var(--sans);color:var(--ink);margin:6px 0 4px}
 .card .r{display:block;font:14px var(--sans);color:var(--ink2)}
@@ -58,7 +60,7 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid va
 .msg{font:13.5px var(--sans);color:var(--dim);margin-top:8px;min-height:1em} .msg.ok{color:var(--verde)} .msg.mal{color:var(--rojo)}
 .min{display:flex;gap:12px;align-items:center;margin:4px 0 10px}
 .min b{font:44px/1 var(--serif);color:var(--oro)} .min span{font:13px var(--sans);color:var(--dim)} .min small{color:var(--faint)}
-.hecho{display:flex;gap:8px;align-items:baseline;font:14px var(--sans);color:var(--dim);padding:9px 0;border-bottom:1px solid var(--hair)}
+.hecho{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;font:14px var(--sans);color:var(--dim);padding:9px 0;border-bottom:1px solid var(--hair)}
 .hecho b{font-weight:500;color:var(--verde)} .hecho b.x{color:var(--faint)} .hecho span{margin-left:auto;color:var(--faint);font:12px var(--mono);white-space:nowrap}
 .vacio{margin-top:26px;padding:18px;border:1px dashed var(--hair);border-radius:18px;color:var(--dim);font:14px var(--sans)}
 .pie{margin-top:36px;display:flex;gap:10px;flex-wrap:wrap}
@@ -84,18 +86,21 @@ body.hojaAbierta{overflow:hidden}
 body.caido .acc button.si{opacity:.5}
 @media(max-width:600px){ .w{padding-bottom:130px} }
 @media (prefers-reduced-motion:no-preference){ #hoja{animation:sube .22s ease-out} @keyframes sube{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}} }
+.archivo-notas>article{flex:0 0 130px}.archivo-notas .archivo-nota{width:100%}
+body.hojaAbierta .chn-velo{z-index:4000}body.hojaAbierta .chn-hoja{z-index:4001}body.hojaAbierta .chn-marco,body.hojaAbierta .chn-pista{z-index:4002}
+.postit>.yod-pin-card{max-width:100%;white-space:normal}
 </style>
 </head>
 <body>
-<main class="w">
+<main class="w" data-chinche-privado="true" data-chinche-surface="despacho-trabajo">
   <div class="fecha" id="fecha">&nbsp;</div>
   <h1 id="saludo">El Despacho</h1>
   <div class="lat esp" id="latido" role="status" aria-live="polite"><i></i>Leyendo tus pendientes…</div>
   <button type="button" class="refrescar" id="refrescar">Actualizar pendientes</button>
   <noscript><p>Activa JavaScript para leer tus pendientes.</p></noscript>
   <div id="arranqueError" class="msg mal" role="alert" hidden></div>
-  <nav class="tabs" aria-label="Vistas del Despacho"><button type="button" id="verTrabajo" aria-pressed="true">Mi trabajo</button><button type="button" id="verCorcho" aria-pressed="false">Mi corcho</button></nav>
-  <div id="trabajo">
+  <nav class="tabs" data-chinche-privado="true" data-chinche-surface="despacho-trabajo" aria-label="Vistas del Despacho"><button type="button" id="verTrabajo" aria-pressed="true">Mi trabajo</button><button type="button" id="verCorcho" aria-pressed="false">Mi corcho</button></nav>
+  <div id="trabajo" data-chinche-privado="true" data-chinche-surface="despacho-trabajo">
 
   <section id="cSi" aria-label="Tu sí"></section>
   <section id="cEsp" aria-label="Puede esperar"></section>
@@ -104,7 +109,7 @@ body.caido .acc button.si{opacity:.5}
   <section id="cHecho" aria-label="Lo que hice solo"></section>
   <section id="operacion" aria-label="Operación completa"></section>
   </div>
-  <section id="corcho" hidden aria-label="Mi corcho"></section>
+  <section id="corcho" data-chinche-privado="true" data-chinche-surface="despacho-corcho" hidden aria-label="Mi corcho"></section>
 
   <nav class="pie">
     <a href="clasico.html">Tablero completo</a>
@@ -113,14 +118,14 @@ body.caido .acc button.si{opacity:.5}
   </nav>
 </main>
 <div id="velo" hidden></div>
-<div id="hoja" hidden role="dialog" aria-modal="true"></div>
+<div id="hoja" data-chinche-card data-chinche-privado="true" data-chinche-surface="despacho-trabajo" data-chinche-item="0" hidden role="dialog" aria-modal="true"></div>
 
 <script>window.addEventListener('error',function(e){if(!/\/(?:app|operacion|corcho)\.js(?:\?|$)/.test(e.filename||e.target&&e.target.src||''))return;var a=document.getElementById('arranqueError');a.hidden=false;a.textContent='No se pudo iniciar una parte del Despacho. Recarga la página para volver a intentar.';},true);</script>
 <script src="operacion.js?v=3"></script>
-<script src="app.js?v=3"></script>
-<script src="corcho.js?v=3"></script>
+<script src="app.js?v=ch10-contexto"></script>
+<script src="corcho.js?v=ch10-contexto"></script>
 <script>if(location.hash!=="#demo"){var sp=document.createElement("script");sp.src="https://yodesarrollomx.github.io/potenciales-yod/portero.js";document.body.appendChild(sp);}</script>
-<script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=ch9"></script>
+<script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=ch10-contexto"></script>
 <script>if(window.YODChinche) YODChinche.init({pantalla:"despacho"});</script>
 <script>if(location.hash==='#demo'){var l=document.getElementById('lnkDemo');l.href='#';l.textContent='Salir del ejemplo';l.onclick=function(e){e.preventDefault();history.replaceState(null,'',location.pathname);location.reload();};}</script>
 </body>

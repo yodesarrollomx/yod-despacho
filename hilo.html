@@ -124,7 +124,7 @@ main{flex:1;max-width:640px;width:100%;margin:0 auto;padding:4px 12px 140px;}
 body.embed{background:transparent}
 </style>
 </head>
-<body>
+<body data-chinche-privado="true" data-chinche-surface="despacho-hilo">
 
 <div id="lockWrap">
   <div class="lockcard">
@@ -145,10 +145,10 @@ body.embed{background:transparent}
   <span id="demoTag" hidden>modo demo</span>
 </header>
 
-<main id="hilo"><div class="vacio">Cargando el hilo…</div></main>
+<main id="hilo" data-chinche-privado="true" data-chinche-surface="despacho-hilo"><div class="vacio">Cargando el hilo…</div></main>
 
 <div class="dlg" id="dlgCambia" hidden>
-  <div class="dlgcard">
+  <div class="dlgcard" data-chinche-privado="true" data-chinche-surface="despacho-hilo">
     <b class="serif" style="font-size:15px;">Cámbiale — dime qué prefieres</b>
     <textarea id="dlgTxt" placeholder="Escribe o dicta el cambio…"></textarea>
     <div class="dlgrow">
@@ -275,6 +275,8 @@ function pintarUltimaPasada(){
   el.className = (mins!=null && mins>90) ? 'roja' : '';
 }
 
+function pinHiloAttrs(f){var i=FILAS.indexOf(f);return ' data-chinche-card data-chinche-privado="true" data-chinche-surface="despacho-hilo" data-chinche-item="'+Math.min(Math.max(i,0),9999)+'"';}
+function pinHiloBoton(){return '<button type="button" class="yod-pin-card" data-chinche-abrir>📌 Pedir cambio</button>';}
 function pintarTodo(){
   pintarUltimaPasada();
   var h = $('#hilo');
@@ -325,7 +327,7 @@ function pintarMovimiento(f){
   var deshacer = f.estado==='ejecutada'
     ? '<button class="btn chico" data-deshacer="'+esc(f.id)+'">Deshacer</button>'
     : (f.estado==='descartada' ? '<span style="color:var(--ink3)">deshecho</span>' : '');
-  return '<div class="mov" id="mov_'+esc(f.id)+'"><span>↳ <b>'+esc(f.titulo||'Lo que moví yo')+'</b> — '+esc(f.texto)+'</span>'+deshacer+'</div>';
+  return '<article class="mov" id="mov_'+esc(f.id)+'"'+pinHiloAttrs(f)+'><span>↳ <b>'+esc(f.titulo||'Lo que moví yo')+'</b> — '+esc(f.texto)+'</span>'+deshacer+pinHiloBoton()+'</article>';
 }
 
 function pintarCaso(f){
@@ -349,13 +351,13 @@ function pintarCaso(f){
     '<button class="btn chico" data-cambia="'+esc(f.id)+'">Cámbiale</button>' +
     '<button class="btn chico" data-despues="'+esc(f.id)+'">Después</button>';
   return '<div class="msg sistema"><div class="av">·</div><div class="bubble" style="font-size:12px;color:var(--ink3)">caso</div></div>'
-    + '<div class="card" id="caso_'+esc(f.id)+'">'
+    + '<article class="card" id="caso_'+esc(f.id)+'"'+pinHiloAttrs(f)+'>'
     + '<h3 class="serif">'+esc(f.titulo||'Un caso')+'</h3>'
     + camposHtml
     + '<div class="opts">'+optsHtml+'</div>'
     + '<div class="botones">'+botonesHtml+'</div>'
     + '<div class="estado" id="estado_'+esc(f.id)+'" hidden></div>'
-    + '</div>';
+    + pinHiloBoton()+'</article>';
 }
 
 function estadoCaso(id, clase, texto){
@@ -518,5 +520,7 @@ async function arrancar(){
 
 iniciarPortero();
 </script>
+<script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=ch10-contexto"></script>
+<script>if(window.YODChinche) YODChinche.init({pantalla:"despacho"});</script>
 </body>
 </html>

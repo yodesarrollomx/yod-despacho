@@ -4,6 +4,8 @@
 var DEMO=location.hash==='#demo',loaded=false,busy=false,notes=[],config=null,editing=null,drag=null,version=0,data=null,demoState=null;
 var q=function(s){return document.querySelector(s);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function pinAttrs(i){return ' data-chinche-card data-chinche-privado="true" data-chinche-surface="despacho-corcho" data-chinche-item="'+Math.min(Math.max(0,i),9999)+'"';}
+function pinButton(){return '<button type="button" class="yod-pin-card" data-chinche-abrir>📌 Pedir cambio</button>';}
 function clamp(v){return Math.max(0,Math.min(88,Number(v)||0));}
 function message(t,error){var m=q('#corchoMsg');if(m){m.textContent=t;m.className='msg'+(error?' mal':'');}}
 function note(id){return notes.find(function(n){return n.id===id;});}
@@ -47,16 +49,19 @@ function enable(){q('#corchoNew').disabled=!loaded||busy;q('#corchoAxes').disabl
 function paint(){
   var active=notes.filter(function(n){return n.payload.estado!=='archivado';}),arch=notes.filter(function(n){return n.payload.estado==='archivado';});
   q('#corchoBoard').innerHTML='<div class="axis-x">'+esc(config.payload.ejeX||'Eje X')+' →</div><div class="axis-y">'+esc(config.payload.ejeY||'Eje Y')+' ↑</div><div class="corcho-grid" id="corchoGrid">'
-    +active.map(function(n){var p=n.payload,c=['arena','rosa','verde','azul','lila'].includes(p.color)?p.color:'arena';return '<article class="postit '+c+'" data-nota="'+esc(n.id)+'" style="left:'+clamp(p.x)+'%;top:'+clamp(p.y)+'%"><button class="mover" data-mover="'+esc(n.id)+'" aria-label="Mover '+esc(p.titulo)+'">⠿ Mover</button><button class="postit-open" data-nota-abrir="'+esc(n.id)+'"><strong>'+esc(p.titulo)+'</strong><span>'+esc(p.cuerpo||'Abrir detalle')+'</span><small>'+esc([p.ejeX,p.ejeY].filter(Boolean).join(' · '))+'</small></button></article>';}).join('')
+    +active.map(function(n,i){var p=n.payload,c=['arena','rosa','verde','azul','lila'].includes(p.color)?p.color:'arena';return '<article class="postit '+c+'" data-nota="'+esc(n.id)+'"'+pinAttrs(i)+' style="left:'+clamp(p.x)+'%;top:'+clamp(p.y)+'%"><button class="mover" data-mover="'+esc(n.id)+'" aria-label="Mover '+esc(p.titulo)+'">⠿ Mover</button><button class="postit-open" data-nota-abrir="'+esc(n.id)+'"><strong>'+esc(p.titulo)+'</strong><span>'+esc(p.cuerpo||'Abrir detalle')+'</span><small>'+esc([p.ejeX,p.ejeY].filter(Boolean).join(' · '))+'</small></button>'+pinButton()+'</article>';}).join('')
     +(!active.length?'<p class="corcho-empty">Tu corcho está libre. Añade tu primera nota.</p>':'')+'</div>';
   q('#corchoArchive').innerHTML='<h3 class="seccion">📎 Clavo de comandas · '+arch.length+'</h3><p class="ayuda">Terminadas, conservadas. Toca una para leerla o devolverla al corcho.</p><div class="archivo-notas">'
-    +arch.sort(function(a,b){return String(b.payload.updatedAt||'').localeCompare(String(a.payload.updatedAt||''));}).map(function(n){return '<button class="archivo-nota" data-nota-abrir="'+esc(n.id)+'"><strong>'+esc(n.payload.titulo)+'</strong><span>'+esc(n.payload.ejeX||'')+'</span></button>';}).join('')+'</div>';
+    +arch.sort(function(a,b){return String(b.payload.updatedAt||'').localeCompare(String(a.payload.updatedAt||''));}).map(function(n,i){return '<article'+pinAttrs(active.length+i)+'><button type="button" class="archivo-nota" data-nota-abrir="'+esc(n.id)+'"><strong>'+esc(n.payload.titulo)+'</strong><span>'+esc(n.payload.ejeX||'')+'</span></button>'+pinButton()+'</article>';}).join('')+'</div>';
   place();
 }
 function place(){var grid=q('#corchoGrid');if(!grid||drag)return;grid.querySelectorAll('.postit').forEach(function(el){var n=note(el.dataset.nota);if(!n)return;el.style.left=Math.max(0,grid.clientWidth-el.offsetWidth)*clamp(n.payload.x)/88+'px';el.style.top=Math.max(0,grid.clientHeight-el.offsetHeight)*clamp(n.payload.y)/88+'px';});}
 function dialog(record){
   editing=record;var axes=record.id==='@config',p=record.payload;
   var el=q('#corchoDialog');if(!el){el=document.createElement('dialog');el.id='corchoDialog';el.setAttribute('aria-modal','true');document.body.appendChild(el);var back=document.createElement('div');back.id='corchoBackdrop';back.hidden=true;document.body.appendChild(back);}
+  el.setAttribute('data-chinche-card','');el.setAttribute('data-chinche-privado','true');el.setAttribute('data-chinche-surface','despacho-corcho');
+  var source=Array.from(document.querySelectorAll('#corcho [data-nota-abrir]')).find(function(b){return b.dataset.notaAbrir===record.id;}),card=source&&source.closest('[data-chinche-item]');
+  if(card)el.setAttribute('data-chinche-item',card.getAttribute('data-chinche-item'));else el.removeAttribute('data-chinche-item');
   el.innerHTML='<form id="corchoForm"><button type="button" class="cerrar" id="corchoClose" aria-label="Cerrar nota">✕</button><h2>'+esc(axes?'Mis ejes':p.estado==='archivado'?'Comanda archivada':'Mi nota')+'</h2>'
     +(axes?'<label>Eje horizontal<input name="ejeX" required maxlength="100" value="'+esc(p.ejeX||'')+'"></label><label>Eje vertical<input name="ejeY" required maxlength="100" value="'+esc(p.ejeY||'')+'"></label>':
       '<label>Título<input name="titulo" required maxlength="160" value="'+esc(p.titulo||'')+'"></label><label>Detalle<textarea name="cuerpo" maxlength="12000">'+esc(p.cuerpo||'')+'</textarea></label>'
@@ -65,7 +70,7 @@ function dialog(record){
       +'<label>Color<select name="color">'+['arena','rosa','verde','azul','lila'].map(function(c){return '<option '+(p.color===c?'selected ':'')+'value="'+c+'">'+c+'</option>';}).join('')+'</select></label>')
     +'<div id="corchoEditMsg" class="msg" role="status" aria-live="polite"></div><div class="acc"><button type="submit" class="si" id="corchoSave">Guardar'+(DEMO?' en el ejemplo':'')+'</button>'
     +(!axes&&record.version>0?'<button type="button" id="corchoArchiveNote">'+(p.estado==='archivado'?'Volver al corcho':'Terminar y archivar')+'</button>':'')+'</div></form>';
-  el.querySelector('.acc').insertAdjacentHTML('beforeend','<button type="button" id="corchoPin">📌 Pedir un cambio aquí</button>');
+  el.querySelector('.acc').insertAdjacentHTML('beforeend','<button type="button" class="yod-pin-card" data-chinche-personal id="corchoPin">📌 Pedir cambio</button>');
   el.show();q('#corchoBackdrop').hidden=false;q('main').inert=true;document.body.classList.add('corchoAbierto');el.querySelector('input').focus();
 }
 function close(){if(busy)return;var el=q('#corchoDialog');if(el&&el.open)el.close();if(q('#corchoBackdrop'))q('#corchoBackdrop').hidden=true;q('main').inert=false;document.body.classList.remove('corchoAbierto');editing=null;q('#corchoNew').focus();}
@@ -86,6 +91,17 @@ async function save(record,payload){
   finally{busy=false;buttons.forEach(function(b){b.disabled=false;});enable();}
 }
 function formPayload(){var f=q('#corchoForm'),d=new FormData(f),p=Object.assign({},editing.payload);if(editing.id==='@config')return {ejeX:String(d.get('ejeX')||'').trim(),ejeY:String(d.get('ejeY')||'').trim()};['titulo','cuerpo','ejeX','ejeY','color'].forEach(function(k){p[k]=String(d.get(k)||'');});p.titulo=p.titulo.trim();p.x=clamp(d.get('x'));p.y=clamp(d.get('y'));return p;}
+// Registrar antes del compartido: el detalle conserva la guardia de edición.
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('#corchoPin');if(!b)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(b.disabled||busy||!editing)return;
+  var api=window.YODChinche;
+  if(!api||!api.anotar){q('#corchoEditMsg').textContent='La chinche no cargó. Recarga la página y vuelve a intentar.';return;}
+  if(api.anotarElemento)return api.anotarElemento(q('#corchoDialog'));
+  // Compatibilidad: versión técnica sin ID ni contenido de nota.
+  api.anotar({seccion:'Mi corcho · detalle',css:'body > dialog:nth-of-type(1)',texto:'Detalle de nota privada',valores:{version:version},sinCaptura:true,sinFolio:true,sinUrlParams:true});
+},true);
 document.addEventListener('click',async function(e){
   if(e.target.id==='corchoBackdrop')return close();
   var t=e.target.closest('button');if(!t)return;
@@ -95,11 +111,6 @@ document.addEventListener('click',async function(e){
   if(t.id==='corchoAxes'&&!busy)return dialog(config);
   if(t.dataset.notaAbrir&&!busy)return dialog(note(t.dataset.notaAbrir));
   if(t.id==='corchoClose')return close();
-  if(t.id==='corchoPin'&&!busy&&editing){
-    if(!window.YODChinche||!window.YODChinche.anotar){q('#corchoEditMsg').textContent='La chinche no cargó. Recarga la página y vuelve a intentar.';return;}
-    // Contexto técnico mínimo: no adjuntar el contenido privado de la nota a un encargo público.
-    window.YODChinche.anotar({seccion:'Mi corcho · detalle',css:'#corchoDialog',texto:'Detalle de nota privada',valores:{notaId:editing.id,version:version}});return;
-  }
   if(t.id==='corchoArchiveNote'&&!busy&&editing){if(!q('#corchoForm').reportValidity())return;var p=formPayload();p.estado=p.estado==='archivado'?'activo':'archivado';if(await save(editing,p))close();}
 });
 document.addEventListener('submit',async function(e){if(e.target.id!=='corchoForm')return;e.preventDefault();if(!editing||busy)return;if(await save(editing,formPayload()))close();});

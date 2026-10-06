@@ -1,22 +1,17 @@
 {
-  "model_revision": "2026-10-03.44-corcho-provisional-035",
-  "proposal_id": "CHG-DESPACHO-CORCHO-PROVISIONAL-035",
-  "summary": "Sala #35: corchoGet/corchoSave usan provisionalmente Portero existente; getAll/update conservan Operación. Propietario exacto con DP, almacén privado y CAS global; sin ampliar scopes, permisos o datos públicos.",
+  "model_revision": "2026-10-05.91-chinche-contexto-despacho",
+  "proposal_id": "CHG-CHINCHE-CONTEXTO-DESPACHO-091",
   "components": [
     "SYS-DESPACHO",
-    "GAS-PORTERO",
-    "GAS-OPERACION",
-    "STORE-DESPACHO-CORCHO"
+    "SYS-YOD-OS",
+    "SYS-SALA"
   ],
+  "summary": "Chinche explícita por tarjeta BANDEJA, tareas ordinarias, focos, Corcho, detalle, hilo y clásico; ancla técnica sin contenidos privados. Consumo shared ch10-contexto; negocio, sesiones y datos intactos.",
   "tests": [
-    "git diff --check; node --check app.js operacion.js corcho.js",
-    "node --test tests/operacion.test.cjs: flags TRUE/FALSE, fechas imposibles/ambiguas y vencidas sin inventar fechas",
-    "node --test tests/ui.test.cjs con red interceptada: lectura/carga/reintento, Corcho global CAS, conflicto y ACK inválido, archivo/restauración, chinche sobre detalle privado y acceso denegado",
-    "14 pruebas locales aprobadas; revisión visual móvil y escritorio. CI del commit exacto antes de integrar. Publicación frontend y backend contrastadas de forma independiente.",
-    "Ruta HTTP exacta de corchoGet/corchoSave a Portero y getAll a Operación en regresiones de interfaz; fuente pública y lectura autenticada del backend contrastadas después de publicación"
+    "git diff --check",
+    "node --check app.js; node --check operacion.js; node --check corcho.js",
+    "npm test con CHINCHE_SOURCE del atlas fijado y red interceptada: tarjetas, señalamiento exacto, privacidad, móvil/escritorio, registro sin foto y acciones normales preservadas",
+    "CI del head exacto y cotejo recursos publicados tras Pages"
   ],
-  "rollback": "Revertir PR del frontend y repetir verificaciones; conservar notas, IDs y registros de negocio. Backend a versión previa en su deployment existente, sin borrar Corcho ni modificar ACL.",
-  "contracts": [
-    "CTR-DESPACHO-CORCHO"
-  ]
+  "rollback": "Revertir frontend y cache version por PR, conservando notas, ejes, tarea, BANDEJA, IDs y registros de Sala."
 }
