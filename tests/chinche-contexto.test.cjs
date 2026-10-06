@@ -26,7 +26,7 @@ test('chinches privadas: tarjetas, control exacto y repintado sin acciones de ne
  const ready=(id,extra,last)=>({id:'ID-PRIVADO-'+id,actividad:'TITULO-PRIVADO-'+id,proyecto:'Admin',responsable:'Alejandro',estado:'Pendiente',fecha:date,observaciones:'Resumen privado\n—— BORRADOR ——\nCUERPO-PRIVADO',comentarios:'Claude~'+date+'~BANDEJA LISTO · tipo=correo · draft=BORRADOR-PRIVADO · para=CORREO-PRIVADO@example.invalid · hora='+now+' · '+extra+(last?'|||Claude~'+date+'~BANDEJA '+last+' · hora='+now:'')});
  const tasks=[ready('alta','prio=alta'),ready('espera','prio=media'),ready('decision','tipo=decision · falta=FALTA-PRIVADA'),ready('hecha','prio=media','ENVIADO'),ready('aprobada','prio=alta','APROBADO'),ready('cambio','prio=alta','CAMBIO'),ready('error','prio=alta','ERROR'),ready('descartada','prio=media','DESCARTADO'),{id:'ID-PRIVADO-tarea',actividad:'TITULO-PRIVADO-tarea',proyecto:'Admin',responsable:'Alejandro',estado:'En proceso',fecha:date,observaciones:'CUERPO-PRIVADO'}];
  const note=(id,estado)=>({id:'N-'+id,titulo:'NOTA-PRIVADA',cuerpo:'CUERPO-PRIVADO',ejeX:'Eje privado',ejeY:'Eje privado',x:12,y:14,color:'arena',estado,createdAt:now,updatedAt:now});
- const corcho={version:3,data:{axes:{ejeX:'Personas',ejeY:'Pendientes'},notes:[note('privada','activo'),note('archivo','archivado')]}};
+ const corcho={version:3,data:{axes:{ejeX:'Personas',ejeY:'Pendientes'},notes:[note('archivo','archivado'),note('privada','activo')]}};
  const filas=[{id:'ID-PRIVADO-caso',tipo:'caso',estado:'abierta',titulo:'TITULO-PRIVADO',texto:'CUERPO-PRIVADO',fecha:now,opciones:'[{"k":"A","texto":"Opción sintética","recomendada":true}]'},{id:'ID-PRIVADO-movimiento',tipo:'movimiento',estado:'ejecutada',titulo:'TITULO-PRIVADO',texto:'CUERPO-PRIVADO',fecha:now}];
  const server=http.createServer((req,res)=>{
   const file=path.resolve(root,'.'+new URL(req.url,'http://local').pathname);
@@ -85,6 +85,7 @@ test('chinches privadas: tarjetas, control exacto y repintado sin acciones de ne
   assert.ok(pin.objeto.tarjeta===null||Number.isInteger(pin.objeto.tarjeta)&&pin.objeto.tarjeta>=0&&pin.objeto.tarjeta<=9999);
   for(const secret of secrets)assert.ok(!JSON.stringify(pin).includes(secret),secret);
   assert.equal(pin.folio,'');assert.equal(new URL(pin.url).search,'');assert.equal(new URL(pin.url).hash,'');assert.equal(saved.photos.length,0);assert.equal(requests.length,n);
+  return pin;
  }
  await t.test('BANDEJA completa, tareas y focos tienen una chinche accesible',async()=>{
   await page.goto(base+'/index.html?token=TOKEN-PRIVADO');await page.locator('#cSi .card').first().waitFor();await page.waitForFunction(()=>!!window.YODChinche?.anotarElemento);
@@ -113,9 +114,17 @@ test('chinches privadas: tarjetas, control exacto y repintado sin acciones de ne
   await cancelPin(page.locator('.postit [data-chinche-abrir]'));assert.equal(await page.locator('#corchoDialog').count(),0);
   await savePin(()=>page.locator('.archivo-notas [data-chinche-abrir]').click(),'despacho-corcho');
   await page.locator('.postit-open').click();await page.locator('#corchoPin').waitFor();assert.equal(await page.locator('#corchoDialog [data-chinche-abrir],#corchoDialog [data-chinche-personal]').count(),1);await page.locator('[name="cuerpo"]').fill('Edición privada sin guardar');await cancelPin(page.locator('#corchoPin'));assert.equal(await page.locator('[name="cuerpo"]').inputValue(),'Edición privada sin guardar');
-  await savePin(()=>page.locator('#corchoPin').click(),'despacho-corcho');
+  const visibleItem=Number(await page.locator('.postit').getAttribute('data-chinche-item'));
+  assert.equal(Number(await page.locator('#corchoDialog').getAttribute('data-chinche-item')),visibleItem);
+  const detailPin=await savePin(()=>page.locator('#corchoPin').click(),'despacho-corcho');assert.equal(detailPin.objeto.tarjeta,visibleItem);
   await savePin(async()=>{await page.evaluate(()=>YODChinche.senalar());await page.locator('[name="cuerpo"]').click();},'despacho-corcho','textarea[name="cuerpo"]');
   if(process.env.EVIDENCE_DIR){fs.mkdirSync(process.env.EVIDENCE_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.EVIDENCE_DIR,'chinche-corcho-detalle-movil.png'),animations:'disabled'});}
+  await page.locator('#corchoClose').click();
+  await page.locator('.archivo-nota').click();
+  assert.equal(await page.locator('#corchoDialog').getAttribute('data-chinche-item'),await page.locator('.archivo-notas article').getAttribute('data-chinche-item'));
+  await page.locator('#corchoClose').click();await page.locator('#corchoAxes').click();
+  assert.equal(await page.locator('#corchoDialog').getAttribute('data-chinche-item'),null);
+  const axesPin=await savePin(()=>page.locator('#corchoPin').click(),'despacho-corcho');assert.equal(axesPin.objeto.tarjeta,null);
   await page.locator('#corchoClose').click();await page.locator('#corchoRead').click();await page.locator('.postit').waitFor();await assertCards('.postit,.archivo-notas article');
  });
  await t.test('hilo carga chinche en casos y movimientos sin responder ni deshacer',async()=>{

@@ -59,7 +59,9 @@ function place(){var grid=q('#corchoGrid');if(!grid||drag)return;grid.querySelec
 function dialog(record){
   editing=record;var axes=record.id==='@config',p=record.payload;
   var el=q('#corchoDialog');if(!el){el=document.createElement('dialog');el.id='corchoDialog';el.setAttribute('aria-modal','true');document.body.appendChild(el);var back=document.createElement('div');back.id='corchoBackdrop';back.hidden=true;document.body.appendChild(back);}
-  el.setAttribute('data-chinche-card','');el.setAttribute('data-chinche-privado','true');el.setAttribute('data-chinche-surface','despacho-corcho');el.setAttribute('data-chinche-item',String(Math.max(0,notes.findIndex(function(n){return n.id===record.id;}))));
+  el.setAttribute('data-chinche-card','');el.setAttribute('data-chinche-privado','true');el.setAttribute('data-chinche-surface','despacho-corcho');
+  var source=Array.from(document.querySelectorAll('#corcho [data-nota-abrir]')).find(function(b){return b.dataset.notaAbrir===record.id;}),card=source&&source.closest('[data-chinche-item]');
+  if(card)el.setAttribute('data-chinche-item',card.getAttribute('data-chinche-item'));else el.removeAttribute('data-chinche-item');
   el.innerHTML='<form id="corchoForm"><button type="button" class="cerrar" id="corchoClose" aria-label="Cerrar nota">✕</button><h2>'+esc(axes?'Mis ejes':p.estado==='archivado'?'Comanda archivada':'Mi nota')+'</h2>'
     +(axes?'<label>Eje horizontal<input name="ejeX" required maxlength="100" value="'+esc(p.ejeX||'')+'"></label><label>Eje vertical<input name="ejeY" required maxlength="100" value="'+esc(p.ejeY||'')+'"></label>':
       '<label>Título<input name="titulo" required maxlength="160" value="'+esc(p.titulo||'')+'"></label><label>Detalle<textarea name="cuerpo" maxlength="12000">'+esc(p.cuerpo||'')+'</textarea></label>'
