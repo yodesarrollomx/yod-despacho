@@ -42,6 +42,8 @@
    executor_busy:'El ejecutor está atendiendo trabajo. Actualiza para comprobar el estado antes de intentar de nuevo.',
    bandeja_observing:'El ejecutor sigue en observación; falta completar el relevo.',
    recipient_mismatch:'Los destinatarios cambiaron: revisa el borrador.',
+   already_sent:'Gmail ya confirmó el envío; una cancelación posterior no puede retirarlo.',
+   send_outcome_uncertain:'Gmail tiene una respuesta pendiente de confirmar. Comprueba el envío antes de asegurar que se canceló.',
    approval_unconfirmed:'La respuesta no se pudo confirmar. Se releyó la tarjeta; comprueba su estado antes de volver a aprobar.'}[code]||'No se pudo confirmar esta acción.';
  }
  var lastRead=0,state=null;
