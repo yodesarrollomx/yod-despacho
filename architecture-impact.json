@@ -11,10 +11,9 @@
     "SHEET-OPERACION",
     "EXT-GMAIL"
   ],
-  "summary": "Preparar aprobaciones de nube con huella y sesión real; relevo explícito, relectura y sin duplicar envíos inciertos.",
+  "summary": "Configurar la URL Google verificada conservando modo legacy y precisar cancelación tras recibo confirmado/incierto.",
   "tests": [
-    "node --check app.js, bandeja.js y bandeja-nube.js",
-    "npm test con Playwright Chromium, red interceptada y Atlas fijado: aprobación/cancelación en móvil/escritorio, respuesta perdida y contrato de firma exacta."
+    "npm test con 26 regresiones de contrato/interfaz y red aislada; Atlas fijo y sintaxis."
   ],
   "rollback": "Volver a legacy sólo tras conciliar recibos de nube; revertir UI por PR sin borrar datos."
 }
