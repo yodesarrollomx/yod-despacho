@@ -18,7 +18,7 @@
    Manda la ÚLTIMA línea BANDEJA. El Ejecutor sólo envía un borrador cuya última línea
    es APROBADO con el mismo draft que la tarjeta anunció. Nada sale sin esa línea. */
 (function(){
-  var SEP='|||', HORA_EJECUTOR=65*60*1000;
+  var VISTOS=Object.create(null), SEP='|||', HORA_EJECUTOR=65*60*1000;
 
   function lineas(r){
     return String(r.comentarios||'').split(SEP).map(function(c){
@@ -34,14 +34,14 @@
   function estadoDe(r){
     var L=lineas(r); if(!L.length) return null;
     var ult=L[L.length-1], k=(ult.texto.match(/^BANDEJA ([A-ZÁÉÍÓÚ]+)/)||[])[1]||'';
-    var draft='', tipo='', para='', creada='';
+    var draft='', huella='', tipo='', para='', creada='';
     L.forEach(function(x){ var c=campos(x.texto);
-      if(/^BANDEJA (LISTO|REHECHO)/.test(x.texto)){ if(c.draft) draft=c.draft; if(c.tipo) tipo=c.tipo; if(c.para) para=c.para; if(!creada) creada=c.hora||x.fecha; }
+      if(/^BANDEJA (LISTO|REHECHO)/.test(x.texto)){ huella=/^[a-f0-9]{64}$/.test(c.huella||'')?c.huella:''; if(c.draft) draft=c.draft; if(c.tipo) tipo=c.tipo; if(c.para) para=c.para; if(!creada) creada=c.hora||x.fecha; }
     });
     var est={LISTO:'listo',REHECHO:'listo',CANCELADO:'listo',APROBADO:'aprobado',CAMBIO:'cambio',
              ENVIADO:'hecho',DESCARTADO:'descartado',ERROR:'error'}[k]||'listo';
     var c=campos(ult.texto);
-    return {est:est, ult:ult, hora:c.hora||'', motivo:c._libre, draft:draft, tipo:tipo||'correo', para:para, creada:creada, n:L.length};
+    return {est:est, ult:ult, hora:c.hora||'', motivo:c._libre, draft:draft, huella:huella, tipo:tipo||'correo', para:para, creada:creada, n:L.length};
   }
   function edadMin(iso){ var t=Date.parse(iso||''); return isNaN(t)?null:Math.round((Date.now()-t)/60000); }
   function haceTxt(m){ if(m===null) return ''; if(m<1) return 'hace un momento'; if(m<60) return 'hace '+m+' min'; if(m<48*60) return 'hace '+Math.round(m/60)+' h'; return 'hace '+Math.round(m/1440)+' d'; }
@@ -54,6 +54,7 @@
   window.pintarBandeja=function(){
     var sec=document.getElementById('bandeja'); if(!sec) return;
     var T=(window.TAREAS||[]).filter(function(r){ return String(r.borrada||'').toUpperCase()!=='TRUE'; });
+    VISTOS=Object.create(null);T.forEach(function(r){VISTOS[r.id]={comentarios:String(r.comentarios||''),observaciones:String(r.observaciones||'')};});
     var items=T.map(function(r){ var s=estadoDe(r); return s?{r:r,s:s}:null; }).filter(Boolean);
     var abiertos=items.filter(function(x){ return /^(listo|aprobado|cambio|error)$/.test(x.s.est); });
     var hechos=items.filter(function(x){ return /^(hecho|descartado)$/.test(x.s.est) && (edadMin(x.s.hora)===null || edadMin(x.s.hora)<7*1440); });
@@ -99,7 +100,17 @@
       var act=(f.tasks||[]).filter(function(x){ return x.id===id; })[0];
       if(!act) throw new Error('esa tarjeta ya no está');
       var s=estadoDe(act);
-      if(!s || s.n!==nVisto){ msg.className='bjMsg mal'; msg.textContent='Cambió mientras la mirabas (el Ejecutor pasó). Te enseño la versión nueva.'; await cargar(); return false; }
+      if(!s || s.n!==nVisto || !VISTOS[id] || String(act.comentarios||'')!==VISTOS[id].comentarios || String(act.observaciones||'')!==VISTOS[id].observaciones){ msg.className='bjMsg mal'; msg.textContent='Cambió mientras la mirabas (el Ejecutor pasó). Te enseño la versión nueva.'; await cargar(); return false; }
+      if(s.huella&&!window.BandejaNube&&/^BANDEJA (APROBADO|CANCELADO)/.test(linea))throw Error('Recarga el Despacho para conectar el ejecutor.');
+      var cloudReceipt=null;
+      if(window.BandejaNube&&/^BANDEJA (APROBADO|CANCELADO)/.test(linea)){
+        cloudReceipt=await BandejaNube.write(/^BANDEJA APROBADO/.test(linea)?'approve':'cancel',act,s.draft,s.huella,credencial());
+        if(cloudReceipt.cloud){
+          var cloudCheck=await llamar('getAll',{}),cloudRow=((cloudCheck&&cloudCheck.tasks)||[]).filter(function(x){return x.id===id;})[0];
+          if(!BandejaNube.matches(cloudRow,cloudReceipt))throw Error(BandejaNube.message(cloudReceipt.error));
+          return true;
+        }
+      }
       var prev=String(act.comentarios||''), nueva='Alejandro~'+hoyLocal()+'~'+linea, patch={comentarios: prev?(prev+SEP+nueva):nueva};
       if(estado && estado!==act.estado){ patch.estado=estado; patch.historial=(act.historial?act.historial+'|':'')+hoyLocal()+' '+estado; if(estado==='Terminado') patch.fechaTerminado=hoyLocal(); }
       msg.textContent='escribiendo…';
@@ -131,7 +142,7 @@
     if(accion==='volver'){ pintarBandeja(); return; }
     if(accion==='si'){
       if(!item.dataset.draft){ msg.className='bjMsg mal'; msg.textContent='Esta tarjeta no dice qué borrador es: no la apruebo a ciegas.'; return; }
-      if(await escribir(item,'BANDEJA APROBADO · draft='+item.dataset.draft+' · hora='+ahora,'En proceso',msg)) await cargar();
+      if(await escribir(item,'BANDEJA APROBADO · draft='+item.dataset.draft+(s.huella?' · huella='+s.huella:'')+' · hora='+ahora,'En proceso',msg)) await cargar();
       return;
     }
     if(accion==='cancelar'){

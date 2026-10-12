@@ -1,17 +1,20 @@
 {
-  "model_revision": "2026-10-05.91-chinche-contexto-despacho",
-  "proposal_id": "CHG-CHINCHE-CONTEXTO-DESPACHO-091",
+  "model_revision": "2026-10-11.bandeja-nube-autorizacion",
+  "proposal_id": "CHG-BANDEJA-NUBE-20261011",
   "components": [
     "SYS-DESPACHO",
     "SYS-YOD-OS",
-    "SYS-SALA"
+    "SYS-SALA",
+    "GAS-BANDEJA-NUBE",
+    "STORE-BANDEJA-RECIBOS",
+    "GAS-PORTERO",
+    "SHEET-OPERACION",
+    "EXT-GMAIL"
   ],
-  "summary": "Chinche explícita por tarjeta BANDEJA, tareas ordinarias, focos, Corcho, detalle, hilo y clásico; ancla técnica sin contenidos privados. Consumo shared ch10-contexto; negocio, sesiones y datos intactos.",
+  "summary": "Preparar aprobaciones de nube con huella y sesión real; relevo explícito, relectura y sin duplicar envíos inciertos.",
   "tests": [
-    "git diff --check",
-    "node --check app.js; node --check operacion.js; node --check corcho.js",
-    "npm test con CHINCHE_SOURCE del atlas fijado y red interceptada: tarjetas, señalamiento exacto, privacidad, móvil/escritorio, registro sin foto y acciones normales preservadas",
-    "CI del head exacto y cotejo recursos publicados tras Pages"
+    "node --check app.js, bandeja.js y bandeja-nube.js",
+    "npm test con Playwright Chromium, red interceptada y Atlas fijado: aprobación/cancelación en móvil/escritorio, respuesta perdida y contrato de firma exacta."
   ],
-  "rollback": "Revertir frontend y cache version por PR, conservando notas, ejes, tarea, BANDEJA, IDs y registros de Sala."
+  "rollback": "Volver a legacy sólo tras conciliar recibos de nube; revertir UI por PR sin borrar datos."
 }

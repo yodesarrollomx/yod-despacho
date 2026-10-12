@@ -20,5 +20,8 @@
     "estado"
   ],
   "sala_datos_url": "https://yodesarrollomx.github.io/sala-edicion/datos/",
-  "_sala_nota": "De aquí sale el estado de producción que se ve en el Despacho: piezas.json (estado, etapa, qué sigue y quién tiene la pelota) y progreso.json (los pasos con hechos/total). Los mantiene estado_piezas.py derivándolos de tres fuentes verificables; el Despacho NO los deduce, los lee. Es el MISMO origen (yodesarrollomx.github.io), así que no hay CORS ni backend de por medio."
+  "_sala_nota": "De aquí sale el estado de producción que se ve en el Despacho: piezas.json (estado, etapa, qué sigue y quién tiene la pelota) y progreso.json (los pasos con hechos/total). Los mantiene estado_piezas.py derivándolos de tres fuentes verificables; el Despacho NO los deduce, los lee. Es el MISMO origen (yodesarrollomx.github.io), así que no hay CORS ni backend de por medio.",
+  "bandeja_mode": "legacy",
+  "bandeja_exec_url": null,
+  "_bandeja_nube_nota": "Ejecutor de nube preparado. Cambiar a cloud sólo con URL verificada, consentimiento Google, dos ciclos y relevo confirmado; no pegar claves en este archivo."
 }

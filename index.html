@@ -120,9 +120,10 @@ body.hojaAbierta .chn-velo{z-index:4000}body.hojaAbierta .chn-hoja{z-index:4001}
 <div id="velo" hidden></div>
 <div id="hoja" data-chinche-card data-chinche-privado="true" data-chinche-surface="despacho-trabajo" data-chinche-item="0" hidden role="dialog" aria-modal="true"></div>
 
-<script>window.addEventListener('error',function(e){if(!/\/(?:app|operacion|corcho)\.js(?:\?|$)/.test(e.filename||e.target&&e.target.src||''))return;var a=document.getElementById('arranqueError');a.hidden=false;a.textContent='No se pudo iniciar una parte del Despacho. Recarga la página para volver a intentar.';},true);</script>
+<script>window.addEventListener('error',function(e){if(!/\/(?:app|operacion|corcho|bandeja-nube)\.js(?:\?|$)/.test(e.filename||e.target&&e.target.src||''))return;var a=document.getElementById('arranqueError');a.hidden=false;a.textContent='No se pudo iniciar una parte del Despacho. Recarga la página para volver a intentar.';},true);</script>
 <script src="operacion.js?v=3"></script>
-<script src="app.js?v=ch10-contexto"></script>
+<script src="bandeja-nube.js?v=bandeja-cloud1"></script>
+<script src="app.js?v=bandeja-cloud1"></script>
 <script src="corcho.js?v=ch10-contexto"></script>
 <script>if(location.hash!=="#demo"){var sp=document.createElement("script");sp.src="https://yodesarrollomx.github.io/potenciales-yod/portero.js";document.body.appendChild(sp);}</script>
 <script src="https://yodesarrollomx.github.io/yod-portal/chinche.js?v=ch10-contexto"></script>

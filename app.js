@@ -52,9 +52,10 @@ var EST={LISTO:'listo',REHECHO:'listo',CANCELADO:'listo',APROBADO:'aprobado',CAM
          ENVIADO:'hecho',RESUELTO:'hecho',DESCARTADO:'descartado',ERROR:'error'};
 function leer(r){
   var L=lineas(r); if(!L.length) return null;
-  var s={id:r.id, r:r, n:L.length, draft:'', tipo:'correo', para:'', thread:'', prio:'media', chips:[], creada:'', falta:''};
+  var s={id:r.id, r:r, n:L.length, draft:'', huella:'', tipo:'correo', para:'', thread:'', prio:'media', chips:[], creada:'', falta:''};
   L.forEach(function(x){ var c=campos(x.texto);
     if(/^BANDEJA (LISTO|REHECHO)/.test(x.texto)){
+      s.huella=/^[a-f0-9]{64}$/.test(c.huella||'')?c.huella:'';
       if(c.draft) s.draft=c.draft; if(c.tipo) s.tipo=c.tipo; if(c.para) s.para=c.para; if(c.thread) s.thread=c.thread;
       if(c.prio) s.prio=c.prio; if(c.chips) s.chips=c.chips.split(',').map(function(z){return z.trim();}).filter(Boolean);
       if(c.falta) s.falta=c.falta; if(!s.creada) s.creada=c.hora||'';
@@ -72,7 +73,7 @@ function leer(r){
 }
 function latido(items){
   /* la vuelta más reciente del Ejecutor = la última línea escrita por Claude en cualquier tarjeta */
-  var mx=0; items.forEach(function(s){ lineas(s.r).forEach(function(x){ if(x.autor==='Claude'){ var t=Date.parse(campos(x.texto).hora||''); if(!isNaN(t)&&t>mx) mx=t; } }); });
+  var mx=0; items.forEach(function(s){ lineas(s.r).forEach(function(x){ if(x.autor==='Claude'||x.autor==='YOD nube'){ var t=Date.parse(campos(x.texto).hora||''); if(!isNaN(t)&&t>mx) mx=t; } }); });
   return mx? new Date(mx).toISOString():'';
 }
 
@@ -110,7 +111,18 @@ async function cargar(){
 async function escribir(s, linea, estado){
   var f=await llamar('getAll',{}); if(!f||!f.ok) throw new Error('no pude releer el tablero, así que no escribí');
   var act=(f.tasks||[]).filter(function(x){ return x.id===s.id; })[0]; if(!act) throw new Error('esa tarjeta ya no está');
-  var s2=leer(act); if(!s2||s2.n!==s.n){ TAREAS=f.tasks; throw new Error('CAMBIO'); }
+  var s2=leer(act); if(!s2||s2.n!==s.n||String(act.comentarios||'')!==String(s.r.comentarios||'')||String(act.observaciones||'')!==String(s.r.observaciones||'')){ TAREAS=f.tasks; throw new Error('CAMBIO'); }
+  if(s2.huella&&!window.BandejaNube&&/^BANDEJA (APROBADO|CANCELADO)/.test(linea))throw Error('Recarga el Despacho para conectar el ejecutor.');
+  var cloudReceipt=null;
+  if(window.BandejaNube&&/^BANDEJA (APROBADO|CANCELADO)/.test(linea)){
+    cloudReceipt=await BandejaNube.write(/^BANDEJA APROBADO/.test(linea)?'approve':'cancel',act,s2.draft,s2.huella,clave());
+    if(cloudReceipt.cloud){
+      var cloudCheck=await llamar('getAll',{}),cloudRow=((cloudCheck&&cloudCheck.tasks)||[]).filter(function(x){return x.id===s.id;})[0];
+      if(cloudCheck&&cloudCheck.tasks)TAREAS=cloudCheck.tasks;
+      if(!BandejaNube.matches(cloudRow,cloudReceipt))throw new Error(BandejaNube.message(cloudReceipt.error));
+      return true;
+    }
+  }
   var prev=String(act.comentarios||''), nueva='Alejandro~'+hoy()+'~'+linea, patch={comentarios:prev?(prev+SEP+nueva):nueva};
   if(estado && estado!==act.estado){ patch.estado=estado; patch.historial=(act.historial?act.historial+'|':'')+hoy()+' '+estado; if(estado==='Terminado') patch.fechaTerminado=hoy(); }
   var err=null; try{ var w=await llamar('update',{id:s.id,patch:patch}); if(w&&w.ok===false) err=new Error(w.error||'no lo aceptó'); }catch(x){ err=x; }
@@ -138,6 +150,7 @@ function tarjeta(s){
     +estadoHtml(s)+'</button>'+chincheBoton()+'</article>';
 }
 function pintar(modo,det){
+  if(window.BandejaNube)Promise.resolve().then(function(){return BandejaNube.refreshState();});
   chincheOrdinal=0;
   var abiertos=[], hechosHoy=[], todo=items();
   todo.forEach(function(s){
@@ -277,7 +290,7 @@ document.addEventListener('click', async function(ev){
       setTimeout(function(){ var y=zona.querySelector('[data-a=si]'); if(y) y.disabled=false; },600); return;
     }
     if(a==='volver'){ abrir(s,true); return; }
-    if(a==='si'){ await accion(s,'BANDEJA APROBADO · draft='+s.draft+' · hora='+ahora,'En proceso',msg,'✓ Aprobado. Sale en la próxima vuelta.'); return; }
+    if(a==='si'){ await accion(s,'BANDEJA APROBADO · draft='+s.draft+(s.huella?' · huella='+s.huella:'')+' · hora='+ahora,'En proceso',msg,'✓ Aprobado. Sale en la próxima vuelta.'); return; }
     if(a==='cancelar'){ await accion(s,'BANDEJA CANCELADO · hora='+ahora,'Pendiente',msg,'Cancelado. No sale.'); return; }
     if(a==='descartar'){
       if(b.dataset.ok!=='1'){ b.dataset.ok='1'; b.textContent='Toca otra vez para descartar'; setTimeout(function(){ b.dataset.ok=''; b.textContent='Descartar'; },4000); return; }
@@ -309,7 +322,7 @@ document.addEventListener('click', async function(ev){
       var ok=0, mal=[];
       for(var i=0;i<lista.length;i++){
         lm.className='msg'; lm.textContent='aprobando '+(i+1)+' de '+lista.length+'…';
-        try{ await escribir(lista[i],'BANDEJA APROBADO · draft='+lista[i].draft+' · hora='+new Date().toISOString(),'En proceso'); ok++; }
+        try{ await escribir(lista[i],'BANDEJA APROBADO · draft='+lista[i].draft+(lista[i].huella?' · huella='+lista[i].huella:'')+' · hora='+new Date().toISOString(),'En proceso'); ok++; }
         catch(e){ mal.push(lista[i].titulo+(e.message==='CAMBIO'?' (cambió mientras tanto)':'')); }
       }
       lm.className = mal.length?'msg mal':'msg ok';
