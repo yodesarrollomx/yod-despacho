@@ -53,3 +53,13 @@ Líneas nuevas:
 `observaciones` = resumen de 1–2 líneas + `\n—— BORRADOR ——\n` + texto completo del borrador. Lo que el Ejecutor agregó o corrigió va entre `⟦ ⟧` y se pinta resaltado.
 
 `hora` es ISO UTC. El latido del Ejecutor es la `hora` más reciente escrita por `Claude`; si pasan más de ~2 h sin vuelta, la pantalla lo dice en rojo.
+
+## Ejecutor de nube preparado (11-oct-2026)
+
+El proyecto dedicado de Google y sus fuentes están en el repositorio privado yod-agent-cloud, server/bandeja. Revisión cada cinco minutos, Gmail por API y redacción por uso. Instalación, consentimiento de Google y relevo deben comprobarse; publicar este frontend no sustituye automáticamente la rutina Claude.
+
+La configuración `bandeja_mode=cloud` y `bandeja_exec_url` cambia sólo aprobación/cancelación al nuevo backend. Las demás acciones siguen usando Operación. No hay fallback de una aprobación incierta: se relee la fila por firma de solicitud. La nueva línea APROBADO copia huella del borrador y lleva un permiso emitido por el servidor tras validar Dirección/DP; se revalida la sesión antes de enviar. Cancelar revoca ese permiso privado incluso si falla Sheets. Escribir el nombre Alejandro en un comentario no concede autoridad.
+
+Los borradores heredados sin huella se vuelven a presentar para revisión; no se usa una aprobación anterior para un contenido nuevo. Una llamada de envío incierta queda reservada y se concilia sin repetir Gmail. Enviar no marca terminada una tarea que espera respuesta. Los correos nuevos sin una tarjeta BANDEJA no se importan ni se responden automáticamente.
+
+El estado técnico de nube llega desde el vigilante a Accesos: programador, Gmail, libro, redacción, compuerta y último acuse separados. El latido de nube no depende de crear comentarios cuando no hay trabajo; pruebas vencidas o sin permiso quedan por verificar.

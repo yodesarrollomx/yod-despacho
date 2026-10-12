@@ -4310,7 +4310,8 @@ document.addEventListener('visibilitychange',function(){
 setInterval(function(){ if(document.visibilityState==='visible' && !CAIDO && Date.now()-_leido>10*60000){ _leido=Date.now(); cargar(); } },60000);
 </script>
 <script src="cabina.js?v=1"></script>
-<script src="bandeja.js?v=1"></script>
+<script src="bandeja-nube.js?v=bandeja-cloud1"></script>
+<script src="bandeja.js?v=bandeja-cloud1"></script>
 <script>// Bandeja conserva su protocolo; aquí sólo se añaden controles técnicos.
 if(window.pintarBandeja){var pintarBandejaBase=window.pintarBandeja;window.pintarBandeja=function(){pintarBandejaBase();chincheClasico(document.getElementById('bandeja'));};}
 </script>
